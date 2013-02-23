@@ -12,8 +12,8 @@ object Main {
   def main(args: Array[String]): Unit = {
     val buffer = new ArrayBuffer[Int] with ObservableBuffer[Int]
     val ro = buffer.observableSeq
-    ro.subscribe(new Subscriber[Message[Int] with Undoable, Publisher[Message[Int] with Undoable]] {
-      override def notify(pub: Publisher[Message[Int] with Undoable], event: Message[Int] with Undoable): Unit = {
+    ro.subscribe(new ro.Sub {
+      override def notify(pub: ro.Pub, event: Message[Int] with Undoable): Unit = {
         println("--> " + event + " in " + pub.getClass())
       }
     })
