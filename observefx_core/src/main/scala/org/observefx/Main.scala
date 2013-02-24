@@ -11,7 +11,7 @@ import scala.collection.mutable.Publisher
 object Main {
   def main(args: Array[String]): Unit = {
     val buffer = new ArrayBuffer[Int] with ObservableBuffer[Int]
-    val ro = buffer.observableSeq
+    val ro = buffer.asSeq
     ro.subscribe(new ro.Sub {
       override def notify(pub: ro.Pub, event: Message[Int] with Undoable): Unit = {
         println("--> " + event + " in " + pub.getClass())
