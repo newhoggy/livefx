@@ -54,12 +54,7 @@ package object observefx {
           }
         }
 
-        override def notify(pub: in.Pub, message: Message[A] with Undoable): Unit = {
-          message match {
-            case s: Script[A] => for (e <- s) process(pub, e)
-            case _ => process(pub, message)
-          }
-        }
+        override def notify(pub: in.Pub, message: Message[A] with Undoable): Unit = process(pub, message)
       })
     }
   }
