@@ -23,22 +23,22 @@ package object livefx {
       in.subscribe(new in.Sub {
         def process(pub: in.Pub, message: Message[A]): Unit = {
           message match {
-            case r: Remove[A] => r.location match {
+            case Remove(location, oldElem) => location match {
               case Start => target.remove(0)
               case End => target.remove(target.size - 1)
               case Index(index) => target.remove(index)
               case NoLo => assert(false)
             }
-            case i: Include[A] => i.location match {
-              case Start => target.prepend(f(i.elem))
-              case End => target.append(f(i.elem))
-              case Index(index) => target.insert(index, f(i.elem))
+            case Include(location, newElem) => location match {
+              case Start => target.prepend(f(newElem))
+              case End => target.append(f(newElem))
+              case Index(index) => target.insert(index, f(newElem))
               case NoLo => assert(false)
             }
-            case u: Update[A] => u.location match {
-              case Start => target(0) = f(u.elem)
-              case End => target(target.size - 1) = f(u.elem)
-              case Index(index) => target(index) = f(u.elem)
+            case Update(location, newElem, oldElem) => location match {
+              case Start => target(0) = f(newElem)
+              case End => target(target.size - 1) = f(newElem)
+              case Index(index) => target(index) = f(newElem)
               case NoLo => assert(false)
             }
             case x: Reset[A] => target.clear()
@@ -64,9 +64,9 @@ package object livefx {
       in.subscribe(new in.Sub {
         def process(pub: in.Pub, message: Message[A]): Unit = {
           message match {
-            case r: Remove[A] => release(r.elem)
-            case i: Include[A] => attach(i.elem)
-            case u: Update[A] => in(u.location).map{ e => println("--> e: " + e); release(e); attach(u.elem); println("--> elem: " + u.elem) }
+            case Remove(_, oldElem) => release(oldElem)
+            case Include(_, newElem) => attach(newElem)
+            case Update(location, newElem, oldElem) => release(oldElem); attach(newElem)
             case x: Reset[A] => target.clear()
             case s: Script[A] => for (e <- s) process(pub, e)
           }
