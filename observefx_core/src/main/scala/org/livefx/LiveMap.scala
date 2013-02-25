@@ -17,7 +17,7 @@ trait LiveMap[A, B] extends Map[A, B] with Publisher[Message[(A, B)] with Undoab
         })
       case Some(old) =>
         super.+=(kv)
-        publish(new Update((key, value)) with Undoable {
+        publish(new Update((key, value), (key, old)) with Undoable {
           def undo = +=((key, old))
         })
     }

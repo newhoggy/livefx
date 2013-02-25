@@ -30,7 +30,7 @@ trait LiveBuffer[A] extends Buffer[A] with Publisher[Message[A] with Undoable] {
   abstract override def update(n: Int, newelement: A): Unit = {
     val oldelement = apply(n)
     super.update(n, newelement)
-    publish(new Update(Index(n), newelement) with Undoable {
+    publish(new Update(Index(n), newelement, oldelement) with Undoable {
       def undo() { update(n, oldelement) }
     })
   }
