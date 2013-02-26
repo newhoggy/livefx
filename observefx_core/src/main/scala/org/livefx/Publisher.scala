@@ -1,7 +1,5 @@
 package org.livefx
 
-import scala.collection.mutable.Subscriber
-
 trait Publisher[Evt] {
   type Pub <: Publisher[Evt]
   type Sub = Subscriber[Evt, Pub]
