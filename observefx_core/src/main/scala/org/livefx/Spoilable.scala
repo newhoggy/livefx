@@ -1,5 +1,5 @@
 package org.livefx
 
 trait Spoilable {
-  def onSpoil(f: Boolean => Unit): Unit
+  def onSpoil(f: Boolean => Unit): Disposable
 }
