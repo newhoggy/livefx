@@ -10,7 +10,6 @@ package object livefx {
   type HashSet[A] = mutable.HashSet[A]
   type Map[A, B] = mutable.Map[A, B]
   type Set[A] = mutable.Set[A]
-  type Undoable = mutable.Undoable
   
   type LiveSeq[A] = Publisher[Message[A] with Undoable]
 
