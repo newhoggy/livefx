@@ -32,3 +32,7 @@ class Script[A] extends ArrayBuffer[Message[A]] with Message[A] {
     res + ")"
   }
 }
+
+case object Spoil extends Message[Nothing]
+
+case object Ping extends Message[Nothing]
