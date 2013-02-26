@@ -1,7 +1,6 @@
 package org.livefx
 
 import scala.collection.mutable.Subscriber
-import scala.collection.mutable.HashSet
 
 trait Publisher[Evt] {
   type Pub <: Publisher[Evt]
