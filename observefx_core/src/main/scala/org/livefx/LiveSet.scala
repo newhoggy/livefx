@@ -1,7 +1,5 @@
 package org.livefx
 
-import scala.collection.mutable.Set
-import scala.collection.mutable.Undoable
 import org.livefx.script._
 
 trait LiveSet[A] extends Set[A] with Publisher[Message[A] with Undoable] {

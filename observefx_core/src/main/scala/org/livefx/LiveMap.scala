@@ -1,6 +1,5 @@
 package org.livefx
 
-import scala.collection.mutable._
 import org.livefx.script._
 
 trait LiveMap[A, B] extends Map[A, B] with Publisher[Message[(A, B)] with Undoable] {
