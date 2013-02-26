@@ -1,7 +1,6 @@
 package org.livefx
 
 import org.livefx.script._
-import scala.collection.mutable._
 
 trait LiveBuffer[A] extends Buffer[A] with Publisher[Message[A] with Undoable] {
   type Pub <: LiveBuffer[A]

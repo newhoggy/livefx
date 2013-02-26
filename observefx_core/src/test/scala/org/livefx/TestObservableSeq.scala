@@ -1,7 +1,6 @@
 package org.livefx
 
 import org.junit.Test
-import scala.collection.mutable.ArrayBuffer
 import org.livefx._
 import org.junit.Assert
 
