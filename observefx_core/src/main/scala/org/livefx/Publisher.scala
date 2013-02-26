@@ -2,7 +2,6 @@ package org.livefx
 
 trait Publisher[Evt] {
   type Pub <: Publisher[Evt]
-  type Sub = Subscriber[Evt, Pub]
   type Filter = Evt => Boolean
 
   /** The publisher itself of type `Pub`. Implemented by a cast from `this` here.
@@ -10,12 +9,10 @@ trait Publisher[Evt] {
    */
   protected val self: Pub = this.asInstanceOf[Pub]
 
-  private val subscribers = new HashSet[Sub]
+  private val subscribers = new HashSet[(Pub, Evt) => Unit]
 
-  def subscribe(sub: Sub) { subscribers += sub }
-  def unsubscribe(sub: Sub) { subscribers -= sub }
+  def subscribe(sub: (Pub, Evt) => Unit) { subscribers += sub }
+  def unsubscribe(sub: (Pub, Evt) => Unit) { subscribers -= sub }
 
-  protected def publish(event: Evt): Unit = {
-    subscribers.foreach(sub => sub.notify(self, event))
-  }
+  protected def publish(event: Evt): Unit = subscribers.foreach(sub => sub(self, event))
 }

@@ -28,7 +28,7 @@ package object livefx {
 
     def liveMap[B](f: A => B): Seq[B] with LiveSeq[B] = new ArrayBuffer[B] with LiveBuffer[B] {
       private final def target = this
-      in.subscribe(new in.Sub {
+      in.subscribe { (pub: in.Pub, message: Message[A] with Undoable) =>
         def process(pub: in.Pub, message: Message[A]): Unit = {
           message match {
             case Remove(location, oldElem) => location match {
@@ -54,8 +54,8 @@ package object livefx {
           }
         }
 
-        override def notify(pub: in.Pub, message: Message[A] with Undoable): Unit = process(pub, message)
-      })
+        process(pub, message)
+      }
     }
     
     def liveCounted: Map[A, Int] with LiveMap[A, Int] = new HashMap[A, Int] with LiveMap[A, Int] {
@@ -69,7 +69,7 @@ package object livefx {
           target(key) = oldCount - 1
         }
       }
-      in.subscribe(new in.Sub {
+      in.subscribe { (pub: in.Pub, message: Message[A] with Undoable) =>
         def process(pub: in.Pub, message: Message[A]): Unit = {
           message match {
             case Remove(_, oldElem) => release(oldElem)
@@ -80,13 +80,13 @@ package object livefx {
           }
         }
 
-        override def notify(pub: in.Pub, message: Message[A] with Undoable): Unit = process(pub, message)
-      })
+        process(pub, message)
+      }
     }
     
     def liveHashed: Set[A] with LiveSet[A] = new HashSet[A] with LiveSet[A] {
       private final def target = this
-      in.subscribe(new in.Sub {
+      in.subscribe { (pub: in.Pub, message: Message[A] with Undoable) =>
         def process(pub: in.Pub, message: Message[A]): Unit = {
           message match {
             case r: Remove[A] => r.location match {
@@ -112,8 +112,8 @@ package object livefx {
           }
         }
 
-        override def notify(pub: in.Pub, message: Message[A] with Undoable): Unit = process(pub, message)
-      })
+        process(pub, message)
+      }
     }
   }
 }
