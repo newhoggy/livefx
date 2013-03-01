@@ -7,5 +7,5 @@ trait Publisher[A] {
   
   def publisher: Pub = this.asInstanceOf[Pub]
   
-  lazy val changes = new EventSource[Pub, Message[A] with Undoable](publisher)
+  lazy val changes = new EventSource[Pub, A](publisher)
 }
