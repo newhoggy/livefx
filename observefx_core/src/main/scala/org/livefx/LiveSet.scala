@@ -2,7 +2,7 @@ package org.livefx
 
 import org.livefx.script._
 
-trait LiveSet[A] extends Set[A] with Publisher[Message[A] with Undoable] {
+trait LiveSet[A] extends Set[A] with Changeable[Message[A] with Undoable] {
   type Pub <: LiveSet[A]
 
   abstract override def +=(elem: A): this.type = {

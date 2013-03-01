@@ -4,21 +4,23 @@ import scala.collection.mutable.ArrayBuffer
 
 trait Message[+A]
 
-case class Include[+A](location: Location, elem: A) extends Message[A] {
+trait Change[+A] extends Message[A]
+
+case class Include[+A](location: Location, elem: A) extends Change[A] {
   def this(elem: A) = this(NoLo, elem)
 }
 
-case class Update[+A](location: Location, elem: A, oldElem: A) extends Message[A] {
+case class Update[+A](location: Location, elem: A, oldElem: A) extends Change[A] {
   def this(elem: A, oldElem: A) = this(NoLo, elem, oldElem)
 }
 
-case class Remove[+A](location: Location, elem: A) extends Message[A] {
+case class Remove[+A](location: Location, elem: A) extends Change[A] {
   def this(elem: A) = this(NoLo, elem)
 }
 
-case class Reset[+A]() extends Message[A]
+case class Reset[+A]() extends Change[A]
 
-class Script[A] extends ArrayBuffer[Message[A]] with Message[A] {
+class Script[A] extends ArrayBuffer[Change[A]] with Change[A] {
   override def toString(): String = {
     var res = "Script("
     var it = this.iterator

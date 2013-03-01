@@ -2,7 +2,7 @@ package org.livefx
 
 import org.livefx.script._
 
-trait LiveBuffer[A] extends Buffer[A] with LiveSeq[A] with Publisher[Message[A] with Undoable] {
+trait LiveBuffer[A] extends Buffer[A] with LiveSeq[A] with Changeable[Message[A] with Undoable] {
   type Pub <: LiveBuffer[A]
   
   abstract override def +=(element: A): this.type = {
