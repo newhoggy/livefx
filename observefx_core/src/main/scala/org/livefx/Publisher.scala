@@ -2,8 +2,8 @@ package org.livefx
 
 import org.livefx.script.Message
 
-trait Publisher[A] {
-  type Pub <: Publisher[A]
+trait Publisher {
+  type Pub <: Publisher
   
   def publisher: Pub = this.asInstanceOf[Pub]
 }

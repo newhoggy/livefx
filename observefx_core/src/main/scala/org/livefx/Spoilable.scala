@@ -2,10 +2,12 @@ package org.livefx
 
 import org.livefx.script.Spoil
 
-trait Spoilable[A] {
-  lazy val _spoils = new EventSource[Spoilable[A], Spoil](this)
+trait Spoilable extends Publisher {
+  type Pub <: Spoilable
   
-  def spoils: Events[Spoilable[A], Spoil] = _spoils
+  lazy val _spoils = new EventSource[Spoilable, Spoil](this)
+  
+  def spoils: Events[Spoilable, Spoil] = _spoils
 
   private var _spoiled: Boolean = true
   
