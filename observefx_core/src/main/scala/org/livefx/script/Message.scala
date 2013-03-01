@@ -33,6 +33,8 @@ class Script[A] extends ArrayBuffer[Message[A]] with Message[A] {
   }
 }
 
-case object Spoil extends Message[Nothing]
+sealed class Spoil extends Message[Nothing]
+
+case object Spoil extends Spoil
 
 case object Ping extends Message[Nothing]

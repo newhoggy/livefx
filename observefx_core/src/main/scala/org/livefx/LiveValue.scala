@@ -2,6 +2,8 @@ package org.livefx
 
 import org.livefx.script.Message
 
-trait LiveValue[A] extends Publisher[Message[A]] with Spoilable[A] {
+trait LiveValue[A] {
+  lazy val changes = new EventSource[LiveValue[A], Message[A]](this)
+  
   def value: A
 }

@@ -11,7 +11,6 @@ package object livefx {
   type Map[A, B] = mutable.Map[A, B]
   type Set[A] = mutable.Set[A]
   
-  type LiveSeq[A] = Publisher[Message[A] with Undoable]
 
   implicit class RichLiveBuffer[A](val in: Buffer[A] with LiveBuffer[A]) {
     def asSeq: Seq[A] with LiveSeq[A] = in
@@ -27,8 +26,8 @@ package object livefx {
 
     def liveMap[B](f: A => B): Seq[B] with LiveSeq[B] = new ArrayBuffer[B] with LiveBuffer[B] {
       private final def target = this
-      in.subscribe { (pub: in.Pub, message: Message[A] with Undoable) =>
-        def process(pub: in.Pub, message: Message[A]): Unit = {
+      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A] with Undoable) =>
+        def process(pub: LiveSeq[A], message: Message[A]): Unit = {
           message match {
             case Remove(location, oldElem) => location match {
               case Start => target.remove(0)
@@ -68,8 +67,8 @@ package object livefx {
           target(key) = oldCount - 1
         }
       }
-      in.subscribe { (pub: in.Pub, message: Message[A] with Undoable) =>
-        def process(pub: in.Pub, message: Message[A]): Unit = {
+      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A] with Undoable) =>
+        def process(pub: LiveSeq[A], message: Message[A]): Unit = {
           message match {
             case Remove(_, oldElem) => release(oldElem)
             case Include(_, newElem) => attach(newElem)
@@ -85,8 +84,8 @@ package object livefx {
     
     def liveHashed: Set[A] with LiveSet[A] = new HashSet[A] with LiveSet[A] {
       private final def target = this
-      in.subscribe { (pub: in.Pub, message: Message[A] with Undoable) =>
-        def process(pub: in.Pub, message: Message[A]): Unit = {
+      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A] with Undoable) =>
+        def process(pub: LiveSeq[A], message: Message[A]): Unit = {
           message match {
             case r: Remove[A] => r.location match {
               case Start => target.remove(in(0))

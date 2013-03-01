@@ -10,6 +10,6 @@ class SimpleLiveValue[A](private var _value: A) extends LiveValue[A] with Spoila
     val oldValue = _value
     _value = newValue
     spoil()
-    publish(Update(NoLo, oldValue, newValue))
+    changes.publish(Update(NoLo, oldValue, newValue))
   }
 }
