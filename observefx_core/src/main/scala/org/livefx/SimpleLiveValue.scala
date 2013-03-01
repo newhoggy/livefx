@@ -12,7 +12,7 @@ class SimpleLiveValue[A](private var _value: A) extends LiveValue[A] with Spoila
     val oldValue = _value
     _value = newValue
     spoil()
-    changes.publish(new Update(NoLo, oldValue, newValue) with Undoable {
+    changesSink.publish(new Update(NoLo, oldValue, newValue) with Undoable {
       def undo() { value = oldValue }
     })
   }

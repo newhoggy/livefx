@@ -8,7 +8,7 @@ trait LiveSet[A] extends Set[A] with Changeable[A] {
   abstract override def +=(elem: A): this.type = {
     if (!contains(elem)) {
       super.+=(elem)
-      changes.publish(new Include(elem) with Undoable { def undo = -=(elem) })
+      changesSink.publish(new Include(elem) with Undoable { def undo = -=(elem) })
     }
     this
   }
@@ -16,14 +16,14 @@ trait LiveSet[A] extends Set[A] with Changeable[A] {
   abstract override def -=(elem: A): this.type = {
     if (contains(elem)) {
       super.-=(elem)
-      changes.publish(new Remove(elem) with Undoable { def undo = +=(elem) })
+      changesSink.publish(new Remove(elem) with Undoable { def undo = +=(elem) })
     }
     this
   }
 
   abstract override def clear(): Unit = {
     super.clear
-    changes.publish(new Reset with Undoable {
+    changesSink.publish(new Reset with Undoable {
       def undo(): Unit = throw new UnsupportedOperationException("cannot undo")
     })
   }
