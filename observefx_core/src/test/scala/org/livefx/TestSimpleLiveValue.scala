@@ -6,6 +6,7 @@ import org.junit.Assert
 class TestSimpleLiveValue {
   @Test
   def testGetAndSet(): Unit = {
+    var spoilCount = 0
     val liveValue = new SimpleLiveValue[Int](0)
     
     Assert.assertEquals(0, liveValue.value)
@@ -14,9 +15,11 @@ class TestSimpleLiveValue {
     Assert.assertEquals(1, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
     
-    liveValue.spoils.subscribe { (publisher, event) =>
-      println("--> spoiled")
-    }
+    liveValue.spoils.subscribe((_, _) => spoilCount += 1)
+    Assert.assertEquals(0, spoilCount)
     liveValue.value = 2
+    Assert.assertEquals(1, spoilCount)
+    Assert.assertEquals(2, liveValue.value)
+    Assert.assertEquals(false, liveValue.spoiled)
   }
 }
