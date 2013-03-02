@@ -15,11 +15,17 @@ class TestSimpleLiveValue {
     Assert.assertEquals(1, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
     
-    liveValue.spoils.subscribe((_, _) => spoilCount += 1)
+    val subscription = liveValue.spoils.subscribe((_, _) => spoilCount += 1)
     Assert.assertEquals(0, spoilCount)
     liveValue.value = 2
     Assert.assertEquals(1, spoilCount)
     Assert.assertEquals(2, liveValue.value)
+    Assert.assertEquals(false, liveValue.spoiled)
+
+    subscription.dispose
+    liveValue.value = 3
+    Assert.assertEquals(1, spoilCount)
+    Assert.assertEquals(3, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
   }
 }
