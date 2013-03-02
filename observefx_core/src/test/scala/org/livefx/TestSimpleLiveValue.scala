@@ -13,5 +13,10 @@ class TestSimpleLiveValue {
     liveValue.value = 1
     Assert.assertEquals(1, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
+    
+    liveValue.spoils.subscribe { (publisher, event) =>
+      println("--> spoiled")
+    }
+    liveValue.value = 2
   }
 }
