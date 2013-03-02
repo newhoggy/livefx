@@ -8,13 +8,8 @@ trait Spoilable extends Publisher {
   lazy val _spoils = new EventSource[Spoilable, Spoil](this)
   
   def spoils: Events[Spoilable, Spoil] = _spoils
-
-  private var _spoiled: Boolean = true
   
-  protected def spoil(): Unit = if (!_spoiled) {
-    _spoiled = true
-    _spoils.publish(Spoil)
-  }
+  def spoiled: Boolean = false
   
-  protected def unspoil(): Unit = _spoiled = false
+  protected def spoil(): Unit = _spoils.publish(Spoil)
 }
