@@ -2,10 +2,10 @@ package org.livefx
 
 import org.livefx.script.Change
 
-trait Changeable[A] extends Publisher {
-  type Pub <: Changeable[A]
+trait Changeable[A, M <: Change[A]] extends Publisher {
+  type Pub <: Changeable[A, M]
   
-  protected lazy val changesSink = new EventSource[Pub, Change[A] with Undoable](publisher)
+  protected lazy val changesSink = new EventSource[Pub, M with Undoable](publisher)
   
-  def changes: Events[Pub, Change[A] with Undoable] = changesSink
+  def changes: Events[Pub, M with Undoable] = changesSink
 }
