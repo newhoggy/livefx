@@ -54,4 +54,28 @@ class TestSimpleLiveValue {
     Assert.assertEquals(13, liveValue.value)
     Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
   }
+
+  @Test
+  def testWeakChangeSubscriber(): Unit = {
+    var changes = List[Change[Int]]()
+    val liveValue = new SimpleLiveValue[Int](0)
+    
+    var subscription = liveValue.changes.subscribeWeak((_, change) => changes = change::changes)
+    Assert.assertEquals(0, liveValue.value)
+    Assert.assertEquals(Nil, changes)
+
+    liveValue.value = 11
+    Assert.assertEquals(11, liveValue.value)
+    Assert.assertEquals(List(Update(NoLo, 0, 11)), changes)
+
+    liveValue.value = 12
+    Assert.assertEquals(12, liveValue.value)
+    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    
+    subscription = null
+    System.gc()
+    liveValue.value = 13
+    Assert.assertEquals(13, liveValue.value)
+    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+  }
 }
