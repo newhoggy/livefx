@@ -4,12 +4,12 @@ import org.livefx.script.Message
 import org.livefx.script.Update
 import org.livefx.script.Spoil
 
-trait LiveValue[@specialized(Boolean, Int, Double) A] extends Changeable[A, Update[A]] with Spoilable {
+trait LiveValue[@specialized(Boolean, Int, Long, Double) A] extends Changeable[A, Update[A]] with Spoilable {
   type Pub <: LiveValue[A]
   
   def value: A
   
-  def map[@specialized(Boolean, Int, Double) B](f: A => B) = {
+  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B) = {
     val source = this
     new LiveBinding[B] {
       val ref = source.spoils.subscribeWeak((_, _) => spoil)
