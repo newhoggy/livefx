@@ -123,14 +123,14 @@ class TestSimpleLiveValue {
       b <- liveB
       c <- liveC
     } yield a + b + c
-    println("--> z: " + liveZ.value)
+    Assert.assertEquals(0, liveZ.value)
     liveB.value = 7
-    println("--> z: " + liveZ.value)
+    Assert.assertEquals(7, liveZ.value)
     liveA.value = 3
-    println("--> z: " + liveZ.value)
+    Assert.assertEquals(10, liveZ.value)
     liveC.value = 10
-    println("--> z: " + liveZ.value)
+    Assert.assertEquals(20, liveZ.value)
     liveA.value = 1
-    println("--> z: " + liveZ.value)
+    Assert.assertEquals(18, liveZ.value)
   }
 }
