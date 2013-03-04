@@ -8,7 +8,7 @@ trait LiveBinding[A] extends LiveValue[A] with Unspoilable {
   
   private var _value: A = null.asInstanceOf[A]
   
-  def value: A = {
+  override def value: A = {
     if (spoiled) {
       val oldValue = _value
       val newValue = computeValue

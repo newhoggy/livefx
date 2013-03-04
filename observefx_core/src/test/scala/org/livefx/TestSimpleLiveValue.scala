@@ -102,4 +102,14 @@ class TestSimpleLiveValue {
     Assert.assertEquals(13, liveValue.value)
     Assert.assertEquals(List(Update(NoLo, 12, 13), Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
   }
+  
+  @Test
+  def testMap(): Unit = {
+    val liveValue = new SimpleLiveValue[Int](0)
+    val liveBinding = liveValue.map(_ * 2)
+    liveValue.value = 1
+    println(liveBinding.value)
+    liveValue.value = 10
+    println(liveBinding.value)
+  }
 }
