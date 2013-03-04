@@ -108,8 +108,8 @@ class TestSimpleLiveValue {
     val liveValue = new SimpleLiveValue[Int](0)
     val liveBinding = liveValue.map(_ * 2)
     liveValue.value = 1
-    println(liveBinding.value)
+    Assert.assertEquals(2, liveBinding.value)
     liveValue.value = 10
-    println(liveBinding.value)
+    Assert.assertEquals(20, liveBinding.value)
   }
 }
