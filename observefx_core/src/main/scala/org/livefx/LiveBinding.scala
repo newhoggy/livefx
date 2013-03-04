@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Update
 import org.livefx.script.NoLo
 
-trait LiveBinding[A] extends LiveValue[A] with Unspoilable {
+abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
   type Pub <: LiveBinding[A]
   
   private var _value: A = null.asInstanceOf[A]

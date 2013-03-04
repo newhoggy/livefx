@@ -112,4 +112,25 @@ class TestSimpleLiveValue {
     liveValue.value = 10
     Assert.assertEquals(20, liveBinding.value)
   }
+  
+  @Test
+  def testForComprehension(): Unit = {
+    val liveA = new SimpleLiveValue[Int](0)
+    val liveB = new SimpleLiveValue[Int](0)
+    val liveC = new SimpleLiveValue[Int](0)
+    val liveZ = for {
+      a <- liveA
+      b <- liveB
+      c <- liveC
+    } yield a + b + c
+    println("--> z: " + liveZ.value)
+    liveB.value = 7
+    println("--> z: " + liveZ.value)
+    liveA.value = 3
+    println("--> z: " + liveZ.value)
+    liveC.value = 10
+    println("--> z: " + liveZ.value)
+    liveA.value = 1
+    println("--> z: " + liveZ.value)
+  }
 }
