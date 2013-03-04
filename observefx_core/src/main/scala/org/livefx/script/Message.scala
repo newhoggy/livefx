@@ -6,15 +6,15 @@ trait Message[+A]
 
 trait Change[+A] extends Message[A]
 
-case class Include[+A](location: Location, elem: A) extends Change[A] {
+case class Include[@specialized(Boolean, Double, Int) +A](location: Location, elem: A) extends Change[A] {
   def this(elem: A) = this(NoLo, elem)
 }
 
-case class Update[+A](location: Location, elem: A, oldElem: A) extends Change[A] {
+case class Update[@specialized(Boolean, Double, Int) +A](location: Location, elem: A, oldElem: A) extends Change[A] {
   def this(elem: A, oldElem: A) = this(NoLo, elem, oldElem)
 }
 
-case class Remove[+A](location: Location, elem: A) extends Change[A] {
+case class Remove[@specialized(Boolean, Double, Int) +A](location: Location, elem: A) extends Change[A] {
   def this(elem: A) = this(NoLo, elem)
 }
 

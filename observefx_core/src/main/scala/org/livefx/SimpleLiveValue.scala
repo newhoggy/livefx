@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Update
 import org.livefx.script.NoLo
 
-class SimpleLiveValue[A](private var _value: A) extends LiveValue[A] with Spoilable {
+class SimpleLiveValue[A](@specialized(Boolean, Int, Double) private var _value: A) extends LiveValue[A] with Spoilable {
   type Pub <: SimpleLiveValue[A]
   
   def value: A = _value
