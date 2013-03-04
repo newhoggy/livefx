@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script._
 
 trait LiveMap[A, B] extends Map[A, B] {
-  lazy val changes = new EventSource[LiveMap[A, B], Message[(A, B)] with Undoable](this)
+  lazy val changes = new EventSource[LiveMap[A, B], Message[(A, B)]](this)
 
   abstract override def += (kv: (A, B)): this.type = {
     val (key, value) = kv
@@ -11,14 +11,10 @@ trait LiveMap[A, B] extends Map[A, B] {
     get(key) match {
       case None =>
         super.+=(kv)
-        changes.publish(new Include((key, value)) with Undoable {
-          def undo = -=(key)
-        })
+        changes.publish(Include(NoLo, (key, value)))
       case Some(old) =>
         super.+=(kv)
-        changes.publish(new Update((key, value), (key, old)) with Undoable {
-          def undo = +=((key, old))
-        })
+        changes.publish(Update(NoLo, (key, value), (key, old)))
     }
     this
   }
@@ -28,17 +24,13 @@ trait LiveMap[A, B] extends Map[A, B] {
       case None =>
       case Some(old) =>
         super.-=(key)
-        changes.publish(new Remove((key, old)) with Undoable {
-          def undo = update(key, old)
-        })
+        changes.publish(Remove(NoLo, (key, old)))
     }
     this
   }
 
   abstract override def clear(): Unit = {
     super.clear
-    changes.publish(new Reset with Undoable {
-      def undo(): Unit = throw new UnsupportedOperationException("cannot undo")
-    })
+    changes.publish(Reset)
   }
 }

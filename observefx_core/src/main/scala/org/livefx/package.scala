@@ -26,7 +26,7 @@ package object livefx {
 
     def liveMap[B](f: A => B): Seq[B] with LiveSeq[B] = new ArrayBuffer[B] with LiveBuffer[B] {
       private final def target = this
-      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A] with Undoable) =>
+      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A]) =>
         def process(pub: LiveSeq[A], message: Message[A]): Unit = {
           message match {
             case Remove(location, oldElem) => location match {
@@ -47,7 +47,7 @@ package object livefx {
               case Index(index) => target(index) = f(newElem)
               case NoLo => assert(false)
             }
-            case x: Reset[A] => target.clear()
+            case Reset => target.clear()
             case s: Script[A] => for (e <- s) process(pub, e)
           }
         }
@@ -67,13 +67,13 @@ package object livefx {
           target(key) = oldCount - 1
         }
       }
-      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A] with Undoable) =>
+      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A]) =>
         def process(pub: LiveSeq[A], message: Message[A]): Unit = {
           message match {
             case Remove(_, oldElem) => release(oldElem)
             case Include(_, newElem) => attach(newElem)
             case Update(location, newElem, oldElem) => release(oldElem); attach(newElem)
-            case x: Reset[A] => target.clear()
+            case Reset => target.clear()
             case s: Script[A] => for (e <- s) process(pub, e)
           }
         }
@@ -84,7 +84,7 @@ package object livefx {
     
     def liveHashed: Set[A] with LiveSet[A] = new HashSet[A] with LiveSet[A] {
       private final def target = this
-      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A] with Undoable) =>
+      in.changes.subscribe { (pub: LiveSeq[A], message: Message[A]) =>
         def process(pub: LiveSeq[A], message: Message[A]): Unit = {
           message match {
             case r: Remove[A] => r.location match {
@@ -105,7 +105,7 @@ package object livefx {
               case Index(index) => target.remove(in(index)); target.add(u.elem)
               case NoLo => assert(false)
             }
-            case x: Reset[A] => target.clear()
+            case Reset => target.clear()
             case s: Script[A] => for (e <- s) process(pub, e)
           }
         }

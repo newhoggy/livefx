@@ -1,6 +1,8 @@
 package org.livefx
 
 trait Unspoilable extends Spoilable {
+  type Pub <: Unspoilable
+  
   private var _spoiled: Boolean = true
   
   protected def unspoil(): Unit = _spoiled = false

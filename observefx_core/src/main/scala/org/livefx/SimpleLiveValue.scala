@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Update
 import org.livefx.script.NoLo
 
-class SimpleLiveValue[A](@specialized(Boolean, Int, Double) private var _value: A) extends LiveValue[A] with Spoilable {
+class SimpleLiveValue[A](@specialized(Boolean, Int, Double) private var _value: A) extends LiveValue[A] {
   type Pub <: SimpleLiveValue[A]
   
   def value: A = _value
@@ -12,8 +12,6 @@ class SimpleLiveValue[A](@specialized(Boolean, Int, Double) private var _value: 
     val oldValue = _value
     _value = newValue
     spoil()
-    changesSink.publish(new Update(NoLo, oldValue, newValue) with Undoable {
-      def undo() { value = oldValue }
-    })
+    changesSink.publish(Update(NoLo, oldValue, newValue))
   }
 }

@@ -7,9 +7,7 @@ trait LiveBuffer[A] extends Buffer[A] with LiveSeq[A] with Changeable[A, Change[
   
   abstract override def +=(element: A): this.type = {
     super.+=(element)
-    changesSink.publish(new Include(End, element) with Undoable {
-      def undo() { trimEnd(1) }
-    })
+    changesSink.publish(Include(End, element))
     this
   }
 
@@ -20,42 +18,32 @@ trait LiveBuffer[A] extends Buffer[A] with LiveSeq[A] with Changeable[A, Change[
 
   abstract override def +=:(element: A): this.type = {
     super.+=:(element)
-    changesSink.publish(new Include(Start, element) with Undoable {
-      def undo() { trimStart(1) }
-    })
+    changesSink.publish(Include(Start, element))
     this
   }
 
   abstract override def update(n: Int, newelement: A): Unit = {
     val oldelement = apply(n)
     super.update(n, newelement)
-    changesSink.publish(new Update(Index(n), newelement, oldelement) with Undoable {
-      def undo() { update(n, oldelement) }
-    })
+    changesSink.publish(Update(Index(n), newelement, oldelement))
   }
 
   abstract override def remove(n: Int): A = {
     val oldelement = apply(n)
     super.remove(n)
-    changesSink.publish(new Remove(Index(n), oldelement) with Undoable {
-      def undo() { insert(n, oldelement) }
-    })
+    changesSink.publish(Remove(Index(n), oldelement))
     oldelement
   }
 
   abstract override def clear(): Unit = {
     super.clear
-    changesSink.publish(new Reset with Undoable {
-      def undo() { throw new UnsupportedOperationException("cannot undo") }
-    })
+    changesSink.publish(Reset)
   }
 
   abstract override def insertAll(n: Int, elems: scala.collection.Traversable[A]) {
     super.insertAll(n, elems)
     var curr = n - 1
-    val msg = elems.foldLeft(new Script[A]() with Undoable {
-      def undo() { throw new UnsupportedOperationException("cannot undo") }
-    }) {
+    val msg = elems.foldLeft(new Script[A]()) {
       case (msg, elem) =>
         curr += 1
         msg += Include(Index(curr), elem)

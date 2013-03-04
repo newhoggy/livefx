@@ -18,7 +18,7 @@ case class Remove[@specialized(Boolean, Double, Int) +A](location: Location, ele
   def this(elem: A) = this(NoLo, elem)
 }
 
-case class Reset[+A]() extends Change[A]
+case object Reset extends Change[Nothing]
 
 class Script[A] extends ArrayBuffer[Change[A]] with Change[A] {
   override def toString(): String = {
