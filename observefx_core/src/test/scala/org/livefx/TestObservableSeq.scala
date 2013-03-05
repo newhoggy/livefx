@@ -26,12 +26,12 @@ class TestObservableSeq {
     val buffer = new ArrayBuffer[Int] with LiveBuffer[Int]
     val counts = buffer.liveCounted
     buffer.insert(0, 0)
-    println("--> " + counts)
+    Assert.assertTrue(counts == Map(0 -> 1))
     buffer.insert(0, 0)
-    println("--> " + counts)
+    Assert.assertTrue(counts == Map(0 -> 2))
     buffer.insert(0, 0)
-    println("--> " + counts)
+    Assert.assertTrue(counts == Map(0 -> 3))
     buffer(1) = 1
-    println("--> " + counts)
+    Assert.assertTrue(counts == Map(1 -> 1, 0 -> 2))
   }
 }
