@@ -27,7 +27,7 @@ trait LiveSeq[A] extends Seq[A] with Changeable[A, Change[A]] {
     val outer = this
     new ArrayBuffer[B] with LiveBuffer[B] {
       private final def target = this
-      outer.changes.subscribe { (pub: LiveSeq[A], change: Change[A]) =>
+      private val ref = outer.changes.subscribeWeak { (pub: LiveSeq[A], change: Change[A]) =>
         def process(pub: LiveSeq[A], change: Change[A]): Unit = {
           change match {
             case Remove(location, oldElem) => location match {
@@ -62,16 +62,19 @@ trait LiveSeq[A] extends Seq[A] with Changeable[A, Change[A]] {
     val outer = this;
     new HashMap[A, Int] with LiveMap[A, Int] {
       private final def target = this
-      def attach(key: A): Unit = target(key) = target.getOrElse(key, 0) + 1
+      def attach(key: A): Unit = {
+        val newCount = target.getOrElse(key, 0) + 1
+        target(key) = newCount 
+      }
       def release(key: A): Unit = {
         val oldCount = target.getOrElse(key, 0)
         if (oldCount <= 1) {
-          target.remove(key)
+          target -= key
         } else {
-          target(key) = oldCount - 1
+          target += (key -> (oldCount - 1))
         }
       }
-      outer.changes.subscribe { (pub: LiveSeq[A], change: Change[A]) =>
+      val result2 = outer.changes.subscribeWeak { (pub: LiveSeq[A], change: Change[A]) =>
         def process(pub: LiveSeq[A], change: Change[A]): Unit = {
           change match {
             case Remove(_, oldElem) => release(oldElem)
@@ -87,38 +90,5 @@ trait LiveSeq[A] extends Seq[A] with Changeable[A, Change[A]] {
     }
   }
   
-  def liveHashed: Set[A] with LiveSet[A] = {
-    val outer = this
-    new HashSet[A] with LiveSet[A] {
-      private final def target = this
-      outer.changes.subscribe { (pub: LiveSeq[A], change: Change[A]) =>
-        def process(pub: LiveSeq[A], change: Change[A]): Unit = {
-          change match {
-            case r: Remove[A] => r.location match {
-              case Start => target.remove(LiveSeq.this(0))
-              case End => target.remove(LiveSeq.this(target.size - 1))
-              case Index(index) => target.remove(LiveSeq.this(index))
-              case NoLo => assert(false)
-            }
-            case i: Include[A] => i.location match {
-              case Start => target.add(i.elem)
-              case End => target.add(i.elem)
-              case Index(index) => target.add(i.elem)
-              case NoLo => assert(false)
-            }
-            case u: Update[A] => u.location match {
-              case Start => target.remove(LiveSeq.this(0)); target.add(u.elem)
-              case End => target.remove(LiveSeq.this(target.size - 1)); target.add(u.elem)
-              case Index(index) => target.remove(LiveSeq.this(index)); target.add(u.elem)
-              case NoLo => assert(false)
-            }
-            case Reset => target.clear()
-            case s: Script[A] => for (e <- s) process(pub, e)
-          }
-        }
-  
-        process(pub, change)
-      }
-    }
-  }
+  def liveSet: Set[A] with LiveSet[A] = liveCounted.liveKeys
 }

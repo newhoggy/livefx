@@ -38,7 +38,7 @@ class TestObservableSeq {
   @Test
   def testLiveHashed(): Unit = {
     val buffer = new ArrayBuffer[Int] with LiveBuffer[Int]
-    val unique = buffer.liveHashed
+    val unique = buffer.liveSet
     buffer.insert(0, 3)
     Assert.assertTrue(unique == Set(3))
     buffer.insert(0, 4)
@@ -46,13 +46,11 @@ class TestObservableSeq {
     buffer.insert(1, 5)
     Assert.assertTrue(unique == Set(3, 4, 5))
     buffer.insert(1, 3)
-    println("--> " + buffer + ", " + unique)
     Assert.assertTrue(unique == Set(3, 4, 5))
     buffer.remove(1)
-    println("--> " + buffer + ", " + unique)
     Assert.assertTrue(unique == Set(3, 4, 5))
     buffer.remove(0)
-    Assert.assertTrue(unique.sameElements(Set(4, 5)))
+    Assert.assertTrue(unique == Set(3, 5))
     buffer(1) = 1
   }
 }
