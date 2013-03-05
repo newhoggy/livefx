@@ -2,19 +2,19 @@ package org.livefx
 
 import org.livefx.script._
 
-trait LiveMap[A, B] extends Map[A, B] {
-  lazy val changes = new EventSource[LiveMap[A, B], Message[(A, B)]](this)
-
+trait LiveMap[A, B] extends Map[A, B] with Changeable[(A, B), Change[(A, B)]] {
+  type Pub <: LiveMap[A, B]
+  
   abstract override def += (kv: (A, B)): this.type = {
     val (key, value) = kv
 
     get(key) match {
       case None =>
         super.+=(kv)
-        changes.publish(Include(NoLo, (key, value)))
+        changesSink.publish(Include(NoLo, kv))
       case Some(old) =>
         super.+=(kv)
-        changes.publish(Update(NoLo, (key, value), (key, old)))
+        changesSink.publish(Update(NoLo, kv, (key, old)))
     }
     this
   }
@@ -24,13 +24,13 @@ trait LiveMap[A, B] extends Map[A, B] {
       case None =>
       case Some(old) =>
         super.-=(key)
-        changes.publish(Remove(NoLo, (key, old)))
+        changesSink.publish(Remove(NoLo, (key, old)))
     }
     this
   }
 
   abstract override def clear(): Unit = {
     super.clear
-    changes.publish(Reset)
+    changesSink.publish(Reset)
   }
 }

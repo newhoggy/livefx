@@ -34,4 +34,25 @@ class TestObservableSeq {
     buffer(1) = 1
     Assert.assertTrue(counts == Map(1 -> 1, 0 -> 2))
   }
+
+  @Test
+  def testLiveHashed(): Unit = {
+    val buffer = new ArrayBuffer[Int] with LiveBuffer[Int]
+    val unique = buffer.liveHashed
+    buffer.insert(0, 3)
+    Assert.assertTrue(unique == Set(3))
+    buffer.insert(0, 4)
+    Assert.assertTrue(unique == Set(3, 4))
+    buffer.insert(1, 5)
+    Assert.assertTrue(unique == Set(3, 4, 5))
+    buffer.insert(1, 3)
+    println("--> " + buffer + ", " + unique)
+    Assert.assertTrue(unique == Set(3, 4, 5))
+    buffer.remove(1)
+    println("--> " + buffer + ", " + unique)
+    Assert.assertTrue(unique == Set(3, 4, 5))
+    buffer.remove(0)
+    Assert.assertTrue(unique.sameElements(Set(4, 5)))
+    buffer(1) = 1
+  }
 }
