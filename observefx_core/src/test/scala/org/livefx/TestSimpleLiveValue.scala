@@ -123,6 +123,27 @@ class TestSimpleLiveValue {
       b <- liveB
       c <- liveC
     } yield a + b + c
+    
+    Assert.assertEquals(0, liveZ.value)
+    liveB.value = 7
+    Assert.assertEquals(7, liveZ.value)
+    liveA.value = 3
+    Assert.assertEquals(10, liveZ.value)
+    liveC.value = 10
+    Assert.assertEquals(20, liveZ.value)
+    liveA.value = 1
+    Assert.assertEquals(18, liveZ.value)
+  }
+  
+  @Test
+  def testComparisons(): Unit = {
+    import LiveNumeric.Implicits._
+    
+    val liveA = new SimpleLiveValue[Int](0)
+    val liveB = new SimpleLiveValue[Int](0)
+    val liveC = new SimpleLiveValue[Int](0)
+    val liveZ = liveA + liveB + liveC
+
     Assert.assertEquals(0, liveZ.value)
     liveB.value = 7
     Assert.assertEquals(7, liveZ.value)
