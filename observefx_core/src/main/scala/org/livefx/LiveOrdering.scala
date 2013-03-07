@@ -8,7 +8,7 @@ trait LiveOrdering[T] extends LivePartialOrdering[T] with Serializable {
     */
   def tryCompare(x: LiveValue[T], y: LiveValue[T]) = compare(x, y).map(Some(_))
 
-  def compare(x: T, y: T): Int
+  def ordering: Ordering[T]
   
   /** Returns an integer whose sign communicates how x compares to y.
    *
@@ -18,7 +18,7 @@ trait LiveOrdering[T] extends LivePartialOrdering[T] with Serializable {
    *  - positive if x > y
    *  - zero otherwise (if x == y)
    */
-  def compare(x: LiveValue[T], y: LiveValue[T]): LiveValue[Int] = for (xv <- x; yv <- y) yield compare(xv, yv)
+  def compare(x: LiveValue[T], y: LiveValue[T]): LiveValue[Int] = for (xv <- x; yv <- y) yield ordering.compare(xv, yv)
 
   /** Return true if `x` <= `y` in the ordering. */
   override def lteq(x: LiveValue[T], y: LiveValue[T]): LiveValue[Boolean] = compare(x, y).map(_ <= 0)
@@ -36,19 +36,19 @@ trait LiveOrdering[T] extends LivePartialOrdering[T] with Serializable {
   override def equiv(x: LiveValue[T], y: LiveValue[T]): LiveValue[Boolean] = compare(x, y).map(_ == 0)
 
   /** Return `x` if `x` >= `y`, otherwise `y`. */
-  def max(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield if (compare(xv, yv) >= 0) xv else yv 
+  def max(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield if (ordering.compare(xv, yv) >= 0) xv else yv 
 
   /** Return `x` if `x` <= `y`, otherwise `y`. */
-  def min(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield if (compare(xv, yv) <= 0) xv else yv
+  def min(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield if (ordering.compare(xv, yv) <= 0) xv else yv
 
   /** Return the opposite ordering of this one. */
   override def reverse: LiveOrdering[T] = new LiveOrdering[T] {
     override def reverse = outer
-    def compare(x: T, y: T) = outer.compare(y, x)
+    override def ordering = outer.ordering.reverse
   }
 
   def on[U](f: U => T): LiveOrdering[U] = new LiveOrdering[U] {
-    def compare(x: U, y: U) = outer.compare(f(x), f(y))
+    def ordering = outer.ordering.on(f)
   }
 
   /** This inner class defines comparison operators available for `T`. */
