@@ -5,6 +5,7 @@ import org.junit.Assert
 import org.livefx.script.Change
 import org.livefx.script.Update
 import org.livefx.script.NoLo
+import scala.reflect.macros.Context
 
 class TestSimpleLiveValue {
   @Test
@@ -118,6 +119,29 @@ class TestSimpleLiveValue {
     val liveA = new SimpleLiveValue[Int](0)
     val liveB = new SimpleLiveValue[Int](0)
     val liveC = new SimpleLiveValue[Int](0)
+    val liveZ = for {
+      a <- liveA
+      b <- liveB
+      c <- liveC
+    } yield a + b + c
+    
+    Assert.assertEquals(0, liveZ.value)
+    liveB.value = 7
+    Assert.assertEquals(7, liveZ.value)
+    liveA.value = 3
+    Assert.assertEquals(10, liveZ.value)
+    liveC.value = 10
+    Assert.assertEquals(20, liveZ.value)
+    liveA.value = 1
+    Assert.assertEquals(18, liveZ.value)
+  }
+  
+  
+  @Test
+  def testForComprehensionShort(): Unit = {
+    val liveA = new SimpleLiveValue[Short](0)
+    val liveB = new SimpleLiveValue[Short](0)
+    val liveC = new SimpleLiveValue[Short](0)
     val liveZ = for {
       a <- liveA
       b <- liveB

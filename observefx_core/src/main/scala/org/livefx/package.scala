@@ -20,4 +20,7 @@ package object livefx {
     def ||(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l || r
     def unary_!(): LiveValue[Boolean] =  self.map(!_)
   }
+  
+  implicit class RichArrayOfStackTraceElement(val self: Seq[StackTraceElement]) {
+  }
 }
