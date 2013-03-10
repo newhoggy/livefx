@@ -1,6 +1,5 @@
 scalaVersion in ThisBuild := "2.10.0"
 
-javaHome in ThisBuild := Some(file(System.getenv("JAVA_HOME")))
 javaHome in ThisBuild := Some(file {
    Option(System.getenv("JAVA_HOME")).getOrElse {
      println("Warning: JAVA_HOME not defined")
