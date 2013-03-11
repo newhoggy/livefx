@@ -19,11 +19,7 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) A] extends Changeable[A
   }
   
   def flatMap[B](f: A => LiveValue[B]): LiveValue[B] = {
-    println(Debug.callerWithoutSpecializationFrom(4))
-    for (caller <- Debug.callers.take(10)) {
-      println(caller)
-    }
-    println()
+    println(Debug.callers.seq.withoutSpecializationFrom(4))
     val source = this
     val binding = new LiveBinding[B] {
       var nested: LiveValue[B] = f(source.value)
@@ -39,13 +35,5 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) A] extends Changeable[A
       protected override def computeValue: B = nested.value
     }
     binding
-  }
-}
-
-object Debug {
-  def callers = new Exception().getStackTrace()
-  
-  def callerWithoutSpecializationFrom(depth: Int): StackTraceElement = {
-    Debug.callers.drop(depth).dropWhile(e => e.getMethodName.endsWith("$sp")).head
   }
 }

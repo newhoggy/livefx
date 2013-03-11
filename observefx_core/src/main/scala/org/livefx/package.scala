@@ -22,5 +22,8 @@ package object livefx {
   }
   
   implicit class RichArrayOfStackTraceElement(val self: Seq[StackTraceElement]) {
+    def withoutSpecializationFrom(depth: Int): StackTraceElement = {
+      self.drop(depth).dropWhile(e => e.getMethodName.endsWith("$sp")).head
+    }
   }
 }
