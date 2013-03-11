@@ -20,7 +20,7 @@ object LiveNumeric {
 }
 
 trait LiveNumeric[T] extends LiveOrdering[T] { outer =>
-  def plus(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = Debug.traceSpoil(for (xv <- x; yv <- y) yield numeric.plus(xv, yv))
+  def plus(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield numeric.plus(xv, yv)
   def minus(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield numeric.minus(xv, yv)
   def times(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield numeric.times(xv, yv)
   def negate(x: LiveValue[T]): LiveValue[T] = for (xv <- x) yield numeric.negate(xv)
