@@ -8,3 +8,4 @@ javaHome in ThisBuild := Some(file {
 })
 
 unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
+
