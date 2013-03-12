@@ -11,6 +11,16 @@ package object macro {
     val paramRep = show(value.tree)
     val paramRepTree = Literal(Constant(paramRep))
     val paramRepExpr = c.Expr[String](paramRepTree)
-    reify { println(paramRepExpr.splice + " = " + value.splice); value.splice }
+    val implicits = c.enclosingImplicits.map(_.toString)
+    val enclosingMethodName = c.enclosingMethod match {
+      case DefDef(_, name, _, _, _, _) => name.toString
+      case _ => "<unknown-method>"
+    }
+
+    reify {
+      println(paramRepExpr.splice + " = " + value.splice)
+      println(c.literal(enclosingMethodName.toString).splice)
+      value.splice
+    }
   }
 }
