@@ -16,8 +16,10 @@ package object macro {
       case DefDef(_, name, _, _, _, _) => name.toString
       case _ => "<unknown-method>"
     }
+    val methodLit = c.universe.showRaw(c.enclosingMethod)
 
     reify {
+      println("Method lit = " + c.literal(methodLit).splice)
       println(paramRepExpr.splice + " = " + value.splice)
       println(c.literal(enclosingMethodName.toString).splice)
       value.splice
