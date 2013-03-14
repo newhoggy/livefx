@@ -28,7 +28,7 @@ package object macro {
 
     val methodLit1 = c.universe.showRaw(value)
     val methodLit2 = value match {
-      case Expr(x) => x.pos.toString
+      case Expr(x) => x.pos.source + ":" + x.pos.line + ":" + x.pos.column
     }
 
     reify {
