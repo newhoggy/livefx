@@ -8,20 +8,35 @@ package object macro {
  
   def debug_impl[T](c: Context)(value: c.Expr[T]): c.Expr[T] = {
     import c.universe._
+    import c.universe.Modifiers
+    import scala.reflect.internal.Trees
     val paramRep = show(value.tree)
     val paramRepTree = Literal(Constant(paramRep))
     val paramRepExpr = c.Expr[String](paramRepTree)
     val implicits = c.enclosingImplicits.map(_.toString)
+    var x: scala.reflect.api.Trees#Modifiers = null
+    val pos = c.enclosingMethod.pos.toString()
+
     val enclosingMethodName = c.enclosingMethod match {
-      case DefDef(_, name, _, _, _, _) => name.toString
+      case DefDef(modifiers, name, _, _, _, _) =>
+//        modifiers match {
+//          case modifiers: {} =>
+//        }
+        modifiers + ":" + modifiers.annotations.toString() + ":"  + (modifiers.annotations mkString ", ")
       case _ => "<unknown-method>"
     }
-    val methodLit = c.universe.showRaw(c.enclosingMethod)
+
+    val methodLit1 = c.universe.showRaw(value)
+    val methodLit2 = value match {
+      case Expr(x) => x.pos.toString
+    }
 
     reify {
-      println("Method lit = " + c.literal(methodLit).splice)
-      println(paramRepExpr.splice + " = " + value.splice)
-      println(c.literal(enclosingMethodName.toString).splice)
+      println("Method lit = " + c.literal(methodLit1).splice)
+      println("Method lit = " + c.literal(methodLit2).splice)
+      println("Method lit = " + c.literal(pos).splice)
+//      println(paramRepExpr.splice + " = " + value.splice)
+      println("--> " + c.literal(enclosingMethodName.toString).splice)
       value.splice
     }
   }
