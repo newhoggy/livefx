@@ -30,6 +30,10 @@ package object macro {
     val methodLit2 = value match {
       case Expr(x) => x.pos.source + ":" + x.pos.line + ":" + x.pos.column
     }
+    
+    reify {
+      implicit val x = 1
+    }
 
     reify {
       println("Method lit = " + c.literal(methodLit1).splice)

@@ -26,4 +26,8 @@ package object livefx {
       self.drop(depth).dropWhile(e => e.getMethodName.endsWith("$sp")).head
     }
   }
+
+  def bindTrace[T](value: T): T = {println("A"); value}
+  def bindTrace(liveValue: LiveValue[Int])(implicit d0: DummyImplicit) = {println("B"); liveValue}
+  def bindTrace(liveValue: LiveValue[Double])(implicit d0: DummyImplicit, d2: DummyImplicit) = {println("C"); liveValue}
 }
