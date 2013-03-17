@@ -2,10 +2,10 @@ import sbt._
 import Keys._
 
 object XSDK extends Build {
-  lazy val root = Project(id = "observesfx", base = file(".")) aggregate(livefx_core)
+  lazy val root = Project(id = "observesfx", base = file(".")) aggregate(livefx_core, livefx_coretest)
 
-  lazy val livefx_macro = Project(id = "livefx_macro", base = file("livefx_macro"))
+  lazy val livefx_core = Project(id = "livefx_core", base = file("livefx_core"))
 
-  lazy val livefx_core = Project(id = "livefx_core", base = file("livefx_core")) dependsOn(livefx_macro)
+  lazy val livefx_coretest = Project(id = "livefx_coretest", base = file("livefx_coretest")) dependsOn(livefx_core)
 }
 
