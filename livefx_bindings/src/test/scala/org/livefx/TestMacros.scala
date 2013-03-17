@@ -10,7 +10,7 @@ class TestMacros {
     val liveA = new SimpleLiveValue[Int](1)
     val liveB = new SimpleLiveValue[Int](1)
     implicit val spoilTrace = List("hello")
-    val y = debug {
+    val y = Debug.debug {
       liveA + liveB
     }
   }
