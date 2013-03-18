@@ -11,7 +11,7 @@ class TestMacros {
     val liveB = new SimpleLiveValue[Int](1)
     implicit val spoilTrace = List("hello")
     val y = Debug.debug {
-      liveA + liveB
+      bindTrace(liveA + liveB, "moo", 1, 2, "")
     }
   }
 }

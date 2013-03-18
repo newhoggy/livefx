@@ -28,5 +28,10 @@ package object livefx {
   }
 
   def bindTrace[T](value: T): T = {println("A"); value}
+  def bindTrace[T](value: T, source: String, line: Int, column: Int, snippet: String): T = {println("A2"); value}
   def bindTrace(liveValue: LiveValue[Int]) = {println("B"); liveValue}
+  def bindTrace(liveValue: LiveValue[Int], source: String, line: Int, column: Int, snippet: String) = {
+    println(s"(${source}:${line}:${column}) => ${snippet}")
+    liveValue
+  }
 }

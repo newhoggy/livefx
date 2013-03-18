@@ -24,15 +24,26 @@ object Debug {
     
     def translate(expr: c.universe.Tree): c.universe.Tree = {
       expr match {
-        case apply: Apply => Apply(bindTraceMethod, List(apply))
-        case _ => expr
+        case apply: Apply =>
+          System.err.println("---> apply: " + c.universe.showRaw(apply))
+          System.err.println("---> position: " + apply.pos.source + ", " + apply.pos.line)
+          Apply(bindTraceMethod, List(
+              apply,
+              Literal(Constant(apply.pos.source.toString)),
+              Literal(Constant(apply.pos.line)),
+              Literal(Constant(apply.pos.column)),
+              Literal(Constant(apply.pos.lineContent))))
+        case _ =>
+          System.err.println("---> expr: " + c.universe.showRaw(expr))
+
+          expr
       }
     }
     
     val value2 = value match {
       case Expr(expr) => translate(expr)
     }
-
+    
     reify {
       c.Expr[T](value2).splice
     }
