@@ -1,7 +1,14 @@
 package org.livefx
 
-case class BindTraceEntry(source: String, line: Int, column: Int)
+import java.io.PrintWriter
+import java.io.PrintStream
 
-object BindTraceEntry {
-  implicit val bindTraceList = List[BindTraceEntry]()
+case class BindTraceEntry(source: String, line: Int, column: Int, snippet: String) {
+  def printTo(out: PrintWriter): Unit = {
+    out.println(s"(${source}:${line}:${column}) ==> ${snippet}")
+  }
+
+  def printTo(out: PrintStream): Unit = {
+    out.println(s"(${source}:${line}:${column}) ==> ${snippet}")
+  }
 }

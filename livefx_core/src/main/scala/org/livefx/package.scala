@@ -2,6 +2,7 @@ package org
 
 import scala.collection.{ mutable => mutable }
 import org.livefx.script._
+import scala.util.DynamicVariable
 
 package object livefx {
   type ArrayBuffer[A] = mutable.ArrayBuffer[A]
@@ -27,11 +28,28 @@ package object livefx {
     }
   }
 
+  private val bindTraceEntries = new DynamicVariable[List[BindTraceEntry]](Nil)
+
   def bindTrace[T](value: T): T = {println("A"); value}
+
   def bindTrace[T](value: T, source: String, line: Int, column: Int, snippet: String): T = {println("A2"); value}
+
   def bindTrace(liveValue: LiveValue[Int]) = {println("B"); liveValue}
+
   def bindTrace(liveValue: LiveValue[Int], source: String, line: Int, column: Int, snippet: String) = {
+    val newBindTraceEntry = BindTraceEntry(source, line, column, snippet)
+
     println(s"(${source}:${line}:${column}) => ${snippet}")
-    liveValue
+    new LiveBinding[Int] {
+      liveValue.spoils.subscribe { (_, _) =>
+        bindTraceEntries.withValue(newBindTraceEntry :: bindTraceEntries.value) {
+          spoil
+        }
+      }
+  
+      protected def computeValue: Int = liveValue.value
+    }
   }
+  
+  def spoilStack = bindTraceEntries.value
 }
