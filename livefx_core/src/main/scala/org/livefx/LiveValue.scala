@@ -19,7 +19,6 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) A] extends Changeable[A
   }
   
   def flatMap[B](f: A => LiveValue[B]): LiveValue[B] = {
-    println(Debug.callers.seq.withoutSpecializationFrom(4))
     val source = this
     val binding = new LiveBinding[B] {
       var nested: LiveValue[B] = f(source.value)

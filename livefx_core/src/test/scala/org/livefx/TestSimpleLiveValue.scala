@@ -166,7 +166,7 @@ class TestSimpleLiveValue {
     val liveA = new SimpleLiveValue[Int](0)
     val liveB = new SimpleLiveValue[Int](0)
     val liveC = new SimpleLiveValue[Int](0)
-    val liveZ = Debug.traceSpoil(Debug.traceSpoil(liveA + liveB) + liveC)
+    val liveZ = liveA + liveB + liveC
 
     Assert.assertEquals(0, liveZ.value)
     liveB.value = 7
