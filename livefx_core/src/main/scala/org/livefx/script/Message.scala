@@ -35,8 +35,6 @@ class Script[A] extends ArrayBuffer[Change[A]] with Change[A] {
   }
 }
 
-sealed class Spoil extends Message[Nothing]
-
-case object Spoil extends Spoil
+sealed case class Spoil(val trace: List[StackTraceElement] = Nil) extends Message[Nothing]
 
 case object Ping extends Message[Nothing]

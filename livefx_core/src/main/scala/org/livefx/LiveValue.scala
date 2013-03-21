@@ -12,7 +12,7 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) A] extends Changeable[A
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B) = {
     val source = this
     new LiveBinding[B] {
-      val ref = source.spoils.subscribeWeak((_, _) => spoil)
+      val ref = source.spoils.subscribeWeak((_, spoilEvent) => spoil(spoilEvent))
       
       protected override def computeValue: B = f(source.value)
     }
@@ -22,13 +22,13 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) A] extends Changeable[A
     val source = this
     val binding = new LiveBinding[B] {
       var nested: LiveValue[B] = f(source.value)
-      val nestedSpoilHandler = { (_: Any, _: Any) => spoil }
+      val nestedSpoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
       var ref: Any = nested.spoils.subscribeWeak(nestedSpoilHandler)
-      val ref1 = source.spoils.subscribeWeak { (_, _) =>
+      val ref1 = source.spoils.subscribeWeak { (_, spoilEvent) =>
         nested.spoils.unsubscribe(nestedSpoilHandler)
         nested = f(source.value)
         ref = nested.spoils.subscribeWeak(nestedSpoilHandler)
-        spoil
+        spoil(spoilEvent)
       }
       
       protected override def computeValue: B = nested.value

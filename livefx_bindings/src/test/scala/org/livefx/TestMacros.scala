@@ -9,10 +9,13 @@ class TestMacros {
     import LiveNumeric.Implicits._
     val liveA = new SimpleLiveValue[Int](1)
     val liveB = new SimpleLiveValue[Int](1)
-    val liveC = liveA + liveB
-    liveC.spoils.subscribe { (_, _) =>
-      for (entry <- spoilStack) {
-        entry.printTo(System.out)
+    val liveC = traceSpoils(
+        traceSpoils(liveA) +
+        traceSpoils(liveB))
+    liveC.spoils.subscribe { (_, spoilEvent) =>
+      println("--> liveC spoiled")
+      for (entry <- spoilEvent.trace) {
+        println(entry)
       }
     }
     println(liveC.value)

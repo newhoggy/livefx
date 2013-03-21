@@ -11,5 +11,5 @@ trait Spoilable extends Publisher {
   
   def spoiled: Boolean = false
   
-  protected def spoil(): Unit = _spoils.publish(Spoil)
+  protected def spoil(spoilEvent: Spoil): Unit = _spoils.publish(spoilEvent)
 }
