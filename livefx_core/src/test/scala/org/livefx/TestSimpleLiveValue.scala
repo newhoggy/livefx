@@ -178,4 +178,41 @@ class TestSimpleLiveValue {
     liveA.value = 1
     Assert.assertEquals(18, liveZ.value)
   }
+
+  @Test
+  def testMacro(): Unit = {
+    import LiveNumeric.Implicits._
+    val liveA = new SimpleLiveValue[Int](1)
+    val liveB = new SimpleLiveValue[Int](1)
+    val liveC = traceSpoils(
+        traceSpoils(liveA) +
+        traceSpoils(liveB))
+    var counter = 0
+    liveC.spoils.subscribe { (_, spoilEvent) =>
+      println("--> spoil")
+      for (entry <- spoilEvent.trace) {
+        counter += 1
+        println(entry)
+      }
+    }
+    Assert.assertEquals(2, liveC.value)
+    Assert.assertEquals(0, counter)
+    liveA.value = 2
+    Assert.assertEquals(3, liveC.value)
+    Assert.assertEquals(2, counter)
+    liveB.value = 3
+    Assert.assertEquals(5, liveC.value)
+    Assert.assertEquals(4, counter)
+    liveA.value = 4
+    Assert.assertEquals(7, liveC.value)
+    Assert.assertEquals(6, counter)
+    liveB.value = 5
+    Assert.assertEquals(9, liveC.value)
+    Assert.assertEquals(8, counter)
+    println("===")
+    liveA.value = 6
+    liveB.value = 7
+    Assert.assertEquals(13, liveC.value)
+    Assert.assertEquals(10, counter)
+  }
 }
