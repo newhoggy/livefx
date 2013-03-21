@@ -184,15 +184,11 @@ class TestSimpleLiveValue {
     import LiveNumeric.Implicits._
     val liveA = new SimpleLiveValue[Int](1)
     val liveB = new SimpleLiveValue[Int](1)
-    val liveC = traceSpoils(
-        traceSpoils(liveA) +
-        traceSpoils(liveB))
+    val liveC = traceSpoils(traceSpoils(liveA) + traceSpoils(liveB))
     var counter = 0
     liveC.spoils.subscribe { (_, spoilEvent) =>
-      println("--> spoil")
       for (entry <- spoilEvent.trace) {
         counter += 1
-        println(entry)
       }
     }
     Assert.assertEquals(2, liveC.value)
@@ -209,7 +205,6 @@ class TestSimpleLiveValue {
     liveB.value = 5
     Assert.assertEquals(9, liveC.value)
     Assert.assertEquals(8, counter)
-    println("===")
     liveA.value = 6
     liveB.value = 7
     Assert.assertEquals(13, liveC.value)
