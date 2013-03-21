@@ -180,7 +180,7 @@ class TestSimpleLiveValue {
   }
 
   @Test
-  def testMacro(): Unit = {
+  def testTraceSpoils(): Unit = {
     import LiveNumeric.Implicits._
     val liveA = new SimpleLiveValue[Int](1)
     val liveB = new SimpleLiveValue[Int](1)
