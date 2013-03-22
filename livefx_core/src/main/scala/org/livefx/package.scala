@@ -21,7 +21,26 @@ package object livefx {
     def ||(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l || r
     def unary_!(): LiveValue[Boolean] =  self.map(!_)
   }
-  
+
+  implicit class RichLiveOptionLiveValue[T](val self: LiveValue[Option[LiveValue[T]]]) {
+    def orElse(that: LiveValue[T]): LiveValue[T] = for {
+      maybeSelfValue <- self
+      value <- maybeSelfValue.getOrElse(that)
+    } yield value
+    
+//    def orElse(that: LiveValue[T]): LiveValue[T] = new LiveBinding[T] {
+//      private val selfChangeSubscriber = { (_: self.Pub, changeEvent: Update[Option[LiveValue[T]]]) =>
+//      }
+//      private val ref1 = that.spoils.subscribe { (_, spoilEvent) => spoil(spoilEvent) }
+//      private val ref2 = self.spoils.subscribe { (_, spoilEvent) => spoil(spoilEvent) }
+//      private val ref3 = self.changes.subscribe(selfChangeSubscriber)
+//      
+//      override def computeValue: T = {
+//        that.value
+//      }
+//    }
+  }
+
   implicit class RichArrayOfStackTraceElement(val self: Seq[StackTraceElement]) {
     def withoutSpecializationFrom(depth: Int): StackTraceElement = {
       self.drop(depth).dropWhile(e => e.getMethodName.endsWith("$sp")).head

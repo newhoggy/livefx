@@ -210,4 +210,30 @@ class TestSimpleLiveValue {
     Assert.assertEquals(13, liveC.value)
     Assert.assertEquals(10, counter)
   }
+  
+  @Test
+  def testOrElse(): Unit = {
+    import org.livefx._
+    val liveA = new SimpleLiveValue[Int](0)
+    val liveB = new SimpleLiveValue[Int](0)
+    val liveC = new SimpleLiveValue[Int](0)
+    val liveD = new SimpleLiveValue[Option[LiveValue[Int]]](None)
+    val liveE = liveD.orElse(liveA)
+    
+    Assert.assertEquals(0, liveE.value)
+    liveA.value = 1
+    Assert.assertEquals(1, liveE.value)
+    liveD.value = Some(liveB)
+    Assert.assertEquals(0, liveE.value)
+    liveB.value = 2
+    Assert.assertEquals(2, liveE.value)
+    liveA.value = 3
+    Assert.assertEquals(2, liveE.value)
+    liveC.value = 4
+    Assert.assertEquals(2, liveE.value)
+    liveD.value = Some(liveC)
+    Assert.assertEquals(4, liveE.value)
+    liveD.value = Some(liveA)
+    Assert.assertEquals(3, liveE.value)
+  }
 }
