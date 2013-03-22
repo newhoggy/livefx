@@ -59,7 +59,7 @@ trait LiveSeq[A] extends Seq[A] with Changeable[A, Change[A]] {
   }
   
   def liveCounted: Map[A, Int] with LiveMap[A, Int] = {
-    val outer = this;
+    val outer = this
     new HashMap[A, Int] with LiveMap[A, Int] {
       private final def target = this
       def attach(key: A): Unit = {
