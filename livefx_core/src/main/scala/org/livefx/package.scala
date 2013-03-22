@@ -27,18 +27,6 @@ package object livefx {
       maybeSelfValue <- self
       value <- maybeSelfValue.getOrElse(that)
     } yield value
-    
-//    def orElse(that: LiveValue[T]): LiveValue[T] = new LiveBinding[T] {
-//      private val selfChangeSubscriber = { (_: self.Pub, changeEvent: Update[Option[LiveValue[T]]]) =>
-//      }
-//      private val ref1 = that.spoils.subscribe { (_, spoilEvent) => spoil(spoilEvent) }
-//      private val ref2 = self.spoils.subscribe { (_, spoilEvent) => spoil(spoilEvent) }
-//      private val ref3 = self.changes.subscribe(selfChangeSubscriber)
-//      
-//      override def computeValue: T = {
-//        that.value
-//      }
-//    }
   }
 
   implicit class RichArrayOfStackTraceElement(val self: Seq[StackTraceElement]) {
