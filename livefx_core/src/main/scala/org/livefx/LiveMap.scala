@@ -5,6 +5,10 @@ import org.livefx.script._
 trait LiveMap[A, B] extends Map[A, B] with Changeable[(A, B), Change[(A, B)]] {
   type Pub <: LiveMap[A, B]
   
+  protected lazy val changesSink = new EventSource[Pub, ChangeableMessage](publisher)
+  
+  def changes: Events[Pub, ChangeableMessage] = changesSink
+
   override def put(key: A, value: B): Option[B] = {
     super.put(key, value) match {
       case None => changesSink.publish(Include(NoLo, (key, value))); None

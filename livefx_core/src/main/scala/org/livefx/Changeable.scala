@@ -4,8 +4,7 @@ import org.livefx.script.Change
 
 trait Changeable[A, M <: Change[A]] extends Publisher {
   type Pub <: Changeable[A, M]
+  type ChangeableMessage = M
   
-  protected lazy val changesSink = new EventSource[Pub, M](publisher)
-  
-  def changes: Events[Pub, M] = changesSink
+  def changes: Events[Pub, M]
 }
