@@ -20,6 +20,8 @@ package object livefx {
     def &&(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l && r
     def ||(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l || r
     def unary_!(): LiveValue[Boolean] =  self.map(!_)
+    
+    def select[T](liveA: LiveValue[T], liveB: LiveValue[T]): LiveValue[T] = for (v <- self; ab <- if (v) liveA else liveB) yield ab
   }
 
   implicit class RichLiveOptionLiveValue[T](val self: LiveValue[Option[LiveValue[T]]]) {
