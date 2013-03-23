@@ -35,4 +35,17 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Changeable[
     }
     binding
   }
+  
+  def spoilCount: LiveValue[Long] = {
+    val outer = this
+    new LiveBinding[Long] {
+      private var counter = 0L
+      private val ref = outer.spoils.subscribeWeak { (_, spoilEvent) =>
+        counter += 1
+        spoil(spoilEvent)
+      }
+      
+      protected override def computeValue: Long = counter
+    }
+  }
 }

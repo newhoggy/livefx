@@ -236,4 +236,29 @@ class TestSimpleLiveValue {
     liveD.value = Some(liveA)
     Assert.assertEquals(3, liveE.value)
   }
+  
+  @Test
+  def testSpoilCount(): Unit = {
+    import LiveNumeric.Implicits._
+    val liveA = new SimpleLiveValue[Int](0)
+    val liveB = new SimpleLiveValue[Int](0)
+    val liveC = liveA + liveB
+    val liveCount = liveA.spoilCount
+    println("--> " + liveCount.value)
+    liveA.value = 1
+    println("--> " + liveCount.value)
+    liveB.value = 1
+    println("--> " + liveCount.value)
+    println("--> liveC.value: " + liveC.value)
+    liveA.value = 2
+    println("--> liveC.value: " + liveC.value)
+    println("--> " + liveCount.value)
+    println("--> liveC.value: " + liveC.value)
+    liveB.value = 2
+    println("--> liveC.value: " + liveC.value)
+    println("--> " + liveCount.value)
+    liveA.value = 3
+    println("--> liveC.value: " + liveC.value)
+    println("--> " + liveCount.value)
+  }
 }
