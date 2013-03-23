@@ -243,22 +243,21 @@ class TestSimpleLiveValue {
     val liveA = new SimpleLiveValue[Int](0)
     val liveB = new SimpleLiveValue[Int](0)
     val liveC = liveA + liveB
-    val liveCount = liveA.spoilCount
-    println("--> " + liveCount.value)
+    val liveACount = liveA.spoilCount
+    val liveBCount = liveB.spoilCount
+    val liveCCount = liveC.spoilCount
+    val live3Count = for (a <- liveA; b <- liveB; c <- liveC) yield (a, b, c)
+    
+    Assert.assertEquals((0, 0, 0), live3Count.value)
     liveA.value = 1
-    println("--> " + liveCount.value)
+    Assert.assertEquals((1, 0, 1), live3Count.value)
     liveB.value = 1
-    println("--> " + liveCount.value)
-    println("--> liveC.value: " + liveC.value)
+    Assert.assertEquals((1, 1, 2), live3Count.value)
     liveA.value = 2
-    println("--> liveC.value: " + liveC.value)
-    println("--> " + liveCount.value)
-    println("--> liveC.value: " + liveC.value)
+    Assert.assertEquals((2, 1, 3), live3Count.value)
     liveB.value = 2
-    println("--> liveC.value: " + liveC.value)
-    println("--> " + liveCount.value)
+    Assert.assertEquals((2, 2, 4), live3Count.value)
     liveA.value = 3
-    println("--> liveC.value: " + liveC.value)
-    println("--> " + liveCount.value)
+    Assert.assertEquals((3, 2, 5), live3Count.value)
   }
 }
