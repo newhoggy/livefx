@@ -260,4 +260,25 @@ class TestSimpleLiveValue {
     liveA.value = 3
     Assert.assertEquals((3, 2, 5), live3Count.value)
   }
+  
+  @Test
+  def testBoolean(): Unit = {
+    import LiveNumeric.Implicits._
+    val liveA = new SimpleLiveValue[Boolean](false)
+    val liveB = new SimpleLiveValue[Boolean](false)
+    val liveAnd = liveA && liveB
+    val liveOr = liveA || liveB
+    val liveNot = !liveA
+    val live3 = for (and <- liveAnd; or <- liveOr; not <- liveNot) yield (and, or, not)
+
+    Assert.assertEquals((false, false, true), live3.value)
+    liveA.value = true
+    Assert.assertEquals((false, true, false), live3.value)
+    liveB.value = true
+    Assert.assertEquals((true, true, false), live3.value)
+    liveA.value = false
+    Assert.assertEquals((false, true, true), live3.value)
+    liveB.value = false
+    Assert.assertEquals((false, false, true), live3.value)
+  }
 }
