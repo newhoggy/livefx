@@ -13,10 +13,58 @@ import org.livefx.script.Update
 import org.livefx.script.Reset
 import org.livefx.script.Script
 
-trait LiveLiveSeq[A, +Pub <: LiveSeq[A]] {
-  def observable: Pub 
+trait LiveLiveSeq[A] {
+  def observable: LiveSeq[A]
+
+  def map[B](f: A => B): LiveLiveSeq[B] = observable.liveMap(f).live
   
-  def map[B](f: A => B): LiveLiveSeq[B, LiveSeq[B]] = observable.liveMap(f).live
+  def flatMap[B](f: A => LiveLiveSeq[B]): LiveLiveSeq[B] = {
+    val outer = this
+    val binding = new ArrayBuffer[B] with LiveBuffer[B] {
+      private final def target = this
+      
+//      private val ref = outer.observable.changes.subscribeWeak { (pub: LiveSeq[A], change: Change[A]) =>
+//        def process(pub: LiveSeq[A], change: Change[A]): Unit = {
+//          change match {
+//            case Remove(location, oldElem) => location match {
+//              case Start => target.remove(0)
+//              case End => target.remove(target.size - 1)
+//              case Index(index) => target.remove(index)
+//              case NoLo => assert(false)
+//            }
+//            case Include(location, newElem) => location match {
+//              case Start => target.prepend(f(newElem))
+//              case End => target.append(f(newElem))
+//              case Index(index) => target.insert(index, f(newElem))
+//              case NoLo => assert(false)
+//            }
+//            case Update(location, newElem, oldElem) => location match {
+//              case Start => target(0) = f(newElem)
+//              case End => target(target.size - 1) = f(newElem)
+//              case Index(index) => target(index) = f(newElem)
+//              case NoLo => assert(false)
+//            }
+//            case Reset => target.clear()
+//            case s: Script[A] => for (e <- s) process(pub, e)
+//          }
+//        }
+//  
+//        process(pub, change)
+//      }
+//      var nested: LiveValue[B] = f(source.value)
+//      val nestedSpoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
+//      var ref: Any = nested.spoils.subscribeWeak(nestedSpoilHandler)
+//      val ref1 = source.spoils.subscribeWeak { (_, spoilEvent) =>
+//        nested.spoils.unsubscribe(nestedSpoilHandler)
+//        nested = f(source.value)
+//        ref = nested.spoils.subscribeWeak(nestedSpoilHandler)
+//        spoil(spoilEvent)
+//      }
+//      
+//      protected override def computeValue: B = nested.value
+    }
+    binding.live
+  }
 }
 
 trait LiveSeq[A] extends Seq[A] with Publisher {
@@ -33,7 +81,9 @@ trait LiveSeq[A] extends Seq[A] with Publisher {
     case NoLo => None
   }
   
-  def live: LiveLiveSeq[A, Pub]
+  object live extends LiveLiveSeq[A] {
+    override def observable = publisher
+  }
   
   def liveMap[B](f: A => B): Seq[B] with LiveSeq[B] = {
     val outer = this
