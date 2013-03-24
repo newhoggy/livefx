@@ -13,8 +13,10 @@ import org.livefx.script.Update
 import org.livefx.script.Reset
 import org.livefx.script.Script
 
-trait LiveLiveSeq[A, Pub <: LiveSeq[A]] {
+trait LiveLiveSeq[A, +Pub <: LiveSeq[A]] {
+  def observable: Pub 
   
+  def map[B](f: A => B): LiveLiveSeq[B, LiveSeq[B]] = observable.liveMap(f).live
 }
 
 trait LiveSeq[A] extends Seq[A] with Publisher {

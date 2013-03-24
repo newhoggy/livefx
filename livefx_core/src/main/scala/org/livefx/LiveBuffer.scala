@@ -10,7 +10,7 @@ trait LiveBuffer[A] extends Buffer[A] with LiveSeq[A] with Publisher {
   type Pub <: LiveBuffer[A]
   
   override lazy val live: LiveLiveBuffer[A, Pub] = new LiveLiveBuffer[A, Pub] {
-    
+    override def observable = publisher
   }
   
   abstract override def +=(element: A): this.type = {
