@@ -38,7 +38,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new SimpleProperty[Int](0)
     
-    val subscription = liveValue.changes.subscribe((_, change) => changes = change::changes)
+    val subscription = liveValue.updates.subscribe((_, change) => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
@@ -61,7 +61,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new SimpleProperty[Int](0)
     
-    var subscription = liveValue.changes.subscribeWeak((_, change) => changes = change::changes)
+    var subscription = liveValue.updates.subscribeWeak((_, change) => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
@@ -85,7 +85,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new SimpleProperty[Int](0)
     
-    var subscription = liveValue.changes.subscribe((_, change) => changes = change::changes)
+    var subscription = liveValue.updates.subscribe((_, change) => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 

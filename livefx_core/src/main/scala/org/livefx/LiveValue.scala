@@ -9,11 +9,15 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   
   def value: A
   
+  //lazy val _updates = new EventSource[Pub, Update[A]](publisher)
+  
+  def updates: Events[Pub, Update[A]]
+
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B) = {
     val source = this
     new LiveBinding[B] {
       val ref = source.spoils.subscribeWeak((_, spoilEvent) => spoil(spoilEvent))
-      
+
       protected override def computeValue: B = f(source.value)
     }
   }

@@ -8,9 +8,9 @@ import org.livefx.script.Change
 class SimpleProperty[A](@specialized(Boolean, Int, Long, Double) private var _value: A) extends LiveValue[A] {
   type Pub <: SimpleProperty[A]
   
-  protected lazy val changesSink = new EventSource[Pub, Change[A]](publisher)
-  
-  def changes: Events[Pub, Change[A]] = changesSink
+  lazy val _updates = new EventSource[Pub, Update[A]](publisher)
+
+  override def updates: Events[Pub, Update[A]] = _updates
 
   def value: A = _value
 
@@ -18,6 +18,6 @@ class SimpleProperty[A](@specialized(Boolean, Int, Long, Double) private var _va
     val oldValue = _value
     _value = newValue
     spoil(Spoil())
-    changesSink.publish(Update(NoLo, oldValue, newValue))
+    _updates.publish(Update(NoLo, oldValue, newValue))
   }
 }
