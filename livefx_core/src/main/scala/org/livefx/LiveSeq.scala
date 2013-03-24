@@ -13,6 +13,10 @@ import org.livefx.script.Update
 import org.livefx.script.Reset
 import org.livefx.script.Script
 
+trait LiveLiveSeq[A, Pub <: LiveSeq[A]] {
+  
+}
+
 trait LiveSeq[A] extends Seq[A] with Publisher {
   type Pub <: LiveSeq[A]
 
@@ -26,6 +30,8 @@ trait LiveSeq[A] extends Seq[A] with Publisher {
     case Index(index) => Some(this(index))
     case NoLo => None
   }
+  
+  def live: LiveLiveSeq[A, Pub]
   
   def liveMap[B](f: A => B): Seq[B] with LiveSeq[B] = {
     val outer = this
