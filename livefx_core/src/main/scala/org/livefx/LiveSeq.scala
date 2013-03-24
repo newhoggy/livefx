@@ -13,12 +13,12 @@ import org.livefx.script.Update
 import org.livefx.script.Reset
 import org.livefx.script.Script
 
-trait LiveSeq[A] extends Seq[A] with Changeable[A, Change[A]] {
+trait LiveSeq[A] extends Seq[A] with Publisher {
   type Pub <: LiveSeq[A]
 
-  protected lazy val changesSink = new EventSource[Pub, ChangeableMessage](publisher)
+  protected lazy val changesSink = new EventSource[Pub, Change[A]](publisher)
   
-  def changes: Events[Pub, ChangeableMessage] = changesSink
+  def changes: Events[Pub, Change[A]] = changesSink
 
   def apply(location: Location): Option[A] = location match {
     case Start => Some(this(0))

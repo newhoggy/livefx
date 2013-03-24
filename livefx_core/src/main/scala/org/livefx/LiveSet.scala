@@ -2,12 +2,12 @@ package org.livefx
 
 import org.livefx.script._
 
-trait LiveSet[A] extends Set[A] with Changeable[A, Change[A]] {
+trait LiveSet[A] extends Set[A] with Publisher {
   type Pub <: LiveSet[A]
 
-  protected lazy val changesSink = new EventSource[Pub, ChangeableMessage](publisher)
+  protected lazy val changesSink = new EventSource[Pub, Change[A]](publisher)
   
-  def changes: Events[Pub, ChangeableMessage] = changesSink
+  def changes: Events[Pub, Change[A]] = changesSink
 
   abstract override def +=(elem: A): this.type = {
     if (!contains(elem)) {

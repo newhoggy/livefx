@@ -4,7 +4,7 @@ import org.livefx.script.Message
 import org.livefx.script.Update
 import org.livefx.script.Spoil
 
-trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Changeable[A, Update[A]] with Spoilable {
+trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   type Pub <: LiveValue[A]
   
   def value: A

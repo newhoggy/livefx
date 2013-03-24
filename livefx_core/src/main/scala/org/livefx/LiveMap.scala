@@ -2,12 +2,12 @@ package org.livefx
 
 import org.livefx.script._
 
-trait LiveMap[A, B] extends Map[A, B] with Changeable[(A, B), Change[(A, B)]] {
+trait LiveMap[A, B] extends Map[A, B] with Publisher {
   type Pub <: LiveMap[A, B]
   
-  protected lazy val changesSink = new EventSource[Pub, ChangeableMessage](publisher)
+  protected lazy val changesSink = new EventSource[Pub, Change[(A, B)]](publisher)
   
-  def changes: Events[Pub, ChangeableMessage] = changesSink
+  def changes: Events[Pub, Change[(A, B)]] = changesSink
 
   override def put(key: A, value: B): Option[B] = {
     super.put(key, value) match {
