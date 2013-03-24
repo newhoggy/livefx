@@ -6,5 +6,5 @@ import org.junit.runners.Suite
 @RunWith(classOf[Suite])
 @Suite.SuiteClasses(Array(
     classOf[TestObservableSeq],
-    classOf[TestSimpleLiveValue]))
+    classOf[TestSimpleProperty]))
 class TestAll
