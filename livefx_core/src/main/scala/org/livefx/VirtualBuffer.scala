@@ -1,6 +1,7 @@
 package org.livefx
 
 import scala.annotation.tailrec
+import scala.reflect.ClassTag
 
 sealed abstract class VirtualEntry[+T] {
   def size: Int
@@ -46,5 +47,37 @@ case class VirtualBuffer[T](aSide: List[VirtualEntry[T]], zSide: List[VirtualEnt
     } else {
       reverse.moveImpl(-steps).reverse
     }
+  }
+}
+
+trait LiveSized {
+  
+}
+
+trait SizeNode[A] {
+  def size: Int
+}
+
+class SizeBranch[A] extends SizeNode[A] {
+  override def size: Int = 1
+}
+
+class SizeLeaf[A: ClassTag](initialCapacity: Int = 32) extends SizeNode[A] {
+  private val elems: Array[A] = new Array[A](initialCapacity)
+  private val sizes: Array[Int] = new Array[Int](initialCapacity)
+  private var aIndex: Int = 0
+  private var zIndex: Int = initialCapacity
+  override def size: Int = {
+    var calculatedSize = 0
+
+    for (i <- 0 to aIndex) {
+      calculatedSize = calculatedSize + sizes(i)
+    }
+    
+    for (i <- zIndex to initialCapacity) {
+      calculatedSize = calculatedSize + sizes(i)
+    }
+    
+    calculatedSize
   }
 }
