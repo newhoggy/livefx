@@ -9,7 +9,10 @@ class TestGapBuffer {
     val buffer = new GapBuffer[Int]()
     
     buffer.insertL(1)
+    Assert.assertEquals(List(1), buffer.iterator.toList)
     buffer.insertL(2)
+    Assert.assertEquals(List(1, 2), buffer.iterator.toList)
     buffer.insertL(3)
+    Assert.assertEquals(List(1, 2, 3), buffer.iterator.toList)
   }
 }

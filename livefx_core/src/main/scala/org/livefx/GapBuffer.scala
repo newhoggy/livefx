@@ -9,7 +9,7 @@ case class GapConfig(val nodeCapacity: Int)
 
 abstract class GapTree[A] {
   def insertL(value: A)(implicit config: GapConfig): GapTree[A]
-  
+
   def insertR(value: A)(implicit config: GapConfig): GapTree[A]
 
   def moveBy(steps: Int): GapTree[A]
@@ -27,6 +27,8 @@ abstract class GapTree[A] {
   def size: Int
   
   def empty: GapTree[A]
+  
+  def remainingCapacity(implicit config: GapConfig): Int
 }
 
 case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List[GapTree[A]], sizeR: Int) extends GapTree[A] {
@@ -54,7 +56,7 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
   }
   
   @tailrec
-  final def moveBy(steps: Int): GapTree[A] = {
+  final override def moveBy(steps: Int): GapTree[A] = {
     if (steps > 0) {
       val head = branchesR.head
       if (steps > head.sizeL) {
@@ -70,9 +72,11 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
     }
   }
 
-  def itemL: A = branchesL.head.itemL
+  final override def itemL: A = branchesL.head.itemL
   
-  def itemR: A = branchesR.head.itemR
+  final override def itemR: A = branchesR.head.itemR
+  
+  final override def remainingCapacity(implicit config: GapConfig): Int = config.nodeCapacity - (branchesL.size + branchesR.size)
   
   final override def size: Int = sizeL + sizeR
 }
@@ -106,6 +110,8 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
   final def itemL: A = valuesL.head
 
   final def itemR: A = valuesR.head
+  
+  final override def remainingCapacity(implicit config: GapConfig): Int = config.nodeCapacity - size
   
   final override def size: Int = sizeL + sizeR
 }
@@ -141,9 +147,11 @@ class GapBuffer[A: ClassTag] extends Iterable[A] {
   }
   
   def iterator: Iterator[A] = new Iterator[A] {
-    var tree = GapBuffer.this.tree.moveTo(0)
-    def hasNext: Boolean = tree.sizeR != 0
-    def next(): A = {
+    private var tree = GapBuffer.this.tree.moveTo(0)
+    final override def hasDefiniteSize: Boolean = true
+    final override def length: Int = tree.sizeR
+    final override def hasNext: Boolean = tree.sizeR != 0
+    final override def next(): A = {
       tree = tree.moveBy(1)
       tree.itemL
     }
