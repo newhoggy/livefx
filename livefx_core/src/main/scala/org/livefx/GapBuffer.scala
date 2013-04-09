@@ -11,7 +11,13 @@ abstract class GapTree[A] {
   def insertR(value: A): GapTree[A]
 
   def moveBy(steps: Int): GapTree[A]
-
+  
+  def moveTo(index: Int): GapTree[A] = moveBy(index - sizeL)
+  
+  def itemL: A
+  
+  def itemR: A
+  
   def sizeL: Int
 
   def sizeR: Int
@@ -30,6 +36,8 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
   }
   
   private final def withAtLeastOneTreeL(): GapTree[A] = if (branchesL.isEmpty) insertTreeL(branchesR.head.empty) else this
+  
+  private final def withAtLeastOneTreeR(): GapTree[A] = if (branchesR.isEmpty) insertTreeL(branchesL.head.empty) else this
   
   final def empty: GapBranch[A] = GapBranch[A](0, Nil, Nil, 0)
   
@@ -60,6 +68,10 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
     }
   }
 
+  def itemL: A = branchesL.head.itemL
+  
+  def itemR: A = branchesR.head.itemR
+  
   final override def size: Int = sizeL + sizeR
 }
 
@@ -89,7 +101,9 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
     }
   }
   
-  final def moveTo(index: Int): GapLeaf[A] = moveBy(index - sizeL)
+  final def itemL: A = valuesL.head
+
+  final def itemR: A = valuesR.head
   
   final override def size: Int = sizeL + sizeR
 }
@@ -99,10 +113,12 @@ object GapLeaf {
   def apply[A](): GapLeaf[A] = GapLeaf[A](0, Nil, Nil, 0)
 }
 
-class GapBuffer[A: ClassTag] {
+class GapBuffer[A: ClassTag] extends Iterable[A] {
   var tree: GapTree[A] = GapLeaf[A](Nil, Nil)
 
   def insertL(value: A): Unit = tree = tree.insertL(value)
+
+  def insertR(value: A): Unit = tree = tree.insertR(value)
 
   def moveBy(steps: Int): Unit = {
     if (steps != 0) {
@@ -117,6 +133,15 @@ class GapBuffer[A: ClassTag] {
       }
 
       tree = tree.moveBy(steps)
+    }
+  }
+  
+  def iterator: Iterator[A] = new Iterator[A] {
+    var tree = GapBuffer.this.tree.moveTo(0)
+    def hasNext: Boolean = tree.sizeR != 0
+    def next(): A = {
+      tree = tree.moveBy(1)
+      tree.itemR
     }
   }
 }
