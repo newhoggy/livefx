@@ -5,10 +5,12 @@ import scalaz.Monoid
 import scala.collection.immutable.Stack
 import scala.annotation.tailrec
 
+case class GapConfig(val nodeCapacity: Int)
+
 abstract class GapTree[A] {
-  def insertL(value: A): GapTree[A]
+  def insertL(value: A)(implicit config: GapConfig): GapTree[A]
   
-  def insertR(value: A): GapTree[A]
+  def insertR(value: A)(implicit config: GapConfig): GapTree[A]
 
   def moveBy(steps: Int): GapTree[A]
   
@@ -41,12 +43,12 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
   
   final def empty: GapBranch[A] = GapBranch[A](0, Nil, Nil, 0)
   
-  final override def insertL(value: A): GapTree[A] = branchesL match {
+  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = branchesL match {
     case b::bs => this.copy(branchesL = b.insertL(value)::bs)
     case Nil => this.copy(branchesL = GapLeaf[A].insertL(value)::branchesL)
   }
   
-  final override def insertR(value: A): GapTree[A] = branchesR match {
+  final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = branchesR match {
     case b::bs => this.copy(branchesR = b.insertR(value)::bs)
     case Nil => this.copy(branchesR = GapLeaf[A].insertR(value)::branchesR)
   }
@@ -76,9 +78,9 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
 }
 
 case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends GapTree[A] {
-  final override def insertL(value: A): GapTree[A] = this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
+  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
   
-  final def insertR(value: A): GapTree[A] = this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
+  final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
   
   final def removeL(): GapTree[A] = this.copy(sizeL = sizeL - 1, valuesL = valuesL.tail)
 
@@ -93,9 +95,9 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
   @tailrec
   final def moveBy(steps: Int): GapLeaf[A] = {
     if (steps > 0) {
-      GapLeaf(sizeL + 1, valuesR.head :: valuesL, valuesR.tail, sizeR - 1).moveBy(steps + 1)
+      GapLeaf(sizeL + 1, valuesR.head :: valuesL, valuesR.tail, sizeR - 1).moveBy(steps - 1)
     } else if (steps < 0) {
-      GapLeaf(sizeL - 1, valuesL.tail, valuesL.head :: valuesR, sizeR + 1).moveBy(steps - 1)
+      GapLeaf(sizeL - 1, valuesL.tail, valuesL.head :: valuesR, sizeR + 1).moveBy(steps + 1)
     } else {
       this
     }
@@ -114,7 +116,9 @@ object GapLeaf {
 }
 
 class GapBuffer[A: ClassTag] extends Iterable[A] {
-  var tree: GapTree[A] = GapLeaf[A](Nil, Nil)
+  private implicit val config = GapConfig(16)
+  
+  private var tree: GapTree[A] = GapLeaf[A](Nil, Nil)
 
   def insertL(value: A): Unit = tree = tree.insertL(value)
 
@@ -141,7 +145,7 @@ class GapBuffer[A: ClassTag] extends Iterable[A] {
     def hasNext: Boolean = tree.sizeR != 0
     def next(): A = {
       tree = tree.moveBy(1)
-      tree.itemR
+      tree.itemL
     }
   }
 }
