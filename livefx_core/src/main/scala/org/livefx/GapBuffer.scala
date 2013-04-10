@@ -7,14 +7,20 @@ import scala.annotation.tailrec
 
 case class GapConfig(val nodeCapacity: Int)
 
+object Util {
+  final def v[T](value: T): T = value
+}
+
 abstract class GapTree[A] {
+  type Self <: GapTree[A]
+
   def insertL(value: A)(implicit config: GapConfig): GapTree[A]
 
   def insertR(value: A)(implicit config: GapConfig): GapTree[A]
 
-  def moveBy(steps: Int): GapTree[A]
+  def moveBy(steps: Int): Self
   
-  def moveTo(index: Int): GapTree[A] = moveBy(index - sizeL)
+  def moveTo(index: Int): Self = moveBy(index - sizeL)
   
   def itemL: A
   
@@ -29,9 +35,13 @@ abstract class GapTree[A] {
   def empty: GapTree[A]
   
   def remainingCapacity(implicit config: GapConfig): Int
+  
+  def divide(implicit config: GapConfig): (GapTree[A], GapTree[A])
 }
 
-case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List[GapTree[A]], sizeR: Int) extends GapTree[A] {
+final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List[GapTree[A]], sizeR: Int) extends GapTree[A] {
+  type Self = GapBranch[A]
+  
   private final def insertTreeL(tree: GapTree[A]): GapTree[A] = this.copy(sizeL = sizeL + tree.size, branchesL = tree::branchesL)
   
   private final def removeTreeL(): GapBranch[A] = {
@@ -43,10 +53,17 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
   
   private final def withAtLeastOneTreeR(): GapTree[A] = if (branchesR.isEmpty) insertTreeL(branchesL.head.empty) else this
   
-  final def empty: GapBranch[A] = GapBranch[A](0, Nil, Nil, 0)
+  final override def empty: GapBranch[A] = GapBranch[A](0, Nil, Nil, 0)
   
   final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = branchesL match {
-    case b::bs => this.copy(branchesL = b.insertL(value)::bs)
+    case b::bs => {
+      if (b.remainingCapacity > 0) {
+        this.copy(branchesL = b.insertL(value)::bs)
+      } else {
+        val (b0, b1) = b.divide
+        this.copy(branchesL = b0::b1::bs)
+      }
+    }
     case Nil => this.copy(branchesL = GapLeaf[A].insertL(value)::branchesL)
   }
   
@@ -56,7 +73,7 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
   }
   
   @tailrec
-  final override def moveBy(steps: Int): GapTree[A] = {
+  final override def moveBy(steps: Int): Self = {
     if (steps > 0) {
       val head = branchesR.head
       if (steps > head.sizeL) {
@@ -79,11 +96,31 @@ case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List
   final override def remainingCapacity(implicit config: GapConfig): Int = config.nodeCapacity - (branchesL.size + branchesR.size)
   
   final override def size: Int = sizeL + sizeR
+  
+  final def shiftTo(index: Int): GapBranch[A] = {
+    if (index < branchesL.size) {
+      val head = branchesL.head
+      GapBranch[A](sizeL - head.size, branchesL.tail, head :: branchesR, sizeR + head.size)
+    } else if (index > branchesL.size) {
+      val head = branchesR.head
+      GapBranch[A](sizeL + head.size, head :: branchesL, branchesR.tail, sizeR - head.size)
+    } else {
+      this
+    }
+  }
+  
+  final def centre(implicit config: GapConfig): GapTree[A] = this.moveTo(config.nodeCapacity / 2)
+
+  final override def divide(implicit config: GapConfig): (GapTree[A], GapTree[A]) = {
+    (null, null)
+  }
 }
 
 case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends GapTree[A] {
+  type Self = GapLeaf[A]
+
   final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
-  
+
   final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
   
   final def removeL(): GapTree[A] = this.copy(sizeL = sizeL - 1, valuesL = valuesL.tail)
@@ -114,6 +151,14 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
   final override def remainingCapacity(implicit config: GapConfig): Int = config.nodeCapacity - size
   
   final override def size: Int = sizeL + sizeR
+  
+  final def centre(implicit config: GapConfig): Self = this.moveTo(config.nodeCapacity / 2)
+  
+  final def dropL: GapLeaf[A] = GapLeaf(0, Nil, valuesR, sizeR)
+
+  final def dropR: GapLeaf[A] = GapLeaf(sizeL, valuesL, Nil, 0)
+
+  final override def divide(implicit config: GapConfig): (GapTree[A], GapTree[A]) = centre match { case c => (c.dropR, c.dropL) }
 }
 
 object GapLeaf {
