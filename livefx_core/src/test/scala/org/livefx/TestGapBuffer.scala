@@ -26,5 +26,11 @@ class TestGapBuffer {
     Assert.assertEquals(List(1, 2), buffer.iterator.toList)
     buffer.insertL(3)
     Assert.assertEquals(List(1, 2, 3), buffer.iterator.toList)
+    buffer.insertR(4)
+    Assert.assertEquals(List(1, 2, 3, 4), buffer.iterator.toList)
+    buffer.insertR(5)
+    Assert.assertEquals(List(1, 2, 3, 5, 4), buffer.iterator.toList)
+    buffer.insertR(6)
+    Assert.assertEquals(List(1, 2, 3, 6, 5, 4), buffer.iterator.toList)
   }
 }
