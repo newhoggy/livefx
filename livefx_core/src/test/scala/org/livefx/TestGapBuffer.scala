@@ -5,6 +5,18 @@ import org.junit.Assert
 
 class TestGapBuffer {
   @Test
+  def testHasAssert(): Unit = {
+    val hasAssert = try {
+      assert(false)
+      false
+    } catch {
+      case e: AssertionError => true
+    }
+    
+    Assert.assertTrue(hasAssert)
+  }
+  
+  @Test
   def testInsertLeftValues(): Unit = {
     val buffer = new GapBuffer[Int]()
     

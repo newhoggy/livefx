@@ -68,7 +68,14 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR
   }
   
   final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = branchesR match {
-    case b::bs => this.copy(branchesR = b.insertR(value)::bs)
+    case b::bs => {
+      if (b.remainingCapacity > 0) {
+        this.copy(branchesR = b.insertR(value)::bs)
+      } else {
+        val (b0, b1) = b.divide
+        this.copy(branchesR = b0::b1::bs)
+      }
+    }
     case Nil => this.copy(branchesR = GapLeaf[A].insertR(value)::branchesR)
   }
   
@@ -119,9 +126,14 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR
 case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends GapTree[A] {
   type Self = GapLeaf[A]
 
-  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
+  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = {
+    assert(remainingCapacity > 0)
+    this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
+  }
 
-  final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
+  final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = {
+    this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
+  }
   
   final def removeL(): GapTree[A] = this.copy(sizeL = sizeL - 1, valuesL = valuesL.tail)
 
