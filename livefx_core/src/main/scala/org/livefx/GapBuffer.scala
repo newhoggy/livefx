@@ -58,16 +58,13 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
   
   final override def empty: GapBranch[A] = throw new UnsupportedOperationException
   
-  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = branchesL match {
-    case b::bs => {
-      if (b.remainingCapacity > 0) {
-        this.copy(branchesL = b.insertL(value)::bs)
-      } else {
-        val (b0, b1) = b.divide
-        this.copy(branchesL = b0::b1::bs)
-      }
+  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = {
+    if (focus.remainingCapacity > 0) {
+      this.copy(focus = focus.insertL(value))
+    } else {
+      val (b0, b1) = focus.divide
+      this.copy(focus = b0, branchesL = b1::branchesL)
     }
-    case Nil => this.copy(branchesL = GapLeaf[A].insertL(value)::branchesL)
   }
   
   final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = branchesR match {
@@ -86,20 +83,18 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
   final override def moveBy(steps: Int): Self = {
     println(s"moveBy($steps) in $this")
     if (steps > 0) {
-      val head = branchesR.head
-      if (steps > head.sizeL) {
-        GapBranch(sizeL + head.size, head :: branchesL, focus, branchesR.tail, sizeR - head.size).moveBy(steps - head.sizeR)
+      if (steps > focus.sizeL) {
+        GapBranch(sizeL + focus.size, focus :: branchesL, branchesR.head, branchesR.tail, sizeR - focus.size).moveBy(steps - focus.sizeR)
       } else {
-        GapBranch(sizeL, head.moveBy(steps) :: branchesR, focus, branchesR.tail, sizeR)
+        GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
       }
     } else if (steps < 0) {
-      val head = branchesL.head
-      if (-steps > head.sizeR) {
-        println(s"moveBy1($steps) in $this ${head.sizeR}")
-        GapBranch(sizeL - head.size, branchesL.tail, focus, head :: branchesR, sizeR + head.size).moveBy(steps + head.sizeR)
+      if (-steps > focus.sizeR) {
+        println(s"moveBy1($steps) in $this ${focus.sizeR}")
+        GapBranch(sizeL - focus.size, branchesL.tail, branchesL.head, focus :: branchesR, sizeR + focus.size).moveBy(steps + focus.sizeR)
       } else {
         println(s"moveBy2($steps) in $this")
-        GapBranch(sizeL, head.moveBy(steps) :: branchesR, focus, branchesR.tail, sizeR)
+        GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
       }
     } else {
       this
