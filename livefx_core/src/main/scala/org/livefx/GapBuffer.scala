@@ -20,7 +20,10 @@ abstract class GapTree[A] {
 
   def moveBy(steps: Int): Self
   
-  def moveTo(index: Int): Self = moveBy(index - sizeL)
+  def moveTo(index: Int): Self = {
+    println(s"moveBy($index - $sizeL)")
+    moveBy(index - sizeL)
+  }
   
   def itemL: A
   
@@ -39,7 +42,7 @@ abstract class GapTree[A] {
   def divide(implicit config: GapConfig): (GapTree[A], GapTree[A])
 }
 
-final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR: List[GapTree[A]], sizeR: Int) extends GapTree[A] {
+final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: GapTree[A], branchesR: List[GapTree[A]], sizeR: Int) extends GapTree[A] {
   type Self = GapBranch[A]
   
   private final def insertTreeL(tree: GapTree[A]): GapTree[A] = this.copy(sizeL = sizeL + tree.size, branchesL = tree::branchesL)
@@ -53,7 +56,7 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR
   
   private final def withAtLeastOneTreeR(): GapTree[A] = if (branchesR.isEmpty) insertTreeL(branchesL.head.empty) else this
   
-  final override def empty: GapBranch[A] = GapBranch[A](0, Nil, Nil, 0)
+  final override def empty: GapBranch[A] = throw new UnsupportedOperationException
   
   final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = branchesL match {
     case b::bs => {
@@ -81,16 +84,23 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR
   
   @tailrec
   final override def moveBy(steps: Int): Self = {
+    println(s"moveBy($steps) in $this")
     if (steps > 0) {
       val head = branchesR.head
       if (steps > head.sizeL) {
-        GapBranch(sizeL + 1, head :: branchesR, branchesR.tail, sizeR - 1).moveBy(steps + 1)
+        GapBranch(sizeL + head.size, head :: branchesL, focus, branchesR.tail, sizeR - head.size).moveBy(steps - head.sizeR)
       } else {
-        GapBranch(sizeL, head.moveBy(steps) :: branchesR, branchesR.tail, sizeR)
+        GapBranch(sizeL, head.moveBy(steps) :: branchesR, focus, branchesR.tail, sizeR)
       }
     } else if (steps < 0) {
       val head = branchesL.head
-      GapBranch(sizeL - 1, branchesL.tail, head :: branchesR, sizeR + 1).moveBy(steps - 1)
+      if (-steps > head.sizeR) {
+        println(s"moveBy1($steps) in $this ${head.sizeR}")
+        GapBranch(sizeL - head.size, branchesL.tail, focus, head :: branchesR, sizeR + head.size).moveBy(steps + head.sizeR)
+      } else {
+        println(s"moveBy2($steps) in $this")
+        GapBranch(sizeL, head.moveBy(steps) :: branchesR, focus, branchesR.tail, sizeR)
+      }
     } else {
       this
     }
@@ -107,10 +117,10 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], branchesR
   final def shiftTo(index: Int): GapBranch[A] = {
     if (index < branchesL.size) {
       val head = branchesL.head
-      GapBranch[A](sizeL - head.size, branchesL.tail, head :: branchesR, sizeR + head.size)
+      GapBranch[A](sizeL - head.size, branchesL.tail, focus, head :: branchesR, sizeR + head.size)
     } else if (index > branchesL.size) {
       val head = branchesR.head
-      GapBranch[A](sizeL + head.size, head :: branchesL, branchesR.tail, sizeR - head.size)
+      GapBranch[A](sizeL + head.size, head :: branchesL, focus, branchesR.tail, sizeR - head.size)
     } else {
       this
     }
@@ -143,7 +153,7 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
   
   final def getR: A = valuesR.head
   
-  final def empty: GapBranch[A] = GapBranch[A](0, Nil, Nil, 0)
+  final def empty: GapBranch[A] = GapBranch[A](0, Nil, GapLeaf[A](), Nil, 0)
   
   @tailrec
   final def moveBy(steps: Int): GapLeaf[A] = {
@@ -178,33 +188,88 @@ object GapLeaf {
   def apply[A](): GapLeaf[A] = GapLeaf[A](0, Nil, Nil, 0)
 }
 
-class GapBuffer[A: ClassTag] extends Iterable[A] {
-  private implicit val config = GapConfig(16)
+final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A] = GapLeaf[A]()) {
+  private implicit val config = _config
   
-  private var tree: GapTree[A] = GapLeaf[A](Nil, Nil)
+  final def insertL(value: A): GapRoot[A] = {
+    if (child.remainingCapacity > 0) {
+      this.copy(child = child.insertL(value))
+    } else {
+      val (b0, b1) = child.divide
+      this.copy(child = GapBranch(b0.size, List(b0), GapLeaf[A](), List(b1), b1.size)).insertL(value)
+    }
+  }
+  
+  final def insertR(value: A): GapRoot[A] = {
+    if (child.remainingCapacity > 0) {
+      this.copy(child = child.insertR(value))
+    } else {
+      val (b0, b1) = child.divide
+      this.copy(child = GapBranch(b0.size, List(b0), GapLeaf[A](), List(b1), b1.size)).insertR(value)
+    }
+  }
 
-  def insertL(value: A): Unit = tree = tree.insertL(value)
+  final def moveBy(steps: Int): GapRoot[A] = this.copy(child = child.moveBy(steps))
+  
+  final def moveTo(index: Int): GapRoot[A] = {
+    println(s"moveBy($index - $sizeL)")
+    moveBy(index - sizeL)
+  }
 
-  def insertR(value: A): Unit = tree = tree.insertR(value)
+  final def itemL: A = child.itemL
+  
+  final def itemR: A = child.itemR
+  
+  final def sizeL: Int = child.sizeL
+
+  final def sizeR: Int = child.sizeR
+
+  final def size: Int = child.size 
+  
+  final def empty: GapTree[A] = child.empty
+
+  def iterator: Iterator[A] = new Iterator[A] {
+    println(GapRoot.this)
+    private var child: GapTree[A] = GapRoot.this.child.moveTo(0)
+    final override def hasDefiniteSize: Boolean = true
+    final override def length: Int = child.sizeR
+    final override def hasNext: Boolean = child.sizeR != 0
+    final override def next(): A = {
+      child = child.moveBy(1)
+      child.itemL
+    }
+  }
+}
+
+class GapBuffer[A: ClassTag](_config: GapConfig = GapConfig(16)) extends Iterable[A] {
+  private implicit val config = _config
+  
+  private var _tree: GapRoot[A] = GapRoot[A]()
+  
+  def tree = _tree
+
+  def insertL(value: A): Unit = _tree = _tree.insertL(value)
+
+  def insertR(value: A): Unit = _tree = _tree.insertR(value)
 
   def moveBy(steps: Int): Unit = {
     if (steps != 0) {
       if (steps < 0) {
-        if (steps + tree.size < 0) {
+        if (steps + _tree.size < 0) {
           throw new IndexOutOfBoundsException
         }
       } else {
-        if (steps - tree.size < 0) {
+        if (steps - _tree.size < 0) {
           throw new IndexOutOfBoundsException
         }
       }
 
-      tree = tree.moveBy(steps)
+      _tree = _tree.moveBy(steps)
     }
   }
   
   def iterator: Iterator[A] = new Iterator[A] {
-    private var tree = GapBuffer.this.tree.moveTo(0)
+    private var tree = GapBuffer.this._tree.moveTo(0)
     final override def hasDefiniteSize: Boolean = true
     final override def length: Int = tree.sizeR
     final override def hasNext: Boolean = tree.sizeR != 0
