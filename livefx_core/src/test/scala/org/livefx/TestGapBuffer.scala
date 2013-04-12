@@ -43,6 +43,8 @@ class TestGapBuffer {
         buffer.child)
 
     Debug.debug = true
+//    buffer = buffer.moveBy(-buffer.sizeL)
+//    println("--> start: " + buffer.child)
     Assert.assertEquals(List(1, 2, 3, 5, 4), buffer.iterator.toList)
 //    buffer = buffer.insertR(6)
 //    Assert.assertEquals(List(1, 2, 3, 6, 5, 4), buffer.iterator.toList)

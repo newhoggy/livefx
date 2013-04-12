@@ -70,50 +70,64 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
   }
   
   final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = {
-//    println("--> enter insertR")
-    try {
-      if (focus.remainingCapacity > 0) {
-        this.copy(focus = focus.insertR(value))
-      } else {
-        focus.divide match {
-          case Left((b0, b1)) => {
-            this.copy(focus = b0, branchesL = b1::branchesL)
-          }
-          case Right((b0, b1)) => {
-            this.copy(focus = b0, branchesL = b1::branchesL)
-          }
+    if (focus.remainingCapacity > 0) {
+      this.copy(focus = focus.insertR(value))
+    } else {
+      focus.divide match {
+        case Left((b0, b1)) => {
+          this.copy(focus = b0, branchesL = b1::branchesL)
+        }
+        case Right((b0, b1)) => {
+          this.copy(focus = b0, branchesL = b1::branchesL)
         }
       }
-    } finally {
-      println("--> exit insertR")
     }
   }
-  
-  @tailrec
+//--> enter: moveBy(-3) in      GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0)
+//-->   enter: moveBy1(-3) in   GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0) 2
+//-->     enter: moveBy(-1) in  GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
+//-->       enter: moveBy2(-1) in GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
+//-->       exit: moveBy2(-1) in GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
+//-->     exit: moveBy(-1) in GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
+//-->   exit: moveBy1(-3) in GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0) 2
+//--> exit: moveBy(-3) in GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0)
+//--> start: GapBranch(1,List(),GapLeaf(1,List(1),List(2, 3),2),List(GapLeaf(0,List(),List(5, 4),2)),2)
+
+//  @tailrec
   final override def moveBy(steps: Int): Self = {
-    if (Debug.debug) println(s"moveBy($steps) in $this")
-    if (steps > 0) {
-      if (steps > focus.sizeL) {
-        GapBranch(sizeL + focus.size, focus :: branchesL, branchesR.head, branchesR.tail, sizeR - focus.size).moveBy(steps - focus.sizeR)
+    Debug.trace(s"moveBy($steps) in $this") {
+      if (steps > 0) {
+        if (steps > focus.sizeR) {
+          Debug.trace("moveBy[1]") {
+            GapBranch(sizeL + focus.size, focus :: branchesL, branchesR.head, branchesR.tail, sizeR - branchesR.head.size).moveBy(steps - branchesR.head.sizeL)
+          }
+        } else {
+          Debug.trace("moveBy[2]") {
+            val result = GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
+            Debug.print(s"moveBy[2]: $result")
+            result
+          }
+        }
+      } else if (steps < 0) {
+        Debug.print(s"focus.sizeR = ${focus.sizeR}")
+        if (-steps > focus.sizeL) {
+          Debug.trace(s"moveBy1($steps) in $this ${focus.sizeR}") {
+            GapBranch(sizeL - branchesL.head.size, branchesL.tail, branchesL.head, focus :: branchesR, sizeR + focus.size).moveBy(steps + branchesL.head.sizeR)
+          }
+        } else {
+          Debug.trace(s"moveBy2($steps) in $this") {
+            GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
+          }
+        }
       } else {
-        GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
+        this
       }
-    } else if (steps < 0) {
-      if (-steps > focus.sizeR) {
-        if (Debug.debug) println(s"moveBy1($steps) in $this ${focus.sizeR}")
-        GapBranch(sizeL - focus.size, branchesL.tail, branchesL.head, focus :: branchesR, sizeR + focus.size).moveBy(steps + focus.sizeR)
-      } else {
-        if (Debug.debug) println(s"moveBy2($steps) in $this")
-        GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
-      }
-    } else {
-      this
     }
   }
 
-  final override def itemL: A = branchesL.head.itemL
+  final override def itemL: A = focus.itemL
   
-  final override def itemR: A = branchesR.head.itemR
+  final override def itemR: A = focus.itemR
   
   final override def remainingCapacity(implicit config: GapConfig): Int = config.nodeCapacity - (branchesL.size + branchesR.size)
   
@@ -160,14 +174,24 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
   
   final def empty: GapBranch[A] = GapBranch[A](0, Nil, GapLeaf[A](), Nil, 0)
   
-  @tailrec
+//  @tailrec
   final def moveBy(steps: Int): GapLeaf[A] = {
     if (steps > 0) {
-      GapLeaf(sizeL + 1, valuesR.head :: valuesL, valuesR.tail, sizeR - 1).moveBy(steps - 1)
+      Debug.trace(s"moveBy[leaf-r]($steps): $this") {
+        val result = GapLeaf(sizeL + 1, valuesR.head :: valuesL, valuesR.tail, sizeR - 1).moveBy(steps - 1)
+        Debug.print(s"moveBy[leaf-result]: $result")
+        result
+      }
     } else if (steps < 0) {
-      GapLeaf(sizeL - 1, valuesL.tail, valuesL.head :: valuesR, sizeR + 1).moveBy(steps + 1)
+      Debug.trace(s"moveBy[leaf-l]($steps): $this") {
+        val result = GapLeaf(sizeL - 1, valuesL.tail, valuesL.head :: valuesR, sizeR + 1).moveBy(steps + 1)
+        Debug.print(s"moveBy[leaf-result]: $result")
+        result
+      }
     } else {
-      this
+      Debug.trace(s"moveBy[leaf-0]($steps): $this") {
+        this
+      }
     }
   }
   
@@ -269,9 +293,10 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
     final override def length: Int = child.sizeR
     final override def hasNext: Boolean = child.sizeR != 0
     final override def next(): A = {
-      if (Debug.debug) println("--> before: " + child)
-      child = child.moveBy(1)
-      if (Debug.debug) println("--> after: " + child)
+      Debug.trace(s"next: $child") {
+        child = child.moveBy(1)
+        Debug.print(s"next-result: $child")
+      }
       child.itemL
     }
   }
