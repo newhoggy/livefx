@@ -63,26 +63,23 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
       this.copy(focus = focus.insertL(value))
     } else {
       focus.divide match {
-        case Left((b0, b1)) => this.copy(focus = b0, branchesL = b1::branchesL)
-        case Right((b0, b1)) => this.copy(focus = b0, branchesL = b1::branchesL)
+        case Left((l, focus)) => this.copy(focus = focus, branchesL = l::branchesL)
+        case Right((focus, r)) => this.copy(focus = focus, branchesR = r::branchesR)
       }
     }
   }
   
   final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = {
-    println("--> enter insertR")
+//    println("--> enter insertR")
     try {
       if (focus.remainingCapacity > 0) {
-        println("--> a")
         this.copy(focus = focus.insertR(value))
       } else {
         focus.divide match {
           case Left((b0, b1)) => {
-            println("--> b")
             this.copy(focus = b0, branchesL = b1::branchesL)
           }
           case Right((b0, b1)) => {
-            println("--> c")
             this.copy(focus = b0, branchesL = b1::branchesL)
           }
         }
@@ -224,25 +221,24 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
       this.copy(child = child.insertL(value))
     } else {
       child.divide match {
-        case Left((b0, b1)) => this.copy(child = GapBranch(b0.size, List(b0), GapLeaf[A](), List(b1), b1.size)).insertL(value)
-        case Right((b0, b1)) => this.copy(child = GapBranch(b0.size, List(b0), GapLeaf[A](), List(b1), b1.size)).insertL(value)
+        case Left((l, focus)) => this.copy(child = GapBranch(l.size, List(l), focus, List(), 0)).insertL(value)
+        case Right((focus, r)) => this.copy(child = GapBranch(0, List(), focus, List(r), r.size)).insertL(value)
       }
-      
     }
   }
   
   final def insertR(value: A): GapRoot[A] = {
     if (child.remainingCapacity > 0) {
       val result = this.copy(child = child.insertR(value))
-      println(s"--> $this.insertR($value) = $result")
+//      println(s"--> $this.insertR($value) = $result")
       result
     } else {
-      println("--> child.divide: " + child.divide)
+//      println("--> child.divide: " + child.divide)
       val x = child.divide match {
         case Left((l, focus)) => this.copy(child = GapBranch(l.size, List(l), focus, Nil, 0)).insertR(value)
         case Right((focus, r)) => this.copy(child = GapBranch(0, Nil, focus, List(r), r.size)).insertR(value)
       }
-      println("--> result: " + x.child)
+//      println("--> result: " + x.child)
       x
     }
   }
@@ -273,7 +269,9 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
     final override def length: Int = child.sizeR
     final override def hasNext: Boolean = child.sizeR != 0
     final override def next(): A = {
+      if (Debug.debug) println("--> before: " + child)
       child = child.moveBy(1)
+      if (Debug.debug) println("--> after: " + child)
       child.itemL
     }
   }
