@@ -41,17 +41,8 @@ class TestGapBuffer {
             List(),
             0),
         buffer.child)
-
-    buffer = buffer.moveBy(-buffer.sizeL).moveBy(1).moveBy(1).moveBy(1)
-    println("--> start: " + buffer.child + ", " + buffer.sizeR)
-    buffer = buffer.moveBy(1)
-    println("--> start: " + buffer.child + ", " + buffer.sizeR)
-    buffer = buffer.moveBy(1)
-    println("--> start: " + buffer.child + ", " + buffer.sizeR)
-    Debug.debug = true
     Assert.assertEquals(List(1, 2, 3, 5, 4), buffer.iterator.toList)
-//    buffer = buffer.insertR(6)
-//    Assert.assertEquals(List(1, 2, 3, 6, 5, 4), buffer.iterator.toList)
-//    println(buffer)
+    buffer = buffer.insertR(6)
+    Assert.assertEquals(List(1, 2, 3, 6, 5, 4), buffer.iterator.toList)
   }
 }
