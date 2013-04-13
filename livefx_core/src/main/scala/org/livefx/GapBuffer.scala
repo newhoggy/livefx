@@ -42,14 +42,14 @@ abstract class GapTree[A] {
   def divide(implicit config: GapConfig): Either[(GapTree[A], GapTree[A]), (GapTree[A], GapTree[A])]
 }
 
-final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: GapTree[A], branchesR: List[GapTree[A]], sizeR: Int) extends GapTree[A] {
+final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], focus: GapTree[A], branchesR: List[GapTree[A]], branchesSizeR: Int) extends GapTree[A] {
   type Self = GapBranch[A]
   
-  private final def insertTreeL(tree: GapTree[A]): GapTree[A] = this.copy(sizeL = sizeL + tree.size, branchesL = tree::branchesL)
+  private final def insertTreeL(tree: GapTree[A]): GapTree[A] = this.copy(branchesSizeL = branchesSizeL + tree.size, branchesL = tree::branchesL)
   
   private final def removeTreeL(): GapBranch[A] = {
     val removed = branchesL.head
-    this.copy(sizeL = sizeL - removed.size, branchesL = branchesL.tail)
+    this.copy(branchesSizeL = branchesSizeL - removed.size, branchesL = branchesL.tail)
   }
   
   private final def withAtLeastOneTreeL(): GapTree[A] = if (branchesL.isEmpty) insertTreeL(branchesR.head.empty) else this
@@ -99,11 +99,11 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
       if (steps > 0) {
         if (steps > focus.sizeR) {
           Debug.trace("moveBy[1]") {
-            GapBranch(sizeL + focus.size, focus :: branchesL, branchesR.head, branchesR.tail, sizeR - branchesR.head.size).moveBy(steps - branchesR.head.sizeL)
+            GapBranch(branchesSizeL + focus.size, focus :: branchesL, branchesR.head, branchesR.tail, branchesSizeR - branchesR.head.size).moveBy(steps - branchesR.head.sizeL)
           }
         } else {
           Debug.trace("moveBy[2]") {
-            val result = GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
+            val result = GapBranch(branchesSizeL, branchesL, focus.moveBy(steps), branchesR, branchesSizeR)
             Debug.print(s"moveBy[2]: $result")
             result
           }
@@ -112,11 +112,11 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
         Debug.print(s"focus.sizeR = ${focus.sizeR}")
         if (-steps > focus.sizeL) {
           Debug.trace(s"moveBy1($steps) in $this ${focus.sizeR}") {
-            GapBranch(sizeL - branchesL.head.size, branchesL.tail, branchesL.head, focus :: branchesR, sizeR + focus.size).moveBy(steps + branchesL.head.sizeR)
+            GapBranch(branchesSizeL - branchesL.head.size, branchesL.tail, branchesL.head, focus :: branchesR, branchesSizeR + focus.size).moveBy(steps + focus.sizeL + branchesL.head.sizeR)
           }
         } else {
           Debug.trace(s"moveBy2($steps) in $this") {
-            GapBranch(sizeL, branchesL, focus.moveBy(steps), branchesR, sizeR)
+            GapBranch(branchesSizeL, branchesL, focus.moveBy(steps), branchesR, branchesSizeR)
           }
         }
       } else {
@@ -131,15 +131,19 @@ final case class GapBranch[A](sizeL: Int, branchesL: List[GapTree[A]], focus: Ga
   
   final override def remainingCapacity(implicit config: GapConfig): Int = config.nodeCapacity - (branchesL.size + branchesR.size)
   
-  final override def size: Int = sizeL + sizeR
+  final override def size: Int = branchesSizeL + focus.size + branchesSizeR
+  
+  final override def sizeL: Int = branchesSizeL + focus.sizeL
+  
+  final override def sizeR: Int = branchesSizeR + focus.sizeR
   
   final def shiftTo(index: Int): GapBranch[A] = {
     if (index < branchesL.size) {
       val head = branchesL.head
-      GapBranch[A](sizeL - head.size, branchesL.tail, focus, head :: branchesR, sizeR + head.size)
+      GapBranch[A](branchesSizeL - head.size, branchesL.tail, focus, head :: branchesR, branchesSizeR + head.size)
     } else if (index > branchesL.size) {
       val head = branchesR.head
-      GapBranch[A](sizeL + head.size, head :: branchesL, focus, branchesR.tail, sizeR - head.size)
+      GapBranch[A](branchesSizeL + head.size, head :: branchesL, focus, branchesR.tail, branchesSizeR - head.size)
     } else {
       this
     }
@@ -293,10 +297,7 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
     final override def length: Int = child.sizeR
     final override def hasNext: Boolean = child.sizeR != 0
     final override def next(): A = {
-      Debug.trace(s"next: $child") {
-        child = child.moveBy(1)
-        Debug.print(s"next-result: $child")
-      }
+      child = child.moveBy(1)
       child.itemL
     }
   }
