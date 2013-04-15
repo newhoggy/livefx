@@ -44,5 +44,12 @@ class TestGapBuffer {
     Assert.assertEquals(List(1, 2, 3, 5, 4), buffer.iterator.toList)
     buffer = buffer.insertR(6)
     Assert.assertEquals(List(1, 2, 3, 6, 5, 4), buffer.iterator.toList)
+    println("--> load: " + buffer.branchLoad)
+  }
+  
+  @Test
+  def testInsertLotsOfValues3(): Unit = {
+    val refBuffer = new ArrayBuffer[Int]
+    
   }
 }

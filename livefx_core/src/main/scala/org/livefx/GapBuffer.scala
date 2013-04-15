@@ -7,10 +7,6 @@ import scala.annotation.tailrec
 
 case class GapConfig(val nodeCapacity: Int)
 
-object Util {
-  final def v[T](value: T): T = value
-}
-
 abstract class GapTree[A] {
   type Self <: GapTree[A]
 
@@ -83,16 +79,7 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
       }
     }
   }
-//--> enter: moveBy(-3) in      GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0)
-//-->   enter: moveBy1(-3) in   GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0) 2
-//-->     enter: moveBy(-1) in  GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
-//-->       enter: moveBy2(-1) in GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
-//-->       exit: moveBy2(-1) in GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
-//-->     exit: moveBy(-1) in GapBranch(1,List(),GapLeaf(2,List(2, 1),List(3),1),List(GapLeaf(0,List(),List(5, 4),2)),2)
-//-->   exit: moveBy1(-3) in GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0) 2
-//--> exit: moveBy(-3) in GapBranch(3,List(GapLeaf(2,List(2, 1),List(3),1)),GapLeaf(0,List(),List(5, 4),2),List(),0)
-//--> start: GapBranch(1,List(),GapLeaf(1,List(1),List(2, 3),2),List(GapLeaf(0,List(),List(5, 4),2)),2)
-
+  
 //  @tailrec
   final override def moveBy(steps: Int): Self = {
     Debug.trace(s"moveBy($steps) in $this") {
@@ -299,6 +286,19 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
     final override def next(): A = {
       child = child.moveBy(1)
       child.itemL
+    }
+  }
+
+  def branchLoad = GapBuffer.branchLoad(child)
+}
+
+object GapBuffer {
+  def branchLoad[A](tree: GapTree[A])(implicit config: GapConfig): scala.collection.immutable.Map[Int, Int] = {
+    import scalaz._
+    import Scalaz._
+    tree match {
+      case branch: GapBranch[A] => branch.branchesL.foldLeft(Map[Int, Int]())((map, b) => map |+| branchLoad(b) + (branch.branchesL.length + branch.branchesR.length -> 1))
+      case leaf: GapLeaf[A] => Map[Int, Int]()
     }
   }
 }

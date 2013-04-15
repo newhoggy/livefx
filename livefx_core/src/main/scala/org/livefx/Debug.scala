@@ -1,6 +1,8 @@
 package org.livefx
 
 object Debug {
+  final def v[T](value: T): T = value
+
   var debug = false
   var level = 0
   
