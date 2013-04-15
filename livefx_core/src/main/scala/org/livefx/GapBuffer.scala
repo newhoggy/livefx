@@ -36,6 +36,8 @@ abstract class GapTree[A] {
   def remainingCapacity(implicit config: GapConfig): Int
   
   def divide(implicit config: GapConfig): Either[(GapTree[A], GapTree[A]), (GapTree[A], GapTree[A])]
+  
+  def pretty(inFocus: Boolean): String
 }
 
 final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], focus: GapTree[A], branchesR: List[GapTree[A]], branchesSizeR: Int) extends GapTree[A] {
@@ -55,12 +57,19 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
   final override def empty: GapBranch[A] = throw new UnsupportedOperationException
   
   final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = {
+    Debug.print("branch.insertL")
     if (focus.remainingCapacity > 0) {
+      Debug.print("branch.insertL 1")
       this.copy(focus = focus.insertL(value))
     } else {
       focus.divide match {
-        case Left((l, focus)) => this.copy(focus = focus, branchesL = l::branchesL)
-        case Right((focus, r)) => this.copy(focus = focus, branchesR = r::branchesR)
+        case Left((l, newFocus)) => {
+          this.copy(branchesSizeL = l.size + branchesSizeL, branchesL = l::branchesL, focus = newFocus.insertL(value))
+        }
+        case Right((newFocus, r)) => {
+          Debug.print("branch.insertL 3")
+          this.copy(focus = newFocus.insertL(value), branchesR = r::branchesR, branchesSizeR = r.size + branchesSizeR)
+        }
       }
     }
   }
@@ -70,11 +79,12 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
       this.copy(focus = focus.insertR(value))
     } else {
       focus.divide match {
-        case Left((b0, b1)) => {
-          this.copy(focus = b0, branchesL = b1::branchesL)
+        case Left((l, newFocus)) => {
+          this.copy(branchesSizeL = l.size + branchesSizeL, branchesL = l::branchesL, focus = newFocus.insertR(value))
         }
-        case Right((b0, b1)) => {
-          this.copy(focus = b0, branchesL = b1::branchesL)
+        case Right((newFocus, r)) => {
+          Debug.print("branch.insertL 3")
+          this.copy(focus = newFocus.insertR(value), branchesR = r::branchesR, branchesSizeR = r.size + branchesSizeR)
         }
       }
     }
@@ -141,6 +151,8 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
   final override def divide(implicit config: GapConfig): Either[(GapTree[A], GapTree[A]), (GapTree[A], GapTree[A])] = {
     Left(null, null)
   }
+  
+  def pretty(inFocus: Boolean): String = s"${(s"$branchesSizeL)" :: branchesL.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: branchesR.map(_.pretty(false)) ::: s"($branchesSizeR" :: List()).mkString("[", ", ", "]")} "
 }
 
 case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends GapTree[A] {
@@ -221,6 +233,8 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
               half)))
     }
   }
+
+  def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
 }
 
 object GapLeaf {
@@ -233,10 +247,19 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
   
   final def insertL(value: A): GapRoot[A] = {
     if (child.remainingCapacity > 0) {
-      this.copy(child = child.insertL(value))
+      Debug.trace(s"insertL($value)", this.child.pretty(true)) {
+        val result = this.copy(child = child.insertL(value))
+        Debug.print("root-result: " + result.child.pretty(true))
+        result
+      }
     } else {
+      Debug.print("insertL divide")
       child.divide match {
-        case Left((l, focus)) => this.copy(child = GapBranch(l.size, List(l), focus, List(), 0)).insertL(value)
+        case Left((l, focus)) => {
+          val result = this.copy(child = GapBranch(l.size, List(l), focus, List(), 0)).insertL(value)
+          Debug.print("result: " +  result.child.pretty(true))
+          result
+        }
         case Right((focus, r)) => this.copy(child = GapBranch(0, List(), focus, List(r), r.size)).insertL(value)
       }
     }
@@ -293,7 +316,7 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
 }
 
 object GapBuffer {
-  def branchLoad[A](tree: GapTree[A])(implicit config: GapConfig): scala.collection.immutable.Map[Int, Int] = {
+  def branchLoad[A](tree: GapTree[A]): scala.collection.immutable.Map[Int, Int] = {
     import scalaz._
     import Scalaz._
     tree match {

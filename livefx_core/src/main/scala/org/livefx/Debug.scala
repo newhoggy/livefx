@@ -16,7 +16,7 @@ object Debug {
   def trace[T](text: String)(f: => T): T = {
     if (debug) {
       val indent = "  " * level
-      try {
+      val result = try {
         println(s"--> ${indent}enter: " + text)
         level += 1
         f
@@ -27,8 +27,31 @@ object Debug {
         }
       } finally {
         level -= 1
-        println(s"--> ${indent}exit: " + text)
       }
+      println(s"--> ${indent}exit: " + text + ", " + result)
+      result
+    } else {
+      f
+    }
+  }
+
+  def trace[A, T](text: String, a: A)(f: => T): T = {
+    if (debug) {
+      val indent = "  " * level
+      val result = try {
+        println(s"--> ${indent}enter: " + text + ", " + a)
+        level += 1
+        f
+      } catch {
+        case e: Exception => {
+          println(s"--> ${indent}exception: $e")
+          throw e
+        }
+      } finally {
+        level -= 1
+      }
+      println(s"--> ${indent}exit: " + text + ", " + result)
+      result
     } else {
       f
     }
