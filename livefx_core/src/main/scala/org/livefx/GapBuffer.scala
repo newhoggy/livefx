@@ -175,17 +175,17 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
       val leftBranches = branchesR.take(branchesR.size - half)
       Left((
           GapBranch[A](
-              branchesR.size,
-              branchesR,
+              branchesSizeL,
+              branchesL,
               focus,
-              rightBranches,
-              rightBranches.foldLeft(0)((a, b) => a + b.size)),
+              leftBranches,
+              leftBranches.foldLeft(0)((a, b) => a + b.size)),
           GapBranch[A](
               0,
               Nil,
               rightBranches.head,
               rightBranches.tail,
-              leftBranches.tail.foldLeft(0)((a, b) => a + b.size))))
+              rightBranches.tail.foldLeft(0)((a, b) => a + b.size))))
     }
   }
   
