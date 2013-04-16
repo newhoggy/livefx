@@ -54,33 +54,24 @@ class TestGapBuffer {
     
     for (i <- 0 to 20) {
       println(s"--> $i")
-      if (i == 9) {
-//        Debug.debug = true
-        // List(0, 1, 3, 4, 6, 8, 7, 5, 2), load: Map(1 -> 1)
-//        println("--> problem: " + buffer.iterator.toList + ", load: " + buffer.branchLoad)
-//        GapRoot(GapConfig(5),GapBranch(4,List(GapLeaf(2,List(1, 0),List(3, 4),2)),GapLeaf(2,List(8, 6),List(7, 5, 2),3),List(),0))
-//        GapRoot(GapConfig(5),GapBranch(4,List(GapLeaf(2,List(8, 6),List(),0), GapLeaf(2,List(1, 0),List(3, 4),2)),GapLeaf(0,List(),List(7, 5, 2),3),List(),0))
-//GapRoot(GapConfig(5),GapBranch(4,List(GapLeaf(2,List(8, 6),List(),0), GapLeaf(2,List(1, 0),List(3, 4),2)),GapLeaf(0,List(),List(7, 5, 2),3),List(),0))
-      }
+      if (i == 11) Debug.debug = true
 
       random.nextBoolean match {
         case true => {
-//          if (i == 9) println("--> insertL")
+          println("--> LL")
           buffer = buffer.insertL(i)
         }
         case false => {
-          if (i == 9) println("--> insertR")
+          println("--> RR")
           buffer = buffer.insertR(i)
         }
       }
+      Debug.debug = false
 
-      if (i == 9 || i == 8 || i == 10 || i == 11) {
+      if (i == 10 || i == 11) {
         println(s"--> problem($i): ${buffer.child.pretty(true)}")
       }
       println(s"--> problem($i): ${buffer.iterator.toList}, load: ${buffer.branchLoad}")
-        // [4), [2), 1, 0, *, 3, 4, (sizeR], [2), 8, 6, *, 7, 5, 2, (sizeR], (0] 
-        // [5), [2), 8, 6, *, (sizeR], [2), 1, 0, *, 3, 4, (sizeR], [0), *, 7, 5, 2, (sizeR], (0] 
-        // [5), [2), 8, 6, *, (sizeR], [2), 1, 0, *, 3, 4, (sizeR], [0), *, 10, 7, 5, 2, (sizeR], (0] 
     }
   }
 }

@@ -43,6 +43,9 @@ abstract class GapTree[A] {
 final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], focus: GapTree[A], branchesR: List[GapTree[A]], branchesSizeR: Int) extends GapTree[A] {
   type Self = GapBranch[A]
   
+  assert(branchesSizeL == branchesL.map(_.size).sum)
+  assert(branchesSizeR == branchesR.map(_.size).sum)
+  
   private final def insertTreeL(tree: GapTree[A]): GapTree[A] = this.copy(branchesSizeL = branchesSizeL + tree.size, branchesL = tree::branchesL)
   
   private final def removeTreeL(): GapBranch[A] = {
@@ -92,7 +95,7 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
   
 //  @tailrec
   final override def moveBy(steps: Int): Self = {
-    Debug.trace(s"moveBy($steps) in $this") {
+    Debug.trace(s"moveBy($steps) in ${this.pretty(true)}") {
       if (steps > 0) {
         if (steps > focus.sizeR) {
           Debug.trace("moveBy[1]") {
@@ -108,11 +111,11 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
       } else if (steps < 0) {
         Debug.print(s"focus.sizeR = ${focus.sizeR}")
         if (-steps > focus.sizeL) {
-          Debug.trace(s"moveBy1($steps) in $this ${focus.sizeR}") {
+          Debug.trace(s"moveBy1($steps) in ${this.pretty(true)} ${focus.sizeR}") {
             GapBranch(branchesSizeL - branchesL.head.size, branchesL.tail, branchesL.head, focus :: branchesR, branchesSizeR + focus.size).moveBy(steps + focus.sizeL + branchesL.head.sizeR)
           }
         } else {
-          Debug.trace(s"moveBy2($steps) in $this") {
+          Debug.trace(s"moveBy2($steps) in ${this.pretty(true)}") {
             GapBranch(branchesSizeL, branchesL, focus.moveBy(steps), branchesR, branchesSizeR)
           }
         }
@@ -147,9 +150,43 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
   }
   
   final def centre(implicit config: GapConfig): GapTree[A] = this.moveTo(config.nodeCapacity / 2)
-
+  
   final override def divide(implicit config: GapConfig): Either[(GapTree[A], GapTree[A]), (GapTree[A], GapTree[A])] = {
-    Left(null, null)
+    val half = (branchesL.size + branchesR.size) / 2
+
+    if (branchesL.size > branchesR.size) {
+      val leftBranches = branchesL.drop(branchesL.size - half)
+      val rightBranches = branchesL.take(branchesL.size - half)
+      Left((
+          GapBranch[A](
+              leftBranches.tail.map(_.size).sum,
+              leftBranches.tail,
+              leftBranches.head,
+              Nil,
+              0),
+          GapBranch[A](
+              rightBranches.map(_.size).sum,
+              rightBranches,
+              focus,
+              branchesR,
+              branchesSizeR)))
+    } else {
+      val rightBranches = branchesR.drop(branchesR.size - half)
+      val leftBranches = branchesR.take(branchesR.size - half)
+      Left((
+          GapBranch[A](
+              branchesR.size,
+              branchesR,
+              focus,
+              rightBranches,
+              rightBranches.foldLeft(0)((a, b) => a + b.size)),
+          GapBranch[A](
+              0,
+              Nil,
+              rightBranches.head,
+              rightBranches.tail,
+              leftBranches.tail.foldLeft(0)((a, b) => a + b.size))))
+    }
   }
   
   def pretty(inFocus: Boolean): String = s"${(s"$branchesSizeL)" :: branchesL.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: branchesR.map(_.pretty(false)) ::: s"($branchesSizeR" :: List()).mkString("[", ", ", "]")} "
@@ -157,6 +194,9 @@ final case class GapBranch[A](branchesSizeL: Int, branchesL: List[GapTree[A]], f
 
 case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends GapTree[A] {
   type Self = GapLeaf[A]
+  
+  assert(sizeL == valuesL.size)
+  assert(sizeR == valuesR.size)
 
   final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = {
     assert(remainingCapacity > 0)
@@ -224,13 +264,14 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
               sizeL - half),
           GapLeaf[A](0, Nil, valuesR, sizeR)))
     } else {
-      Right((
+      val result = Right((
           GapLeaf[A](sizeL, valuesL, Nil, 0),
           GapLeaf[A](
               sizeR - half,
-              valuesR.take(sizeL - half).reverse,
-              valuesR.drop(sizeL - half),
+              valuesR.take(sizeR - half).reverse,
+              valuesR.drop(sizeR - half),
               half)))
+      result
     }
   }
 
@@ -267,17 +308,12 @@ final case class GapRoot[A](_config: GapConfig = GapConfig(16), child: GapTree[A
   
   final def insertR(value: A): GapRoot[A] = {
     if (child.remainingCapacity > 0) {
-      val result = this.copy(child = child.insertR(value))
-//      println(s"--> $this.insertR($value) = $result")
-      result
+      this.copy(child = child.insertR(value))
     } else {
-//      println("--> child.divide: " + child.divide)
-      val x = child.divide match {
-        case Left((l, focus)) => this.copy(child = GapBranch(l.size, List(l), focus, Nil, 0)).insertR(value)
-        case Right((focus, r)) => this.copy(child = GapBranch(0, Nil, focus, List(r), r.size)).insertR(value)
+      child.divide match {
+        case Left((l, focus)) => this.copy(child = GapBranch(l.size, List(l), focus, Nil, 0).insertR(value))
+        case Right((focus, r)) => this.copy(child = GapBranch(0, Nil, focus, List(r), r.size).insertR(value))
       }
-//      println("--> result: " + x.child)
-      x
     }
   }
 
