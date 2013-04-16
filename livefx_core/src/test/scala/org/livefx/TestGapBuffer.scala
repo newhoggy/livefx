@@ -57,4 +57,24 @@ class TestGapBuffer {
       Assert.assertEquals((0 to i).toList, buffer.iterator.toList.sorted)
     }
   }
+
+  @Test
+  def testInsertLotsOfValues4(): Unit = {
+    var buffer = new GapRoot[Int](GapConfig(5))
+    val random = new scala.util.Random(0)
+    
+    for (i <- 0 to 100) {
+      buffer = if (random.nextBoolean) buffer.insertL(i) else buffer.insertR(i)
+    }
+
+    Assert.assertEquals((0 to 100).toList, buffer.iterator.toList.sorted)
+    
+    buffer = buffer.moveTo(buffer.size / 2)
+
+    Assert.assertEquals((0 to 100).toList, buffer.iterator.toList.sorted)
+
+//    while (buffer.size > 0) {
+//      buffer = if (random.nextBoolean) buffer.removeL() else buffer.removeR()
+//    }
+  }
 }
