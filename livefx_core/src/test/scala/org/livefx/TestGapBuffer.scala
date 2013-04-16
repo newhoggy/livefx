@@ -44,7 +44,6 @@ class TestGapBuffer {
     Assert.assertEquals(List(1, 2, 3, 5, 4), buffer.iterator.toList)
     buffer = buffer.insertR(6)
     Assert.assertEquals(List(1, 2, 3, 6, 5, 4), buffer.iterator.toList)
-    println("--> load: " + buffer.branchLoad)
   }
   
   @Test
@@ -53,25 +52,9 @@ class TestGapBuffer {
     val random = new scala.util.Random(0)
     
     for (i <- 0 to 20) {
-      println(s"--> $i")
-      if (i == 11) Debug.debug = true
+      buffer = if (random.nextBoolean) buffer.insertL(i) else buffer.insertR(i)
 
-      random.nextBoolean match {
-        case true => {
-          println("--> LL")
-          buffer = buffer.insertL(i)
-        }
-        case false => {
-          println("--> RR")
-          buffer = buffer.insertR(i)
-        }
-      }
-      Debug.debug = false
-
-      if (i == 10 || i == 11) {
-        println(s"--> problem($i): ${buffer.child.pretty(true)}")
-      }
-      println(s"--> problem($i): ${buffer.iterator.toList}, load: ${buffer.branchLoad}")
+      Assert.assertEquals((0 to i).toList, buffer.iterator.toList.sorted)
     }
   }
 }
