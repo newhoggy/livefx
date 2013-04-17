@@ -5,10 +5,6 @@ import scalaz.Scalaz.mkIdentity
 
 case class Config(val nodeCapacity: Int)
 
-final case class Trees[+A](trees: List[Tree[A]]) {
-  def ::[B >: A](tree: Tree[B]): Trees[B] = this.copy(trees = tree::trees)
-}
-
 object Buffer {
   def branchLoad[A](tree: Tree[A]): scala.collection.immutable.Map[Int, Int] = {
     import scalaz._
