@@ -7,12 +7,12 @@ import scala.annotation.tailrec
 
 case class GapConfig(val nodeCapacity: Int)
 
-abstract class GapTree[A] {
+abstract class GapTree[+A] {
   type Self <: GapTree[A]
 
-  def insertL(value: A)(implicit config: GapConfig): GapTree[A]
+  def insertL[B >: A](value: B)(implicit config: GapConfig): GapTree[B]
 
-  def insertR(value: A)(implicit config: GapConfig): GapTree[A]
+  def insertR[B >: A](value: B)(implicit config: GapConfig): GapTree[B]
 
   def moveBy(steps: Int): Self
   
@@ -43,15 +43,15 @@ abstract class GapTree[A] {
 final case class GapSide[A](trees: List[GapTree[A]]) {
   def ::(tree: GapTree[A]): GapSide[A] = this.copy(trees = tree::trees)
 }
-
-object :: {
-  import scala.collection.immutable.{:: => #::}
-  
-  def apply[A](side: GapSide[A]): Option[(GapTree[A], GapSide[A])] = side.trees match {
-    case t#::ts => Some((t, GapSide(ts)))
-    case Nil => None
-  }
-}
+//
+//object :: {
+//  import scala.collection.immutable.{:: => #::}
+//  
+//  def apply[A](side: GapSide[A]): Option[(GapTree[A], GapSide[A])] = side.trees match {
+//    case t#::ts => Some((t, GapSide(ts)))
+//    case Nil => None
+//  }
+//}
 
 final case class GapBranch[A](treesSizeL: Int, ls: List[GapTree[A]], focus: GapTree[A], rs: List[GapTree[A]], treesSizeR: Int) extends GapTree[A] {
   type Self = GapBranch[A]
@@ -72,7 +72,7 @@ final case class GapBranch[A](treesSizeL: Int, ls: List[GapTree[A]], focus: GapT
   
   final override def empty: GapBranch[A] = throw new UnsupportedOperationException
   
-  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = {
+  final override def insertL[B >: A](value: B)(implicit config: GapConfig): GapTree[B] = {
     Debug.print("branch.insertL")
     if (focus.remainingCapacity > 0) {
       Debug.print("branch.insertL 1")
@@ -90,7 +90,7 @@ final case class GapBranch[A](treesSizeL: Int, ls: List[GapTree[A]], focus: GapT
     }
   }
   
-  final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = {
+  final override def insertR[B >: A](value: B)(implicit config: GapConfig): GapTree[B] = {
     if (focus.remainingCapacity > 0) {
       this.copy(focus = focus.insertR(value))
     } else {
@@ -211,12 +211,12 @@ case class GapLeaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int
   assert(sizeL == valuesL.size)
   assert(sizeR == valuesR.size)
 
-  final override def insertL(value: A)(implicit config: GapConfig): GapTree[A] = {
+  final override def insertL[B >: A](value: B)(implicit config: GapConfig): GapTree[B] = {
     assert(remainingCapacity > 0)
     this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
   }
 
-  final override def insertR(value: A)(implicit config: GapConfig): GapTree[A] = {
+  final override def insertR[B >: A](value: B)(implicit config: GapConfig): GapTree[B] = {
     this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
   }
   
