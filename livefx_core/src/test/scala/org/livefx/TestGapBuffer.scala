@@ -2,6 +2,10 @@ package org.livefx
 
 import org.junit.Test
 import org.junit.Assert
+import org.livefx.gap.GapRoot
+import org.livefx.gap.GapLeaf
+import org.livefx.gap.GapConfig
+import org.livefx.gap.GapBranch
 
 class TestGapBuffer {
   @Test

@@ -1,9 +1,7 @@
-package org.livefx
+package org.livefx.gap
 
-import scala.reflect.ClassTag
-import scalaz.Monoid
-import scala.collection.immutable.Stack
-import scala.annotation.tailrec
+import org.livefx.Debug
+import scalaz.Scalaz.mkIdentity
 
 case class GapConfig(val nodeCapacity: Int)
 
