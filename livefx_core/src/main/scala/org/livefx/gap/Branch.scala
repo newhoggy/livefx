@@ -95,7 +95,7 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
   
   final override def itemR: A = focus.itemR
   
-  final override def remainingCapacity(implicit config: Config): Int = config.nodeCapacity - (ls.size + rs.size)
+  final override def remainingCapacity(implicit config: Config): Int = config.nodeCapacity - (ls.treeCount + rs.treeCount)
   
   final override def size: Int = treesSizeL + focus.size + treesSizeR
   
@@ -104,10 +104,10 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
   final override def sizeR: Int = treesSizeR + focus.sizeR
   
   final def shiftTo(index: Int): Branch[A] = {
-    if (index < ls.size) {
+    if (index < ls.treeCount) {
       val head = ls.head
       Branch[A](treesSizeL - head.size, ls.tail, focus, head :: rs, treesSizeR + head.size)
-    } else if (index > ls.size) {
+    } else if (index > ls.treeCount) {
       val head = rs.head
       Branch[A](treesSizeL + head.size, head :: ls, focus, rs.tail, treesSizeR - head.size)
     } else {
@@ -118,10 +118,10 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
   final def centre(implicit config: Config): Tree[A] = this.moveTo(config.nodeCapacity / 2)
   
   final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
-    val half = (ls.size + rs.size) / 2
+    val half = (ls.treeCount + rs.treeCount) / 2
     
-    if (ls.size > rs.size) {
-      val pivot = ls.size - half
+    if (ls.treeCount > rs.treeCount) {
+      val pivot = ls.treeCount - half
       val leftTrees = ls.drop(pivot)
       val rightTrees = ls.take(pivot)
       
@@ -139,7 +139,7 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
               rs,
               treesSizeR)).postcondition(x => x._1.size + x._2.size == this.size))
     } else {
-      val pivot = rs.size - half
+      val pivot = rs.treeCount - half
       val rightTrees = rs.drop(pivot)
       val leftTrees = rs.take(pivot)
       Left((
