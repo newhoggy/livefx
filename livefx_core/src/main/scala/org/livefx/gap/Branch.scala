@@ -1,10 +1,11 @@
 package org.livefx.gap
 
 import org.livefx.Debug
+import org.livefx.debug._
 
-final case class Branch[+A](treesSizeL: Int, ls: List[Tree[A]], focus: Tree[A], rs: List[Tree[A]], treesSizeR: Int) extends Tree[A] {
-  assert(treesSizeL == ls.map(_.size).sum)
-  assert(treesSizeR == rs.map(_.size).sum)
+final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: Trees[A], treesSizeR: Int) extends Tree[A] {
+  assert(treesSizeL == ls.trees.map(_.size).sum)
+  assert(treesSizeR == rs.trees.map(_.size).sum)
   
   private final def insertTreeL[B >: A](tree: Tree[B]): Tree[B] = this.copy(treesSizeL = treesSizeL + tree.size, ls = tree::ls)
   
@@ -50,7 +51,7 @@ final case class Branch[+A](treesSizeL: Int, ls: List[Tree[A]], focus: Tree[A], 
           this.copy(focus = newFocus.insertR(value), rs = r::rs, treesSizeR = r.size + treesSizeR)
         }
       }
-    }
+    } postcondition (_.size == this.size + 1)
   }
   
 //  @tailrec
@@ -118,41 +119,44 @@ final case class Branch[+A](treesSizeL: Int, ls: List[Tree[A]], focus: Tree[A], 
   
   final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
     val half = (ls.size + rs.size) / 2
-
+    
     if (ls.size > rs.size) {
-      val leftTrees = ls.drop(ls.size - half)
-      val rightTrees = ls.take(ls.size - half)
+      val pivot = ls.size - half
+      val leftTrees = ls.drop(pivot)
+      val rightTrees = ls.take(pivot)
+      
       Left((
           Branch[A](
-              leftTrees.tail.map(_.size).sum,
+              leftTrees.tail.trees.map(_.size).sum,
               leftTrees.tail,
               leftTrees.head,
-              Nil,
+              TreesNil,
               0),
           Branch[A](
-              rightTrees.map(_.size).sum,
+              rightTrees.trees.map(_.size).sum,
               rightTrees,
               focus,
               rs,
-              treesSizeR)))
+              treesSizeR)).postcondition(x => x._1.size + x._2.size == this.size))
     } else {
-      val rightTrees = rs.drop(rs.size - half)
-      val leftTrees = rs.take(rs.size - half)
+      val pivot = rs.size - half
+      val rightTrees = rs.drop(pivot)
+      val leftTrees = rs.take(pivot)
       Left((
           Branch[A](
               treesSizeL,
               ls,
               focus,
               leftTrees,
-              leftTrees.foldLeft(0)((a, b) => a + b.size)),
+              leftTrees.trees.foldLeft(0)((a, b) => a + b.size)),
           Branch[A](
               0,
-              Nil,
+              TreesNil,
               rightTrees.head,
               rightTrees.tail,
-              rightTrees.tail.foldLeft(0)((a, b) => a + b.size))))
+              rightTrees.tail.trees.foldLeft(0)((a, b) => a + b.size))).postcondition(x => x._1.size + x._2.size == this.size))
     }
   }
   
-  def pretty(inFocus: Boolean): String = s"${(s"$treesSizeL)" :: ls.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.map(_.pretty(false)) ::: s"($treesSizeR" :: List()).mkString("[", ", ", "]")} "
+  def pretty(inFocus: Boolean): String = s"${(s"$treesSizeL)" :: ls.trees.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.trees.map(_.pretty(false)) ::: s"($treesSizeR" :: List()).mkString("[", ", ", "]")} "
 }

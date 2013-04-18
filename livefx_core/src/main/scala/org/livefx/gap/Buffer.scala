@@ -10,7 +10,7 @@ object Buffer {
     import scalaz._
     import Scalaz._
     tree match {
-      case branch: Branch[A] => branch.ls.foldLeft(Map[Int, Int]())((map, b) => map |+| branchLoad(b) + (branch.ls.length + branch.rs.length -> 1))
+      case branch: Branch[A] => branch.ls.trees.foldLeft(Map[Int, Int]())((map, b) => map |+| branchLoad(b) + (branch.ls.trees.length + branch.rs.trees.length -> 1))
       case leaf: Leaf[A] => Map[Int, Int]()
     }
   }

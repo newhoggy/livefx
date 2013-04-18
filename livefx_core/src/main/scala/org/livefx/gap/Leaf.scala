@@ -1,6 +1,7 @@
 package org.livefx.gap
 
 import org.livefx.Debug
+import org.livefx.debug._
 
 case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends Tree[A] {
   type Self = Leaf[A]
@@ -11,11 +12,11 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
   final override def insertL[B >: A](value: B)(implicit config: Config): Tree[B] = {
     assert(remainingCapacity > 0)
     this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
-  }
+  } postcondition (_.size == this.size + 1)
 
   final override def insertR[B >: A](value: B)(implicit config: Config): Tree[B] = {
     this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
-  }
+  } postcondition (_.size == this.size + 1)
   
   final def removeL(): Tree[A] = this.copy(sizeL = sizeL - 1, valuesL = valuesL.tail)
 
@@ -25,7 +26,7 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
   
   final def getR: A = valuesR.head
   
-  final def empty: Branch[A] = Branch[A](0, Nil, Leaf[A](), Nil, 0)
+  final def empty: Branch[A] = Branch[A](0, TreesNil, Leaf[A](), TreesNil, 0)
   
 //  @tailrec
   final def moveBy(steps: Int): Leaf[A] = {
@@ -77,17 +78,21 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
               valuesL.drop(sizeL - half),
               valuesL.take(sizeL - half).reverse,
               sizeL - half),
-          Leaf[A](0, Nil, valuesR, sizeR)))
+          Leaf[A](0, Nil, valuesR, sizeR)).postcondition(x => x._1.size + x._2.size == this.size))
     } else {
-      val result = Right((
+      Right((
           Leaf[A](sizeL, valuesL, Nil, 0),
           Leaf[A](
               sizeR - half,
               valuesR.take(sizeR - half).reverse,
               valuesR.drop(sizeR - half),
-              half)))
-      result
+              half)).postcondition(x => x._1.size + x._2.size == this.size))
     }
+//  } postcondition {
+//    _ match {
+//      case Left(x) => x._1.size + x._2.size == this.size
+//      case Right(x) => x._1.size + x._1.size == this.size
+//    } 
   }
 
   def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"

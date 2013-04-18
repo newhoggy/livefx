@@ -1,6 +1,7 @@
 package org.livefx.gap
 
 import org.livefx.Debug
+import org.livefx.debug._
 
 final case class Root[A](_config: Config = Config(16), child: Tree[A] = Leaf[A]()) {
   private implicit val config = _config
@@ -16,25 +17,28 @@ final case class Root[A](_config: Config = Config(16), child: Tree[A] = Leaf[A](
       Debug.print("insertL divide")
       child.divide match {
         case Left((l, focus)) => {
-          val result = this.copy(child = Branch(l.size, List(l), focus, List(), 0)).insertL(value)
+          val result = this.copy(child = Branch(l.size, l::TreesNil, focus, TreesNil, 0)).insertL(value)
           Debug.print("result: " +  result.child.pretty(true))
           result
         }
-        case Right((focus, r)) => this.copy(child = Branch(0, List(), focus, List(r), r.size)).insertL(value)
+        case Right((focus, r)) => this.copy(child = Branch(0, TreesNil, focus, r::TreesNil, r.size)).insertL(value)
       }
     }
-  }
+  } postcondition(_.size == this.size + 1)
   
   final def insertR(value: A): Root[A] = {
     if (child.remainingCapacity > 0) {
       this.copy(child = child.insertR(value))
     } else {
       child.divide match {
-        case Left((l, focus)) => this.copy(child = Branch(l.size, List(l), focus, Nil, 0).insertR(value))
-        case Right((focus, r)) => this.copy(child = Branch(0, Nil, focus, List(r), r.size).insertR(value))
+        case Left((l, focus)) =>
+          this.copy(child = Branch(l.size, l::TreesNil, focus, TreesNil, 0).insertR(value))
+        case Right((focus, r)) =>
+          assert(r.size + focus.size == this.size)
+          this.copy(child = Branch(0, TreesNil, focus, r::TreesNil, r.size).insertR(value))
       }
     }
-  }
+  } postcondition(_.size == this.size + 1)
 
   final def moveBy(steps: Int): Root[A] = this.copy(child = child.moveBy(steps))
   
