@@ -4,24 +4,21 @@ import org.livefx.Debug
 import org.livefx.debug._
 import org.livefx.LeftOrRight
 
-case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends Tree[A] {
+case class Leaf[A](valuesL: Items[A], valuesR: Items[A]) extends Tree[A] {
   type Self = Leaf[A]
   
-  assert(sizeL == valuesL.size)
-  assert(sizeR == valuesR.size)
-
   final override def insertL[B >: A](value: B)(implicit config: Config): Tree[B] = {
     assert(remainingCapacity > 0)
-    this.copy(sizeL = sizeL + 1, valuesL = value::valuesL)
+    this.copy(valuesL = value::valuesL)
   } postcondition (_.size == this.size + 1)
 
   final override def insertR[B >: A](value: B)(implicit config: Config): Tree[B] = {
-    this.copy(sizeR = sizeR + 1, valuesR = value::valuesR)
+    this.copy(valuesR = value::valuesR)
   } postcondition (_.size == this.size + 1)
   
-  final def removeL(): Tree[A] = this.copy(sizeL = sizeL - 1, valuesL = valuesL.tail)
+  final def removeL(): Tree[A] = this.copy(valuesL = valuesL.tail)
 
-  final def removeR(): Tree[A] = this.copy(sizeR = sizeR - 1, valuesR = valuesR.tail)
+  final def removeR(): Tree[A] = this.copy(valuesR = valuesR.tail)
   
   final def getL: A = valuesL.head
   
@@ -29,17 +26,21 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
   
   final def empty: Branch[A] = Branch[A](TreesNil, Leaf[A](), TreesNil)
   
+  final override def sizeL = valuesL.count
+  
+  final override def sizeR = valuesR.count
+  
 //  @tailrec
   final def moveBy(steps: Int): Leaf[A] = {
     if (steps > 0) {
       Debug.trace(s"moveBy[leaf-r]($steps): $this") {
-        val result = Leaf(sizeL + 1, valuesR.head :: valuesL, valuesR.tail, sizeR - 1).moveBy(steps - 1)
+        val result = Leaf(valuesR.head :: valuesL, valuesR.tail).moveBy(steps - 1)
         Debug.print(s"moveBy[leaf-result]: $result")
         result
       }
     } else if (steps < 0) {
       Debug.trace(s"moveBy[leaf-l]($steps): $this") {
-        val result = Leaf(sizeL - 1, valuesL.tail, valuesL.head :: valuesR, sizeR + 1).moveBy(steps + 1)
+        val result = Leaf(valuesL.tail, valuesL.head :: valuesR).moveBy(steps + 1)
         Debug.print(s"moveBy[leaf-result]: $result")
         result
       }
@@ -65,29 +66,29 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
   
   final def centre(implicit config: Config): Leaf[A] = this.moveTo(config.nodeCapacity / 2)
   
-  final def dropL: Leaf[A] = Leaf(0, Nil, valuesR, sizeR)
+  final def dropL: Leaf[A] = Leaf(ItemsNil, valuesR)
 
-  final def dropR: Leaf[A] = Leaf(sizeL, valuesL, Nil, 0)
+  final def dropR: Leaf[A] = Leaf(valuesL, ItemsNil)
 
   final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
     val half = size / 2
     if (sizeL >= half) {
       val pivot = sizeL - half
       Left((
-          Leaf[A](half, valuesL.drop(pivot), valuesL.take(pivot).reverse, sizeL - half),
-          Leaf[A](0, Nil, valuesR, sizeR)))
+          Leaf[A](valuesL.drop(pivot), valuesL.take(pivot).reverse),
+          Leaf[A](ItemsNil, valuesR)))
     } else {
       val pivot = sizeR - half
       Right((
-          Leaf[A](sizeL, valuesL, Nil, 0), 
-          Leaf[A](sizeR - half, valuesR.take(pivot).reverse, valuesR.drop(pivot), half)))
+          Leaf[A](valuesL, ItemsNil), 
+          Leaf[A](valuesR.take(pivot).reverse, valuesR.drop(pivot))))
     }.postcondition{case LeftOrRight((l, r)) => l.size + r.size == this.size}
   }
 
-  def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
+  def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.toList.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.toList.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
 }
 
 object Leaf {
-  def apply[A](valuesL: List[A], valuesR: List[A]): Leaf[A] = Leaf[A](valuesL.size, valuesL, valuesR, valuesR.size)
-  def apply[A](): Leaf[A] = Leaf[A](0, Nil, Nil, 0)
+  def apply[A](valuesL: List[A], valuesR: List[A]): Leaf[A] = Leaf[A](valuesL.foldRight(ItemsNil: Items[A])((a, b) => a::b), valuesR.foldRight(ItemsNil: Items[A])((a, b) => a::b))
+  def apply[A](): Leaf[A] = Leaf[A](ItemsNil, ItemsNil)
 }

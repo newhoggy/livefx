@@ -26,22 +26,22 @@ class TestGapBuffer {
     var buffer = new Root[Int](Config(4))
     
     buffer = buffer.insertL(1)
-    Assert.assertEquals(Leaf(1, List(1), List(), 0), buffer.child)
+    Assert.assertEquals(Leaf(List(1), List()), buffer.child)
     Assert.assertEquals(List(1), buffer.iterator.toList)
     buffer = buffer.insertL(2)
-    Assert.assertEquals(Leaf(2, List(2, 1), List(), 0), buffer.child)
+    Assert.assertEquals(Leaf(List(2, 1), List()), buffer.child)
     Assert.assertEquals(List(1, 2), buffer.iterator.toList)
     buffer = buffer.insertL(3)
-    Assert.assertEquals(Leaf(3, List(3, 2, 1), List(), 0), buffer.child)
+    Assert.assertEquals(Leaf(List(3, 2, 1), List()), buffer.child)
     Assert.assertEquals(List(1, 2, 3), buffer.iterator.toList)
     buffer = buffer.insertR(4)
-    Assert.assertEquals(Leaf(3, List(3, 2, 1), List(4), 1), buffer.child)
+    Assert.assertEquals(Leaf(List(3, 2, 1), List(4)), buffer.child)
     Assert.assertEquals(List(1, 2, 3, 4), buffer.iterator.toList)
     buffer = buffer.insertR(5)
     Assert.assertEquals(
         Branch(
-            Leaf(2, List(2, 1), List(3), 1)::TreesNil,
-            Leaf(0, List(), List(5, 4), 2),
+            Leaf(List(2, 1), List(3))::TreesNil,
+            Leaf(List(), List(5, 4)),
             TreesNil),
         buffer.child)
     Assert.assertEquals(List(1, 2, 3, 5, 4), buffer.iterator.toList)
