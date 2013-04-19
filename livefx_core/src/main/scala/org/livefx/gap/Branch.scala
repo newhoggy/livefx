@@ -3,15 +3,12 @@ package org.livefx.gap
 import org.livefx.Debug
 import org.livefx.debug._
 
-final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: Trees[A], treesSizeR: Int) extends Tree[A] {
-  assert(treesSizeL == ls.trees.map(_.size).sum)
-  assert(treesSizeR == rs.trees.map(_.size).sum)
-  
-  private final def insertTreeL[B >: A](tree: Tree[B]): Tree[B] = this.copy(treesSizeL = treesSizeL + tree.size, ls = tree::ls)
+final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends Tree[A] {
+  private final def insertTreeL[B >: A](tree: Tree[B]): Tree[B] = this.copy(ls = tree::ls)
   
   private final def removeTreeL(): Branch[A] = {
     val removed = ls.head
-    this.copy(treesSizeL = treesSizeL - removed.size, ls = ls.tail)
+    this.copy(ls = ls.tail)
   }
   
   private final def withAtLeastOneTreeL(): Tree[A] = if (ls.isEmpty) insertTreeL(rs.head.empty) else this
@@ -28,11 +25,11 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
     } else {
       focus.divide match {
         case Left((l, newFocus)) => {
-          this.copy(treesSizeL = l.size + treesSizeL, ls = l::ls, focus = newFocus.insertL(value))
+          this.copy(ls = l::ls, focus = newFocus.insertL(value))
         }
         case Right((newFocus, r)) => {
           Debug.print("branch.insertL 3")
-          this.copy(focus = newFocus.insertL(value), rs = r::rs, treesSizeR = r.size + treesSizeR)
+          this.copy(focus = newFocus.insertL(value), rs = r::rs)
         }
       }
     }
@@ -44,11 +41,11 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
     } else {
       focus.divide match {
         case Left((l, newFocus)) => {
-          this.copy(treesSizeL = l.size + treesSizeL, ls = l::ls, focus = newFocus.insertR(value))
+          this.copy(ls = l::ls, focus = newFocus.insertR(value))
         }
         case Right((newFocus, r)) => {
           Debug.print("branch.insertL 3")
-          this.copy(focus = newFocus.insertR(value), rs = r::rs, treesSizeR = r.size + treesSizeR)
+          this.copy(focus = newFocus.insertR(value), rs = r::rs)
         }
       }
     } postcondition (_.size == this.size + 1)
@@ -60,11 +57,11 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
       if (steps > 0) {
         if (steps > focus.sizeR) {
           Debug.trace("moveBy[1]") {
-            Branch(treesSizeL + focus.size, focus :: ls, rs.head, rs.tail, treesSizeR - rs.head.size).moveBy(steps - rs.head.sizeL)
+            Branch(focus :: ls, rs.head, rs.tail).moveBy(steps - rs.head.sizeL)
           }
         } else {
           Debug.trace("moveBy[2]") {
-            val result = Branch(treesSizeL, ls, focus.moveBy(steps), rs, treesSizeR)
+            val result = Branch(ls, focus.moveBy(steps), rs)
             Debug.print(s"moveBy[2]: $result")
             result
           }
@@ -73,11 +70,11 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
         Debug.print(s"focus.sizeR = ${focus.sizeR}")
         if (-steps > focus.sizeL) {
           Debug.trace(s"moveBy1($steps) in ${this.pretty(true)} ${focus.sizeR}") {
-            Branch(treesSizeL - ls.head.size, ls.tail, ls.head, focus :: rs, treesSizeR + focus.size).moveBy(steps + focus.sizeL + ls.head.sizeR)
+            Branch(ls.tail, ls.head, focus :: rs).moveBy(steps + focus.sizeL + ls.head.sizeR)
           }
         } else {
           Debug.trace(s"moveBy2($steps) in ${this.pretty(true)}") {
-            Branch(treesSizeL, ls, focus.moveBy(steps), rs, treesSizeR)
+            Branch(ls, focus.moveBy(steps), rs)
           }
         }
       } else {
@@ -97,19 +94,19 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
   
   final override def remainingCapacity(implicit config: Config): Int = config.nodeCapacity - (ls.treeCount + rs.treeCount)
   
-  final override def size: Int = treesSizeL + focus.size + treesSizeR
+  final override def size: Int = ls.size + focus.size + rs.size
   
-  final override def sizeL: Int = treesSizeL + focus.sizeL
+  final override def sizeL: Int = ls.size + focus.sizeL
   
-  final override def sizeR: Int = treesSizeR + focus.sizeR
+  final override def sizeR: Int = rs.size + focus.sizeR
   
   final def shiftTo(index: Int): Branch[A] = {
     if (index < ls.treeCount) {
       val head = ls.head
-      Branch[A](treesSizeL - head.size, ls.tail, focus, head :: rs, treesSizeR + head.size)
+      Branch[A](ls.tail, focus, head :: rs)
     } else if (index > ls.treeCount) {
       val head = rs.head
-      Branch[A](treesSizeL + head.size, head :: ls, focus, rs.tail, treesSizeR - head.size)
+      Branch[A](head :: ls, focus, rs.tail)
     } else {
       this
     }
@@ -127,36 +124,28 @@ final case class Branch[+A](treesSizeL: Int, ls: Trees[A], focus: Tree[A], rs: T
       
       Left((
           Branch[A](
-              leftTrees.tail.trees.map(_.size).sum,
               leftTrees.tail,
               leftTrees.head,
-              TreesNil,
-              0),
+              TreesNil),
           Branch[A](
-              rightTrees.trees.map(_.size).sum,
               rightTrees,
               focus,
-              rs,
-              treesSizeR)).postcondition(x => x._1.size + x._2.size == this.size))
+              rs)).postcondition(x => x._1.size + x._2.size == this.size))
     } else {
       val pivot = rs.treeCount - half
       val rightTrees = rs.drop(pivot)
       val leftTrees = rs.take(pivot)
       Left((
           Branch[A](
-              treesSizeL,
               ls,
               focus,
-              leftTrees,
-              leftTrees.trees.foldLeft(0)((a, b) => a + b.size)),
+              leftTrees),
           Branch[A](
-              0,
               TreesNil,
               rightTrees.head,
-              rightTrees.tail,
-              rightTrees.tail.trees.foldLeft(0)((a, b) => a + b.size))).postcondition(x => x._1.size + x._2.size == this.size))
+              rightTrees.tail)).postcondition(x => x._1.size + x._2.size == this.size))
     }
   }
   
-  def pretty(inFocus: Boolean): String = s"${(s"$treesSizeL)" :: ls.trees.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.trees.map(_.pretty(false)) ::: s"($treesSizeR" :: List()).mkString("[", ", ", "]")} "
+  def pretty(inFocus: Boolean): String = s"${(s"${ls.size})" :: ls.trees.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.trees.map(_.pretty(false)) ::: s"(${rs.size}" :: List()).mkString("[", ", ", "]")} "
 }

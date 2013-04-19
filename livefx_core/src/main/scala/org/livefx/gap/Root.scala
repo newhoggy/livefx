@@ -17,11 +17,11 @@ final case class Root[A](_config: Config = Config(16), child: Tree[A] = Leaf[A](
       Debug.print("insertL divide")
       child.divide match {
         case Left((l, focus)) => {
-          val result = this.copy(child = Branch(l.size, l::TreesNil, focus, TreesNil, 0)).insertL(value)
+          val result = this.copy(child = Branch(l::TreesNil, focus, TreesNil)).insertL(value)
           Debug.print("result: " +  result.child.pretty(true))
           result
         }
-        case Right((focus, r)) => this.copy(child = Branch(0, TreesNil, focus, r::TreesNil, r.size)).insertL(value)
+        case Right((focus, r)) => this.copy(child = Branch(TreesNil, focus, r::TreesNil)).insertL(value)
       }
     }
   } postcondition(_.size == this.size + 1)
@@ -32,10 +32,10 @@ final case class Root[A](_config: Config = Config(16), child: Tree[A] = Leaf[A](
     } else {
       child.divide match {
         case Left((l, focus)) =>
-          this.copy(child = Branch(l.size, l::TreesNil, focus, TreesNil, 0).insertR(value))
+          this.copy(child = Branch(l::TreesNil, focus, TreesNil).insertR(value))
         case Right((focus, r)) =>
           assert(r.size + focus.size == this.size)
-          this.copy(child = Branch(0, TreesNil, focus, r::TreesNil, r.size).insertR(value))
+          this.copy(child = Branch(TreesNil, focus, r::TreesNil).insertR(value))
       }
     }
   } postcondition(_.size == this.size + 1)

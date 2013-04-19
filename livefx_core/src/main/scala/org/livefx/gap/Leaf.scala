@@ -26,7 +26,7 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
   
   final def getR: A = valuesR.head
   
-  final def empty: Branch[A] = Branch[A](0, TreesNil, Leaf[A](), TreesNil, 0)
+  final def empty: Branch[A] = Branch[A](TreesNil, Leaf[A](), TreesNil)
   
 //  @tailrec
   final def moveBy(steps: Int): Leaf[A] = {

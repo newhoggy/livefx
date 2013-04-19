@@ -13,16 +13,18 @@ abstract class Trees[+A] {
   def trees: List[Tree[A]]
 
   def drop(n: Int): Trees[A]
-
   def take(n: Int): Trees[A]
 }
 
 final case class TreesCons[+A](head: Tree[A], tail: Trees[A]) extends Trees[A] {
-  override def isEmpty: Boolean = false
   override val treeCount: Int = tail.treeCount + 1
   override val size: Int = head.size + tail.size
-  override def trees: List[Tree[A]] = head::tail.trees
 
+  assert(size == trees.map(_.size).sum)
+  
+  override def isEmpty: Boolean = false
+  override def trees: List[Tree[A]] = head::tail.trees
+  
   override def drop(n: Int): Trees[A] = {
     if (n < 0) throw new IndexOutOfBoundsException
     if (n > 0) tail.drop(n - 1) else this 
