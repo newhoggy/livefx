@@ -2,6 +2,7 @@ package org.livefx.gap
 
 import org.livefx.Debug
 import org.livefx.debug._
+import org.livefx.LeftOrRight
 
 case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) extends Tree[A] {
   type Self = Leaf[A]
@@ -80,7 +81,7 @@ case class Leaf[A](sizeL: Int, valuesL: List[A], valuesR: List[A], sizeR: Int) e
       Right((
           Leaf[A](sizeL, valuesL, Nil, 0), 
           Leaf[A](sizeR - half, valuesR.take(pivot).reverse, valuesR.drop(pivot), half)))
-    }.postcondition{case org.livefx.LeftOrRight((l, r)) => l.size + r.size == this.size}
+    }.postcondition{case LeftOrRight((l, r)) => l.size + r.size == this.size}
   }
 
   def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
