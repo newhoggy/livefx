@@ -29,10 +29,6 @@ case class Leaf[A](valuesL: Items[A], valuesR: Items[A]) extends Tree[A] {
 
   final override def size: Int = sizeL + sizeR
 
-  final def dropL: Leaf[A] = Leaf(ItemsNil, valuesR)
-
-  final def dropR: Leaf[A] = Leaf(valuesL, ItemsNil)
-
   def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.toList.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.toList.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
 }
 

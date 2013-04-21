@@ -56,8 +56,6 @@ final case class Root[A](_config: Config = Config(16), child: Tree[A] = Leaf[A](
   final def sizeR: Int = child.sizeR
 
   final def size: Int = child.size 
-  
-  final def empty: Tree[A] = child.empty
 
   def iterator: Iterator[A] = new Iterator[A] {
     if (Debug.debug) println(Root.this)
