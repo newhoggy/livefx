@@ -29,21 +29,21 @@ object Items {
     case ItemsCons(head, tail) => reverse(tail, head::result)
     case ItemsNil => result
   }
-  
+
   @tailrec
   def drop[A](self: Items[A], n: Int): Items[A] = n match {
     case x if x > 0 => drop(self.tail, n - 1)
     case x if x == 0 => self
     case _ => throw new IndexOutOfBoundsException
   }
-  
+
   @tailrec
   def takeReverse[A](self: Items[A], n: Int, result: Items[A] = ItemsNil): Items[A] = n match {
     case x if x > 0 => takeReverse(self.tail, n - 1, self.head:: result)
     case x if x == 0 => result
     case _ => throw new IndexOutOfBoundsException
   }
-  
+
   @tailrec
   def toList[A](self: Items[A], result: Items[A] = ItemsNil): List[A] = self match {
     case ItemsCons(head, tail) => toList(self.tail, self.head::result)
