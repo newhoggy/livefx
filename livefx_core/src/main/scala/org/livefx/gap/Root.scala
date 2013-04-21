@@ -69,5 +69,5 @@ final case class Root[A](_config: Config = Config(16), child: Tree[A] = Leaf[A](
     }
   }
 
-  def branchLoad = Buffer.branchLoad(child)
+  def branchLoad = Tree.branchLoad(child)
 }
