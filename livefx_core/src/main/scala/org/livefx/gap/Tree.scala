@@ -17,6 +17,8 @@ abstract class Tree[+A] {
 
   @inline final def moveTo(index: Int): Tree[A] = moveBy(index - sizeL)
 
+  @inline final def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = Tree.divide(this)
+
   def itemL: A
 
   def itemR: A
@@ -28,8 +30,6 @@ abstract class Tree[+A] {
   def size: Int
 
   def remainingCapacity(implicit config: Config): Int
-
-  @inline final def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = Tree.divide(this)
 
   def pretty(inFocus: Boolean): String
 }
