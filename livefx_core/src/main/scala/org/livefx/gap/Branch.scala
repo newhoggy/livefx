@@ -34,38 +34,5 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
     }
   }
 
-  final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
-    val half = (ls.treeCount + rs.treeCount) / 2
-    
-    if (ls.treeCount > rs.treeCount) {
-      val pivot = ls.treeCount - half
-      val leftTrees = ls.drop(pivot)
-      val rightTrees = ls.take(pivot)
-      
-      Left((
-          Branch[A](
-              leftTrees.tail,
-              leftTrees.head,
-              TreesNil),
-          Branch[A](
-              rightTrees,
-              focus,
-              rs)).postcondition(x => x._1.size + x._2.size == this.size))
-    } else {
-      val pivot = rs.treeCount - half
-      val rightTrees = rs.drop(pivot)
-      val leftTrees = rs.take(pivot)
-      Left((
-          Branch[A](
-              ls,
-              focus,
-              leftTrees),
-          Branch[A](
-              TreesNil,
-              rightTrees.head,
-              rightTrees.tail)).postcondition(x => x._1.size + x._2.size == this.size))
-    }
-  }
-
   def pretty(inFocus: Boolean): String = s"${(s"${ls.size})" :: ls.trees.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.trees.map(_.pretty(false)) ::: s"(${rs.size}" :: List()).mkString("[", ", ", "]")} "
 }

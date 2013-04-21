@@ -2,6 +2,7 @@ package org.livefx.gap
 
 import org.livefx.debug._
 import scala.annotation.tailrec
+import org.livefx.LeftOrRight
 
 abstract class Tree[+A] {
   @inline final def insertL[B >: A](value: B)(implicit config: Config): Tree[B] = Tree.insertL(this, value)
@@ -30,7 +31,7 @@ abstract class Tree[+A] {
 
   def remainingCapacity(implicit config: Config): Int
 
-  def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])]
+  @inline final def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = Tree.divide(this)
 
   def pretty(inFocus: Boolean): String
 }
@@ -106,6 +107,57 @@ object Tree {
       }
     } else {
       self
+    }
+  }
+
+  final def divide[A](self: Tree[A])(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
+    self match {
+      case self@Leaf(valuesL, valuesR) => {
+        val half = self.size / 2
+        if (self.sizeL >= half) {
+          val pivot = self.sizeL - half
+          Left((
+              Leaf[A](valuesL.drop(pivot), valuesL.take(pivot).reverse),
+              Leaf[A](ItemsNil, valuesR)))
+        } else {
+          val pivot = self.sizeR - half
+          Right((
+              Leaf[A](valuesL, ItemsNil), 
+              Leaf[A](valuesR.take(pivot).reverse, valuesR.drop(pivot))))
+        }.postcondition{case LeftOrRight((l, r)) => l.size + r.size == self.size}
+      }
+      case self@Branch(ls, focus, rs) => {
+        val half = (ls.treeCount + rs.treeCount) / 2
+
+        if (ls.treeCount > rs.treeCount) {
+          val pivot = ls.treeCount - half
+          val leftTrees = ls.drop(pivot)
+          val rightTrees = ls.take(pivot)
+
+          Left((
+              Branch[A](
+                  leftTrees.tail,
+                  leftTrees.head,
+                  TreesNil),
+              Branch[A](
+                  rightTrees,
+                  focus,
+                  rs)).postcondition(x => x._1.size + x._2.size == self.size))
+        } else {
+          val pivot = rs.treeCount - half
+          val rightTrees = rs.drop(pivot)
+          val leftTrees = rs.take(pivot)
+          Left((
+              Branch[A](
+                  ls,
+                  focus,
+                  leftTrees),
+              Branch[A](
+                  TreesNil,
+                  rightTrees.head,
+                  rightTrees.tail)).postcondition(x => x._1.size + x._2.size == self.size))
+        }
+      }
     }
   }
 }

@@ -33,21 +33,6 @@ case class Leaf[A](valuesL: Items[A], valuesR: Items[A]) extends Tree[A] {
 
   final def dropR: Leaf[A] = Leaf(valuesL, ItemsNil)
 
-  final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
-    val half = size / 2
-    if (sizeL >= half) {
-      val pivot = sizeL - half
-      Left((
-          Leaf[A](valuesL.drop(pivot), valuesL.take(pivot).reverse),
-          Leaf[A](ItemsNil, valuesR)))
-    } else {
-      val pivot = sizeR - half
-      Right((
-          Leaf[A](valuesL, ItemsNil), 
-          Leaf[A](valuesR.take(pivot).reverse, valuesR.drop(pivot))))
-    }.postcondition{case LeftOrRight((l, r)) => l.size + r.size == this.size}
-  }
-
   def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.toList.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.toList.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
 }
 
