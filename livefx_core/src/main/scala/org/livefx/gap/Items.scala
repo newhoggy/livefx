@@ -25,28 +25,28 @@ final case object ItemsNil extends Items[Nothing] {
 
 object Items {
   @tailrec
-  def reverse[A](items: Items[A], result: Items[A]): Items[A] = items match {
+  def reverse[A](self: Items[A], result: Items[A]): Items[A] = self match {
     case ItemsCons(head, tail) => reverse(tail, head::result)
     case ItemsNil => result
   }
   
   @tailrec
-  def drop[A](items: Items[A], n: Int): Items[A] = n match {
-    case x if x > 0 => drop(items.tail, n - 1)
-    case x if x == 0 => items
+  def drop[A](self: Items[A], n: Int): Items[A] = n match {
+    case x if x > 0 => drop(self.tail, n - 1)
+    case x if x == 0 => self
     case _ => throw new IndexOutOfBoundsException
   }
   
   @tailrec
-  def takeReverse[A](items: Items[A], n: Int, result: Items[A] = ItemsNil): Items[A] = n match {
-    case x if x > 0 => takeReverse(items.tail, n - 1, items.head:: result)
+  def takeReverse[A](self: Items[A], n: Int, result: Items[A] = ItemsNil): Items[A] = n match {
+    case x if x > 0 => takeReverse(self.tail, n - 1, self.head:: result)
     case x if x == 0 => result
     case _ => throw new IndexOutOfBoundsException
   }
   
   @tailrec
-  def toList[A](items: Items[A], result: Items[A] = ItemsNil): List[A] = items match {
-    case ItemsCons(head, tail) => toList(items.tail, items.head::result)
+  def toList[A](self: Items[A], result: Items[A] = ItemsNil): List[A] = self match {
+    case ItemsCons(head, tail) => toList(self.tail, self.head::result)
     case ItemsNil => Nil
   }
 }

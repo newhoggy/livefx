@@ -4,19 +4,8 @@ import org.livefx.Debug
 import org.livefx.debug._
 
 final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends Tree[A] {
-  private final def insertTreeL[B >: A](tree: Tree[B]): Tree[B] = this.copy(ls = tree::ls)
-  
-  private final def removeTreeL(): Branch[A] = {
-    val removed = ls.head
-    this.copy(ls = ls.tail)
-  }
-  
-  private final def withAtLeastOneTreeL(): Tree[A] = if (ls.isEmpty) insertTreeL(rs.head.empty) else this
-  
-  private final def withAtLeastOneTreeR(): Tree[A] = if (rs.isEmpty) insertTreeL(ls.head.empty) else this
-  
   final override def empty: Branch[A] = throw new UnsupportedOperationException
-  
+
   final override def insertL[B >: A](value: B)(implicit config: Config): Tree[B] = {
     Debug.print("branch.insertL")
     if (focus.remainingCapacity > 0) {
@@ -34,7 +23,7 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
       }
     }
   }
-  
+
   final override def insertR[B >: A](value: B)(implicit config: Config): Tree[B] = {
     if (focus.remainingCapacity > 0) {
       this.copy(focus = focus.insertR(value))
@@ -50,8 +39,12 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
       }
     } postcondition (_.size == this.size + 1)
   }
-  
-//  @tailrec
+
+  def removeL(): Tree[A] = throw new UnsupportedOperationException
+
+  def removeR(): Tree[A] = throw new UnsupportedOperationException
+
+  //  @tailrec
   final override def moveBy(steps: Int): Branch[A] = {
     Debug.trace(s"moveBy($steps) in ${this.pretty(true)}") {
       if (steps > 0) {
@@ -89,17 +82,17 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
   }
 
   final override def itemL: A = focus.itemL
-  
+
   final override def itemR: A = focus.itemR
-  
+
   final override def remainingCapacity(implicit config: Config): Int = config.nodeCapacity - (ls.treeCount + rs.treeCount)
-  
+
   final override def size: Int = ls.size + focus.size + rs.size
-  
+
   final override def sizeL: Int = ls.size + focus.sizeL
-  
+
   final override def sizeR: Int = rs.size + focus.sizeR
-  
+
   final def shiftTo(index: Int): Branch[A] = {
     if (index < ls.treeCount) {
       val head = ls.head
@@ -111,9 +104,9 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
       this
     }
   }
-  
+
   final def centre(implicit config: Config): Tree[A] = this.moveTo(config.nodeCapacity / 2)
-  
+
   final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
     val half = (ls.treeCount + rs.treeCount) / 2
     
@@ -146,6 +139,6 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
               rightTrees.tail)).postcondition(x => x._1.size + x._2.size == this.size))
     }
   }
-  
+
   def pretty(inFocus: Boolean): String = s"${(s"${ls.size})" :: ls.trees.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.trees.map(_.pretty(false)) ::: s"(${rs.size}" :: List()).mkString("[", ", ", "]")} "
 }
