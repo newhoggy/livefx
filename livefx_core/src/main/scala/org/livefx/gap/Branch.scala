@@ -6,80 +6,9 @@ import org.livefx.debug._
 final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends Tree[A] {
   final override def empty: Branch[A] = throw new UnsupportedOperationException
 
-  final override def insertL[B >: A](value: B)(implicit config: Config): Tree[B] = {
-    Debug.print("branch.insertL")
-    if (focus.remainingCapacity > 0) {
-      Debug.print("branch.insertL 1")
-      this.copy(focus = focus.insertL(value))
-    } else {
-      focus.divide match {
-        case Left((l, newFocus)) => {
-          this.copy(ls = l::ls, focus = newFocus.insertL(value))
-        }
-        case Right((newFocus, r)) => {
-          Debug.print("branch.insertL 3")
-          this.copy(focus = newFocus.insertL(value), rs = r::rs)
-        }
-      }
-    }
-  }
-
-  final override def insertR[B >: A](value: B)(implicit config: Config): Tree[B] = {
-    if (focus.remainingCapacity > 0) {
-      this.copy(focus = focus.insertR(value))
-    } else {
-      focus.divide match {
-        case Left((l, newFocus)) => {
-          this.copy(ls = l::ls, focus = newFocus.insertR(value))
-        }
-        case Right((newFocus, r)) => {
-          Debug.print("branch.insertL 3")
-          this.copy(focus = newFocus.insertR(value), rs = r::rs)
-        }
-      }
-    } postcondition (_.size == this.size + 1)
-  }
-
   def removeL(): Tree[A] = throw new UnsupportedOperationException
 
   def removeR(): Tree[A] = throw new UnsupportedOperationException
-
-  //  @tailrec
-  final override def moveBy(steps: Int): Branch[A] = {
-    Debug.trace(s"moveBy($steps) in ${this.pretty(true)}") {
-      if (steps > 0) {
-        if (steps > focus.sizeR) {
-          Debug.trace("moveBy[1]") {
-            Branch(focus :: ls, rs.head, rs.tail).moveBy(steps - rs.head.sizeL)
-          }
-        } else {
-          Debug.trace("moveBy[2]") {
-            val result = Branch(ls, focus.moveBy(steps), rs)
-            Debug.print(s"moveBy[2]: $result")
-            result
-          }
-        }
-      } else if (steps < 0) {
-        Debug.print(s"focus.sizeR = ${focus.sizeR}")
-        if (-steps > focus.sizeL) {
-          Debug.trace(s"moveBy1($steps) in ${this.pretty(true)} ${focus.sizeR}") {
-            Branch(ls.tail, ls.head, focus :: rs).moveBy(steps + focus.sizeL + ls.head.sizeR)
-          }
-        } else {
-          Debug.trace(s"moveBy2($steps) in ${this.pretty(true)}") {
-            Branch(ls, focus.moveBy(steps), rs)
-          }
-        }
-      } else {
-        this
-      }
-    }
-  }
-
-  final override def moveTo(index: Int): Branch[A] = {
-    if (Debug.debug) println(s"moveBy($index - $sizeL)")
-    moveBy(index - sizeL)
-  }
 
   final override def itemL: A = focus.itemL
 
@@ -104,8 +33,6 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
       this
     }
   }
-
-  final def centre(implicit config: Config): Tree[A] = this.moveTo(config.nodeCapacity / 2)
 
   final override def divide(implicit config: Config): Either[(Tree[A], Tree[A]), (Tree[A], Tree[A])] = {
     val half = (ls.treeCount + rs.treeCount) / 2
