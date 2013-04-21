@@ -7,10 +7,6 @@ import org.livefx.LeftOrRight
 case class Leaf[A](valuesL: Items[A], valuesR: Items[A]) extends Tree[A] {
   type Self = Leaf[A]
 
-  final def removeL(): Tree[A] = this.copy(valuesL = valuesL.tail)
-
-  final def removeR(): Tree[A] = this.copy(valuesR = valuesR.tail)
-
   final def getL: A = valuesL.head
 
   final def getR: A = valuesR.head

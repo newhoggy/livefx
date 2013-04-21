@@ -4,10 +4,6 @@ import org.livefx.Debug
 import org.livefx.debug._
 
 final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends Tree[A] {
-  def removeL(): Tree[A] = throw new UnsupportedOperationException
-
-  def removeR(): Tree[A] = throw new UnsupportedOperationException
-
   final override def itemL: A = focus.itemL
 
   final override def itemR: A = focus.itemR

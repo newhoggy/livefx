@@ -9,9 +9,9 @@ abstract class Tree[+A] {
 
   @inline final def insertR[B >: A](value: B)(implicit config: Config): Tree[B] = Tree.insertR(this, value)
 
-  def removeL(): Tree[A]
+  @inline final def removeL(): Tree[A] = Tree.removeL(this)
 
-  def removeR(): Tree[A]
+  @inline final def removeR(): Tree[A] = Tree.removeR(this)
 
   @inline final def moveBy(steps: Int): Tree[A] = Tree.moveBy(this, steps)
 
@@ -165,6 +165,20 @@ object Tree {
     tree match {
       case branch: Branch[A] => branch.ls.trees.foldLeft(Map[Int, Int]())((map, b) => map |+| branchLoad(b) + (branch.ls.trees.length + branch.rs.trees.length -> 1))
       case leaf: Leaf[A] => Map[Int, Int]()
+    }
+  }
+
+  final def removeL[A](self: Tree[A]): Tree[A] = {
+    self match {
+      case self@Leaf(valuesL, valuesR) => self.copy(valuesL = valuesL.tail)
+      case self@Branch(ls, focus, rs) => throw new UnsupportedOperationException
+    }
+  }
+
+  final def removeR[A](self: Tree[A]): Tree[A] = {
+    self match {
+      case self@Leaf(valuesL, valuesR) => self.copy(valuesR = valuesR.tail)
+      case self@Branch(ls, focus, rs) => throw new UnsupportedOperationException
     }
   }
 }
