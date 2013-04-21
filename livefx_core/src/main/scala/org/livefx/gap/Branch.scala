@@ -20,17 +20,5 @@ final case class Branch[+A](ls: Trees[A], focus: Tree[A], rs: Trees[A]) extends 
 
   final override def sizeR: Int = rs.size + focus.sizeR
 
-  final def shiftTo(index: Int): Branch[A] = {
-    if (index < ls.treeCount) {
-      val head = ls.head
-      Branch[A](ls.tail, focus, head :: rs)
-    } else if (index > ls.treeCount) {
-      val head = rs.head
-      Branch[A](head :: ls, focus, rs.tail)
-    } else {
-      this
-    }
-  }
-
   def pretty(inFocus: Boolean): String = s"${(s"${ls.size})" :: ls.trees.reverse.map(_.pretty(false)) ::: s"*${focus.pretty(inFocus)}*" :: rs.trees.map(_.pretty(false)) ::: s"(${rs.size}" :: List()).mkString("[", ", ", "]")} "
 }
