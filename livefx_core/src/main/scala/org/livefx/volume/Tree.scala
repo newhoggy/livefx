@@ -449,13 +449,4 @@ object RedBlackTree {
   private[this] class ValuesIterator[B](tree: Tree[B]) extends TreeIterator[B, B](tree) {
     override def nextResult(tree: Tree[B]) = tree.value
   }
-  
-  def main(args: Array[String]): Unit = {
-    var tree: Tree[String] = Leaf
-    println(tree)
-    tree = this.insert(tree, 0, "0", true)
-    println(tree)
-    tree = this.insert(tree, 1, "1", true)
-    println(tree)
-  }
 }
