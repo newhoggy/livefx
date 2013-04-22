@@ -8,6 +8,9 @@ abstract class Trees[+A] {
   def tail: Trees[A]
   def isEmpty: Boolean
   def ::[B >: A](head: Tree[B]): Trees[B] = TreesCons(head, this)
+  def prependReversed[B >: A](values: Trees[B]): Trees[B] = values match {
+    case TreesCons(head, tail) => (head::this)
+  }
   def treeCount: Int
   def size: Int
   def trees: List[Tree[A]]
@@ -46,4 +49,8 @@ final object TreesNil extends Trees[Nothing] {
   override def drop(n: Int): Trees[Nothing] = if (n == 0) this else throw new IndexOutOfBoundsException
   override def take(n: Int): Trees[Nothing] = if (n == 0) this else throw new IndexOutOfBoundsException
   override def toString: String = "TreesNil"
+}
+
+object Trees {
+  
 }

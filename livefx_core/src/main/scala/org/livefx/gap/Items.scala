@@ -11,6 +11,7 @@ abstract class Items[+A] {
   @inline final def drop(n: Int): Items[A] = Items.drop(this, n)
   @inline final def take(n: Int): Items[A] = Items.takeReverse(this, n).reverse
   @inline final def toList: List[A] = Items.toList(this)
+  @inline final def prependReversed[B >: A](values: Items[B]): Items[B] = Items.takeAllReverse(this, values) 
 }
 
 final case class ItemsCons[A](head: A, tail: Items[A]) extends Items[A] {
@@ -42,6 +43,12 @@ object Items {
     case x if x > 0 => takeReverse(self.tail, n - 1, self.head:: result)
     case x if x == 0 => result
     case _ => throw new IndexOutOfBoundsException
+  }
+
+  @tailrec
+  def takeAllReverse[A, B >: A](self: Items[A], result: Items[B] = ItemsNil): Items[B] = self match {
+    case ItemsCons(head, tail) => takeAllReverse(tail, head::result)
+    case ItemsNil => result
   }
 
   @tailrec

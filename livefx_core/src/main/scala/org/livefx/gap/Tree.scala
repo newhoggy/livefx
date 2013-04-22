@@ -9,9 +9,9 @@ abstract class Tree[+A] {
 
   @inline final def insertR[B >: A](value: B)(implicit config: Config): Tree[B] = Tree.insertR(this, value)
 
-  @inline final def removeL(): Tree[A] = Tree.removeL(this)
+  @inline final def removeL()(implicit config: Config): Tree[A] = Tree.removeL(this)
 
-  @inline final def removeR(): Tree[A] = Tree.removeR(this)
+  @inline final def removeR()(implicit config: Config): Tree[A] = Tree.removeR(this)
 
   @inline final def moveBy(steps: Int): Tree[A] = Tree.moveBy(this, steps)
 
@@ -168,17 +168,49 @@ object Tree {
     }
   }
 
-  final def removeL[A](self: Tree[A]): Tree[A] = {
+  final def removeL[A](self: Tree[A])(implicit config: Config): Tree[A] = {
     self match {
       case self@Leaf(valuesL, valuesR) => self.copy(valuesL = valuesL.tail)
-      case self@Branch(ls, focus, rs) => throw new UnsupportedOperationException
+      case self@Branch(ls, focus, rs) => {
+        if (focus.sizeL > 0) {
+          self.copy(focus = removeL(focus))
+        } else if (ls.head.size <= 0) {
+          throw new IndexOutOfBoundsException
+        } else if (focus.size + rs.head.size > config.nodeCapacity) {
+          removeL(self.copy(ls.tail, ls.head, focus::rs))
+        } else {
+          removeL(self.copy(ls.tail, ls.head, merge(focus, rs.head)::rs.tail))
+        }
+      }
     }
   }
 
-  final def removeR[A](self: Tree[A]): Tree[A] = {
+  final def removeR[A](self: Tree[A])(implicit config: Config): Tree[A] = {
     self match {
       case self@Leaf(valuesL, valuesR) => self.copy(valuesR = valuesR.tail)
-      case self@Branch(ls, focus, rs) => throw new UnsupportedOperationException
+      case self@Branch(ls, focus, rs) => {
+        if (focus.sizeR > 0) {
+          self.copy(focus = removeR(focus))
+        } else if (rs.head.size <= 0) {
+          throw new IndexOutOfBoundsException
+        } else if (focus.size + ls.head.size > config.nodeCapacity) {
+          removeL(self.copy(focus::ls, rs.head, rs.tail))
+        } else {
+          removeL(self.copy(merge(focus, ls.head)::ls.tail, rs.head, rs.tail))
+        }
+      }
     }
+  }
+
+  final def merge[A](l: Tree[A], r: Tree[A]): Tree[A] = (l, r) match {
+    case (l: Leaf[A], r: Leaf[A]) => Leaf(l.valuesL.prependReversed(l.valuesR), r.valuesR.prependReversed(r.valuesL))
+    case (l: Branch[A], r: Branch[A]) => {
+        if (l.size > r.size) {
+        Branch(l.ls, l.focus, (r.focus::r.rs).prependReversed(r.ls).prependReversed(l.rs))
+      } else {
+        Branch((l.focus::l.ls).prependReversed(l.rs).prependReversed(r.ls), r.focus, r.rs)
+      }
+    }
+    case _ => throw new UnsupportedOperationException
   }
 }
