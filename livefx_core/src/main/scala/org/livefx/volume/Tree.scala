@@ -120,7 +120,7 @@ object RedBlackTree {
     throw new IndexOutOfBoundsException
   } else {
     if (k < tree.left.count) balanceLeft(isBlackTree(tree), tree.value, upd(tree.left, k, v, overwrite), tree.right)
-    else if (k > tree.left.count) balanceRight(isBlackTree(tree), tree.value, tree.left, upd(tree.right, k, v, overwrite))
+    else if (k > tree.left.count) balanceRight(isBlackTree(tree), tree.value, tree.left, upd(tree.right, k - tree.left.count - 1, v, overwrite))
     else if (overwrite) mkTree(isBlackTree(tree), v, tree.left, tree.right)
     else tree
   }

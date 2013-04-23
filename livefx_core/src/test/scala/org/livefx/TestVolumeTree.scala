@@ -12,12 +12,19 @@ class TestVolumeTree {
     var tree: RedBlackTree.Tree[Int] = RedBlackTree.Leaf
 
     for (i <- 0 to 100) {
-      random.nextInt(1) match {
+      random.nextInt(2) match {
         case 0 =>
           val index = random.nextInt(list.size + 1)
           println(s"--> (${list.size})insert($index, $i)")
           list.insert(index, i)
           tree = RedBlackTree.insert(tree, index, i, false)
+        case 1 =>
+          if (list.size > 0) {
+            val index = random.nextInt(list.size)
+            println(s"--> (${list.size})update($index, $i)")
+            list(index) = i
+            tree = RedBlackTree.update(tree, index, i, true)
+          }
       }
 
       println(s"--> tree: $tree")
