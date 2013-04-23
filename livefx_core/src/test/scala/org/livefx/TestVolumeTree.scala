@@ -30,7 +30,16 @@ class TestVolumeTree {
       println(s"--> tree: $tree")
       Assert.assertEquals(list.toList, RedBlackTree.iterator(tree).toList)
     }
-    
+
+    for (i <- 0 to list.size - 1) {
+      val index = random.nextInt(list.size)
+      println(s"--> [$i] remove($index)")
+      list.remove(index)
+      tree = RedBlackTree.delete(tree, index)
+      println(s"--> tree: $tree")
+      Assert.assertEquals(list.toList, RedBlackTree.iterator(tree).toList)
+    }
+
     Assert.assertEquals(list.slice(10, 15), RedBlackTree.iterator(RedBlackTree.range(tree, 10, 15)).toList)
   }
 }

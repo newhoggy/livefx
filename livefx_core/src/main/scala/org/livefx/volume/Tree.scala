@@ -173,7 +173,7 @@ object RedBlackTree {
       sys.error("Defect: invariance violation")
     }
     def delLeft = if (isBlackTree(tree.left)) balLeft(tree.value, del(tree.left, k), tree.right) else RedTree(tree.value, del(tree.left, k), tree.right)
-    def delRight = if (isBlackTree(tree.right)) balRight(tree.value, tree.left, del(tree.right, k)) else RedTree(tree.value, tree.left, del(tree.right, k))
+    def delRight = if (isBlackTree(tree.right)) balRight(tree.value, tree.left, del(tree.right, k - tree.left.count - 1)) else RedTree(tree.value, tree.left, del(tree.right, k - tree.left.count - 1))
     def append(tl: Tree[B], tr: Tree[B]): Tree[B] = if (tl == Leaf) {
       tr
     } else if (tr == Leaf) {
