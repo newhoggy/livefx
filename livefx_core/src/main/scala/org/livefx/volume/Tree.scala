@@ -56,7 +56,7 @@ object RedBlackTree {
     if (tree.right != Leaf) foreach(tree.right, f)
   }
 
-  def valuesIterator[_, B](tree: Tree[B]): Iterator[B] = new ValuesIterator(tree)
+  def iterator[_, B](tree: Tree[B]): Iterator[B] = new ValuesIterator(tree)
 
   @tailrec
   def nth[B](tree: Tree[B], n: Int): Tree[B] = {
@@ -92,13 +92,28 @@ object RedBlackTree {
     else
       mkTree(isBlack, xv, a, r)
   }
-  private[this] def ins[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = if (tree == Leaf) {
-    RedTree(v, Leaf, Leaf)
-  } else {
-    if (k <= tree.left.count) balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, k, v, overwrite), tree.right)
-    else if (k > tree.left.count) balanceRight(isBlackTree(tree), tree.value, tree.left, ins(tree.right, k, v, overwrite))
-    else if (overwrite) mkTree(isBlackTree(tree), v, tree.left, tree.right)
-    else tree
+  private[this] def ins[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = {
+    println(s"--> ins($tree, $k, $v, $overwrite)")
+    if (tree == Leaf) {
+      RedTree(v, Leaf, Leaf)
+    } else {
+      if (k <= tree.left.count) {
+        println("--> insA")
+        balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, k, v, overwrite), tree.right)
+      }
+      else if (k > tree.left.count) {
+        println(s"--> insB, count: ${tree.left.count}")
+        balanceRight(isBlackTree(tree), tree.value, tree.left, ins(tree.right, k - tree.left.count - 1, v, overwrite))
+      }
+      else if (overwrite) {
+        println("--> insC")
+        mkTree(isBlackTree(tree), v, tree.left, tree.right)
+      }
+      else {
+        println("--> insD")
+        tree
+      }
+    }
   }
   private[this] def upd[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = if (tree == Leaf) {
 //    RedTree(v, Leaf, Leaf)
