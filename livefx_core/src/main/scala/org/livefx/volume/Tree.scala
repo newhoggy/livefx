@@ -231,10 +231,10 @@ object RedBlackTree {
   }
   private[this] def doRange[B](tree: Tree[B], from: A, until: A)(implicit ordering: Ordering[A]): Tree[B] = {
     if (tree == Leaf) return Leaf
-    if (ordering.lt(tree.left.count, from)) return doRange(tree.right, from, until);
+    if (ordering.lt(tree.left.count, from)) return doRange(tree.right, from - tree.left.count - 1, until - tree.left.count - 1);
     if (ordering.lteq(until, tree.left.count)) return doRange(tree.left, from, until);
     val newLeft = doFrom(tree.left, from)
-    val newRight = doUntil(tree.right, until)
+    val newRight = doUntil(tree.right, until - tree.left.count - 1)
     if ((newLeft eq tree.left) && (newRight eq tree.right)) tree
     else if (newLeft == Leaf) upd(newRight, 0, tree.value, false);
     else if (newRight == Leaf) upd(newLeft, 0, tree.value, false);
