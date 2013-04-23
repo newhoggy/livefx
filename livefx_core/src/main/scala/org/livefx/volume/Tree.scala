@@ -206,7 +206,6 @@ object RedBlackTree {
   }
 
   private[this] def doFrom[B](tree: Tree[B], from: A)(implicit ordering: Ordering[A]): Tree[B] = {
-    println(s"--> doFrom($tree, $from)")
     if (tree == Leaf) return Leaf
     if (ordering.lt(tree.left.count, from)) return doFrom(tree.right, from - tree.left.count - 1)
     val newLeft = doFrom(tree.left, from)
@@ -232,42 +231,14 @@ object RedBlackTree {
   }
   private[this] def doRange[B](tree: Tree[B], from: A, until: A)(implicit ordering: Ordering[A]): Tree[B] = {
     if (tree == Leaf) return Leaf
-    if (ordering.lt(tree.left.count, from)) {
-      println(s"--> a: $from $until | ${tree.left.count} ${tree.right.count} $tree")
-      val result = doRange(tree.right, from - tree.left.count - 1, until - tree.left.count - 1);
-      println(s"--> A: $result")
-      return result
-    }
-    if (ordering.lteq(until, tree.left.count)) {
-      println(s"--> b: $from $until | ${tree.left.count} ${tree.right.count} $tree")
-      val result = doRange(tree.left, from, until);
-      println(s"--> B: $result")
-      return result
-    }
+    if (ordering.lt(tree.left.count, from)) return doRange(tree.right, from - tree.left.count - 1, until - tree.left.count - 1)
+    if (ordering.lteq(until, tree.left.count)) return doRange(tree.left, from, until)
     val newLeft = doFrom(tree.left, from)
     val newRight = doUntil(tree.right, until - tree.left.count - 1)
-    if ((newLeft eq tree.left) && (newRight eq tree.right)) {
-      println(s"--> C: $from $until $tree")
-      tree
-    }
-    else if (newLeft == Leaf) {
-      println(s"--> d: $from $until | ${tree.left.count} ${tree.right.count} $tree")
-      val result = upd(newRight, 0, tree.value, false);
-      println(s"--> D: $result")
-      return result
-    }
-    else if (newRight == Leaf) {
-      println(s"--> e: $tree")
-      val result = upd(newLeft, 0, tree.value, false)
-      println(s"--> E: $result")
-      result
-    }
-    else {
-      println(s"--> f: $tree")
-      val result = rebalance(tree, newLeft, newRight)
-      println(s"--> F: $result")
-      result
-    }
+    if ((newLeft eq tree.left) && (newRight eq tree.right)) tree
+    else if (newLeft == Leaf) upd(newRight, 0, tree.value, false)
+    else if (newRight == Leaf) upd(newLeft, 0, tree.value, false)
+    else rebalance(tree, newLeft, newRight)
   }
 
   private[this] def doDrop[B](tree: Tree[B], n: Int): Tree[B] = {
