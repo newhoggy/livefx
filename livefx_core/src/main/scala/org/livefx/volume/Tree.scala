@@ -20,7 +20,7 @@ object RedBlackTree {
   }
 
   def update[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = blacken(upd(tree, k, v, overwrite))
-  def insert[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = blacken(ins(tree, k, v, overwrite))
+  def insert[B, B1 >: B](tree: Tree[B], k: A, v: B1)(implicit ordering: Ordering[A]): Tree[B1] = blacken(ins(tree, k, v))
   def delete[B](tree: Tree[B], k: A)(implicit ordering: Ordering[A]): Tree[B] = blacken(del(tree, k))
   def rangeImpl[B](tree: Tree[B], from: Option[A], until: Option[A]): Tree[B] = (from, until) match {
     case (Some(from), Some(until)) => this.range(tree, from, until)
@@ -92,26 +92,18 @@ object RedBlackTree {
     else
       mkTree(isBlack, xv, a, r)
   }
-  private[this] def ins[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = {
-    println(s"--> ins($tree, $k, $v, $overwrite)")
+  private[this] def ins[B, B1 >: B](tree: Tree[B], k: A, v: B1)(implicit ordering: Ordering[A]): Tree[B1] = {
     if (tree == Leaf) {
       RedTree(v, Leaf, Leaf)
     } else {
       if (k <= tree.left.count) {
-        println("--> insA")
-        balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, k, v, overwrite), tree.right)
+        balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, k, v), tree.right)
       }
       else if (k > tree.left.count) {
-        println(s"--> insB, count: ${tree.left.count}")
-        balanceRight(isBlackTree(tree), tree.value, tree.left, ins(tree.right, k - tree.left.count - 1, v, overwrite))
-      }
-      else if (overwrite) {
-        println("--> insC")
-        mkTree(isBlackTree(tree), v, tree.left, tree.right)
+        balanceRight(isBlackTree(tree), tree.value, tree.left, ins(tree.right, k - tree.left.count - 1, v))
       }
       else {
-        println("--> insD")
-        tree
+        mkTree(isBlackTree(tree), v, tree.left, tree.right)
       }
     }
   }

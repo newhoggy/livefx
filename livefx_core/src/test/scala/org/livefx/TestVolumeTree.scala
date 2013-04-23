@@ -17,7 +17,7 @@ class TestVolumeTree {
           val index = random.nextInt(list.size + 1)
           println(s"--> (${list.size})insert($index, $i)")
           list.insert(index, i)
-          tree = RedBlackTree.insert(tree, index, i, false)
+          tree = RedBlackTree.insert(tree, index, i)
         case 1 =>
           if (list.size > 0) {
             val index = random.nextInt(list.size)
