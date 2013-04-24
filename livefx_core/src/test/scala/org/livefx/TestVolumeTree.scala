@@ -1,6 +1,6 @@
 package org.livefx
 
-import org.livefx.volume.VolumeTree
+import org.livefx.volume._
 import org.junit.Test
 import org.junit.Assert
 
@@ -9,7 +9,7 @@ class TestVolumeTree {
   def test1(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    var tree: VolumeTree[Int] = VolumeTree.Leaf
+    var tree: VolumeTree[Int] = VolumeLeaf
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {
