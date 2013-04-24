@@ -5,33 +5,31 @@ import scalaz.Monoid
 import scala.annotation.meta.getter
 
 object RedBlackTree {
-  type A = Int
-
-  def get[B](tree: Tree[B], x: A)(implicit ordering: Ordering[A]): Option[B] = lookup(tree, x) match {
+  def get[B](tree: Tree[B], index: Int): Option[B] = lookup(tree, index) match {
     case Leaf => None
     case tree => Some(tree.value)
   }
 
   @tailrec
-  def lookup[B](tree: Tree[B], x: A)(implicit ordering: Ordering[A]): Tree[B] = if (tree == Leaf) Leaf else {
-    if (x < tree.left.count) lookup(tree.left, x)
-    else if (x > tree.left.count) lookup(tree.right, x)
+  def lookup[B](tree: Tree[B], index: Int): Tree[B] = if (tree == Leaf) Leaf else {
+    if (index < tree.left.count) lookup(tree.left, index)
+    else if (index > tree.left.count) lookup(tree.right, index)
     else tree
   }
 
-  def update[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = blacken(upd(tree, k, v, overwrite))
-  def insert[B, B1 >: B](tree: Tree[B], k: A, v: B1)(implicit ordering: Ordering[A]): Tree[B1] = blacken(ins(tree, k, v))
-  def delete[B](tree: Tree[B], k: A)(implicit ordering: Ordering[A]): Tree[B] = blacken(del(tree, k))
-  def rangeImpl[B](tree: Tree[B], from: Option[A], until: Option[A]): Tree[B] = (from, until) match {
+  def update[B, B1 >: B](tree: Tree[B], index: Int, v: B1, overwrite: Boolean): Tree[B1] = blacken(upd(tree, index, v, overwrite))
+  def insert[B, B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = blacken(ins(tree, index, v))
+  def delete[B](tree: Tree[B], index: Int): Tree[B] = blacken(del(tree, index))
+  def rangeImpl[B](tree: Tree[B], from: Option[Int], until: Option[Int]): Tree[B] = (from, until) match {
     case (Some(from), Some(until)) => this.range(tree, from, until)
     case (Some(from), None)        => this.from(tree, from)
     case (None,       Some(until)) => this.until(tree, until)
     case (None,       None)        => tree
   }
-  def range[B](tree: Tree[B], from: A, until: A): Tree[B] = blacken(doRange(tree, from, until))
-  def from[B](tree: Tree[B], from: A): Tree[B] = blacken(doFrom(tree, from))
-  def to[B](tree: Tree[B], to: A): Tree[B] = blacken(doTo(tree, to))
-  def until[B](tree: Tree[B], key: A): Tree[B] = blacken(doUntil(tree, key))
+  def range[B](tree: Tree[B], from: Int, until: Int): Tree[B] = blacken(doRange(tree, from, until))
+  def from[B](tree: Tree[B], from: Int): Tree[B] = blacken(doFrom(tree, from))
+  def to[B](tree: Tree[B], to: Int): Tree[B] = blacken(doTo(tree, to))
+  def until[B](tree: Tree[B], key: Int): Tree[B] = blacken(doUntil(tree, key))
 
   def drop[B](tree: Tree[B], n: Int): Tree[B] = blacken(doDrop(tree, n))
   def take[B](tree: Tree[B], n: Int): Tree[B] = blacken(doTake(tree, n))
@@ -74,106 +72,104 @@ object RedBlackTree {
   private[this] def blacken[B](t: Tree[B]): Tree[B] = if (t == Leaf) Leaf else t.black
 
   private[this] def mkTree[B](isBlack: Boolean, v: B, l: Tree[B], r: Tree[B]) =
-    if (isBlack) BlackTree(v, l, r) else RedTree(v, l, r)
+    if (isBlack) BlackTree(l, v, r) else RedTree(l, v, r)
 
   private[this] def balanceLeft[B, B1 >: B](isBlack: Boolean, zv: B, l: Tree[B1], d: Tree[B1]): Tree[B1] = {
     if (isRedTree(l) && isRedTree(l.left))
-      RedTree(l.value, BlackTree(l.left.value, l.left.left, l.left.right), BlackTree(zv, l.right, d))
+      RedTree(BlackTree(l.left.left, l.left.value, l.left.right), l.value, BlackTree(l.right, zv, d))
     else if (isRedTree(l) && isRedTree(l.right))
-      RedTree(l.right.value, BlackTree(l.value, l.left, l.right.left), BlackTree(zv, l.right.right, d))
+      RedTree(BlackTree(l.left, l.value, l.right.left), l.right.value, BlackTree(l.right.right, zv, d))
     else
       mkTree(isBlack, zv, l, d)
   }
   private[this] def balanceRight[B, B1 >: B](isBlack: Boolean, xv: B, a: Tree[B1], r: Tree[B1]): Tree[B1] = {
     if (isRedTree(r) && isRedTree(r.left))
-      RedTree(r.left.value, BlackTree(xv, a, r.left.left), BlackTree(r.value, r.left.right, r.right))
+      RedTree(BlackTree(a, xv, r.left.left), r.left.value, BlackTree(r.left.right, r.value, r.right))
     else if (isRedTree(r) && isRedTree(r.right))
-      RedTree(r.value, BlackTree(xv, a, r.left), BlackTree(r.right.value, r.right.left, r.right.right))
+      RedTree(BlackTree(a, xv, r.left), r.value, BlackTree(r.right.left, r.right.value, r.right.right))
     else
       mkTree(isBlack, xv, a, r)
   }
-  private[this] def ins[B, B1 >: B](tree: Tree[B], k: A, v: B1)(implicit ordering: Ordering[A]): Tree[B1] = {
+  private[this] def ins[B, B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = {
     if (tree == Leaf) {
-      RedTree(v, Leaf, Leaf)
+      RedTree(Leaf, v, Leaf)
     } else {
-      if (k <= tree.left.count) {
-        balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, k, v), tree.right)
-      }
-      else if (k > tree.left.count) {
-        balanceRight(isBlackTree(tree), tree.value, tree.left, ins(tree.right, k - tree.left.count - 1, v))
-      }
-      else {
+      if (index <= tree.left.count) {
+        balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, index, v), tree.right)
+      } else if (index > tree.left.count) {
+        balanceRight(isBlackTree(tree), tree.value, tree.left, ins(tree.right, index - tree.left.count - 1, v))
+      } else {
         mkTree(isBlackTree(tree), v, tree.left, tree.right)
       }
     }
   }
-  private[this] def upd[B, B1 >: B](tree: Tree[B], k: A, v: B1, overwrite: Boolean)(implicit ordering: Ordering[A]): Tree[B1] = if (tree == Leaf) {
+  private[this] def upd[B, B1 >: B](tree: Tree[B], index: Int, v: B1, overwrite: Boolean): Tree[B1] = if (tree == Leaf) {
 //    RedTree(v, Leaf, Leaf)
     throw new IndexOutOfBoundsException
   } else {
-    if (k < tree.left.count) balanceLeft(isBlackTree(tree), tree.value, upd(tree.left, k, v, overwrite), tree.right)
-    else if (k > tree.left.count) balanceRight(isBlackTree(tree), tree.value, tree.left, upd(tree.right, k - tree.left.count - 1, v, overwrite))
+    if (index < tree.left.count) balanceLeft(isBlackTree(tree), tree.value, upd(tree.left, index, v, overwrite), tree.right)
+    else if (index > tree.left.count) balanceRight(isBlackTree(tree), tree.value, tree.left, upd(tree.right, index - tree.left.count - 1, v, overwrite))
     else if (overwrite) mkTree(isBlackTree(tree), v, tree.left, tree.right)
     else tree
   }
-  private[this] def updNth[B, B1 >: B](tree: Tree[B], idx: Int, k: A, v: B1, overwrite: Boolean): Tree[B1] = if (tree == Leaf) {
-    RedTree(v, Leaf, Leaf)
+  private[this] def updNth[B, B1 >: B](tree: Tree[B], idx: Int, index: Int, v: B1, overwrite: Boolean): Tree[B1] = if (tree == Leaf) {
+    RedTree(Leaf, v, Leaf)
   } else {
     val rank = tree.left.count + 1
-    if (idx < rank) balanceLeft(isBlackTree(tree), tree.value, updNth(tree.left, idx, k, v, overwrite), tree.right)
-    else if (idx > rank) balanceRight(isBlackTree(tree), tree.value, tree.left, updNth(tree.right, idx - rank, k, v, overwrite))
+    if (idx < rank) balanceLeft(isBlackTree(tree), tree.value, updNth(tree.left, idx, index, v, overwrite), tree.right)
+    else if (idx > rank) balanceRight(isBlackTree(tree), tree.value, tree.left, updNth(tree.right, idx - rank, index, v, overwrite))
     else if (overwrite) mkTree(isBlackTree(tree), v, tree.left, tree.right)
     else tree
   }
 
   /* Based on Stefan Kahrs' Haskell version of Okasaki's Red&Black Trees
    * http://www.cse.unsw.edu.au/~dons/data/RedBlackTree.html */
-  private[this] def del[B](tree: Tree[B], k: A)(implicit ordering: Ordering[A]): Tree[B] = if (tree == Leaf) Leaf else {
+  private[this] def del[B](tree: Tree[B], index: Int): Tree[B] = if (tree == Leaf) Leaf else {
     def balance(xv: B, tl: Tree[B], tr: Tree[B]) = if (isRedTree(tl)) {
       if (isRedTree(tr)) {
-        RedTree(xv, tl.black, tr.black)
+        RedTree(tl.black, xv, tr.black)
       } else if (isRedTree(tl.left)) {
-        RedTree(tl.value, tl.left.black, BlackTree(xv, tl.right, tr))
+        RedTree(tl.left.black, tl.value, BlackTree(tl.right, xv, tr))
       } else if (isRedTree(tl.right)) {
-        RedTree(tl.right.value, BlackTree(tl.value, tl.left, tl.right.left), BlackTree(xv, tl.right.right, tr))
+        RedTree(BlackTree(tl.left, tl.value, tl.right.left), tl.right.value, BlackTree(tl.right.right, xv, tr))
       } else {
-        BlackTree(xv, tl, tr)
+        BlackTree(tl, xv, tr)
       }
     } else if (isRedTree(tr)) {
       if (isRedTree(tr.right)) {
-        RedTree(tr.value, BlackTree(xv, tl, tr.left), tr.right.black)
+        RedTree(BlackTree(tl, xv, tr.left), tr.value, tr.right.black)
       } else if (isRedTree(tr.left)) {
-        RedTree(tr.left.value, BlackTree(xv, tl, tr.left.left), BlackTree(tr.value, tr.left.right, tr.right))
+        RedTree(BlackTree(tl, xv, tr.left.left), tr.left.value, BlackTree(tr.left.right, tr.value, tr.right))
       } else {
-        BlackTree(xv, tl, tr)
+        BlackTree(tl, xv, tr)
       }
     } else {
-      BlackTree(xv, tl, tr)
+      BlackTree(tl, xv, tr)
     }
     def subl(t: Tree[B]) =
       if (t.isInstanceOf[BlackTree[_]]) t.red
       else sys.error("Defect: invariance violation; expected black, got "+t)
 
     def balLeft(xv: B, tl: Tree[B], tr: Tree[B]) = if (isRedTree(tl)) {
-      RedTree(xv, tl.black, tr)
+      RedTree(tl.black, xv, tr)
     } else if (isBlackTree(tr)) {
       balance(xv, tl, tr.red)
     } else if (isRedTree(tr) && isBlackTree(tr.left)) {
-      RedTree(tr.left.value, BlackTree(xv, tl, tr.left.left), balance(tr.value, tr.left.right, subl(tr.right)))
+      RedTree(BlackTree(tl, xv, tr.left.left), tr.left.value, balance(tr.value, tr.left.right, subl(tr.right)))
     } else {
       sys.error("Defect: invariance violation")
     }
     def balRight(xv: B, tl: Tree[B], tr: Tree[B]) = if (isRedTree(tr)) {
-      RedTree(xv, tl, tr.black)
+      RedTree(tl, xv, tr.black)
     } else if (isBlackTree(tl)) {
       balance(xv, tl.red, tr)
     } else if (isRedTree(tl) && isBlackTree(tl.right)) {
-      RedTree(tl.right.value, balance(tl.value, subl(tl.left), tl.right.left), BlackTree(xv, tl.right.right, tr))
+      RedTree(balance(tl.value, subl(tl.left), tl.right.left), tl.right.value, BlackTree(tl.right.right, xv, tr))
     } else {
       sys.error("Defect: invariance violation")
     }
-    def delLeft = if (isBlackTree(tree.left)) balLeft(tree.value, del(tree.left, k), tree.right) else RedTree(tree.value, del(tree.left, k), tree.right)
-    def delRight = if (isBlackTree(tree.right)) balRight(tree.value, tree.left, del(tree.right, k - tree.left.count - 1)) else RedTree(tree.value, tree.left, del(tree.right, k - tree.left.count - 1))
+    def delLeft = if (isBlackTree(tree.left)) balLeft(tree.value, del(tree.left, index), tree.right) else RedTree(del(tree.left, index), tree.value, tree.right)
+    def delRight = if (isBlackTree(tree.right)) balRight(tree.value, tree.left, del(tree.right, index - tree.left.count - 1)) else RedTree(tree.left, tree.value, del(tree.right, index - tree.left.count - 1))
     def append(tl: Tree[B], tr: Tree[B]): Tree[B] = if (tl == Leaf) {
       tr
     } else if (tr == Leaf) {
@@ -181,58 +177,58 @@ object RedBlackTree {
     } else if (isRedTree(tl) && isRedTree(tr)) {
       val bc = append(tl.right, tr.left)
       if (isRedTree(bc)) {
-        RedTree(bc.value, RedTree(tl.value, tl.left, bc.left), RedTree(tr.value, bc.right, tr.right))
+        RedTree(RedTree(tl.left, tl.value, bc.left), bc.value, RedTree(bc.right, tr.value, tr.right))
       } else {
-        RedTree(tl.value, tl.left, RedTree(tr.value, bc, tr.right))
+        RedTree(tl.left, tl.value, RedTree(bc, tr.value, tr.right))
       }
     } else if (isBlackTree(tl) && isBlackTree(tr)) {
       val bc = append(tl.right, tr.left)
       if (isRedTree(bc)) {
-        RedTree(bc.value, BlackTree(tl.value, tl.left, bc.left), BlackTree(tr.value, bc.right, tr.right))
+        RedTree(BlackTree(tl.left, tl.value, bc.left), bc.value, BlackTree(bc.right, tr.value, tr.right))
       } else {
-        balLeft(tl.value, tl.left, BlackTree(tr.value, bc, tr.right))
+        balLeft(tl.value, tl.left, BlackTree(bc, tr.value, tr.right))
       }
     } else if (isRedTree(tr)) {
-      RedTree(tr.value, append(tl, tr.left), tr.right)
+      RedTree(append(tl, tr.left), tr.value, tr.right)
     } else if (isRedTree(tl)) {
-      RedTree(tl.value, tl.left, append(tl.right, tr))
+      RedTree(tl.left, tl.value, append(tl.right, tr))
     } else {
       sys.error("unmatched tree on append: " + tl + ", " + tr)
     }
 
-    if (k < tree.left.count) delLeft
-    else if (k > tree.left.count) delRight
+    if (index < tree.left.count) delLeft
+    else if (index > tree.left.count) delRight
     else append(tree.left, tree.right)
   }
 
-  private[this] def doFrom[B](tree: Tree[B], from: A)(implicit ordering: Ordering[A]): Tree[B] = {
+  private[this] def doFrom[B](tree: Tree[B], from: Int): Tree[B] = {
     if (tree == Leaf) return Leaf
-    if (ordering.lt(tree.left.count, from)) return doFrom(tree.right, from - tree.left.count - 1)
+    if (tree.left.count < from) return doFrom(tree.right, from - tree.left.count - 1)
     val newLeft = doFrom(tree.left, from)
     if (newLeft eq tree.left) tree
     else if (newLeft == Leaf) upd(tree.right, 0, tree.value, false)
     else rebalance(tree, newLeft, tree.right)
   }
-  private[this] def doTo[B](tree: Tree[B], to: A)(implicit ordering: Ordering[A]): Tree[B] = {
+  private[this] def doTo[B](tree: Tree[B], to: Int): Tree[B] = {
     if (tree == Leaf) return Leaf
-    if (ordering.lt(to, tree.left.count)) return doTo(tree.left, to)
+    if (to < tree.left.count) return doTo(tree.left, to)
     val newRight = doTo(tree.right, to)
     if (newRight eq tree.right) tree
     else if (newRight == Leaf) upd(tree.left, 0, tree.value, false)
     else rebalance(tree, tree.left, newRight)
   }
-  private[this] def doUntil[B](tree: Tree[B], until: A)(implicit ordering: Ordering[A]): Tree[B] = {
+  private[this] def doUntil[B](tree: Tree[B], until: Int): Tree[B] = {
     if (tree == Leaf) return Leaf
-    if (ordering.lteq(until, tree.left.count)) return doUntil(tree.left, until)
+    if (until <= tree.left.count) return doUntil(tree.left, until)
     val newRight = doUntil(tree.right, until)
     if (newRight eq tree.right) tree
     else if (newRight == Leaf) upd(tree.left, 0, tree.value, false)
     else rebalance(tree, tree.left, newRight)
   }
-  private[this] def doRange[B](tree: Tree[B], from: A, until: A)(implicit ordering: Ordering[A]): Tree[B] = {
+  private[this] def doRange[B](tree: Tree[B], from: Int, until: Int): Tree[B] = {
     if (tree == Leaf) return Leaf
-    if (ordering.lt(tree.left.count, from)) return doRange(tree.right, from - tree.left.count - 1, until - tree.left.count - 1)
-    if (ordering.lteq(until, tree.left.count)) return doRange(tree.left, from, until)
+    if (tree.left.count < from) return doRange(tree.right, from - tree.left.count - 1, until - tree.left.count - 1)
+    if (until <= tree.left.count) return doRange(tree.left, from, until)
     val newLeft = doFrom(tree.left, from)
     val newRight = doUntil(tree.right, until - tree.left.count - 1)
     if ((newLeft eq tree.left) && (newRight eq tree.right)) tree
@@ -339,13 +335,13 @@ object RedBlackTree {
     val (zipper, levelled, leftMost, smallerDepth) = compareDepth(blkNewLeft, blkNewRight)
 
     if (levelled) {
-      BlackTree(tree.value, blkNewLeft, blkNewRight)
+      BlackTree(blkNewLeft, tree.value, blkNewRight)
     } else {
       val zipFrom = findDepth(zipper, smallerDepth)
       val union = if (leftMost) {
-        RedTree(tree.value, blkNewLeft, zipFrom.head)
+        RedTree(blkNewLeft, tree.value, zipFrom.head)
       } else {
-        RedTree(tree.value, zipFrom.head, blkNewRight)
+        RedTree(zipFrom.head, tree.value, blkNewRight)
       }
       val zippedTree = zipFrom.tail.foldLeft(union: Tree[B]) { (tree, node) =>
         if (leftMost)
@@ -366,22 +362,21 @@ object RedBlackTree {
     def count: Int
   }
 
-  final case class RedTree[+B](value: B, left: Tree[B], right: Tree[B]) extends Tree[B] {
-    override def black: Tree[B] = BlackTree(value, left, right)
+  final case class RedTree[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree[B] {
+    override def black: Tree[B] = BlackTree(left, value, right)
     override def red: Tree[B] = this
     override def toString: String = "RedTree(" + value + ", " + left + ", " + right + ")"
     final val count: Int = 1 + left.count + right.count
   }
   
-  final case class BlackTree[+B](value: B, left: Tree[B], right: Tree[B]) extends Tree[B] {
+  final case class BlackTree[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree[B] {
     override def black: Tree[B] = this
-    override def red: Tree[B] = RedTree(value, left, right)
+    override def red: Tree[B] = RedTree(left, value, right)
     override def toString: String = "BlackTree(" + value + ", " + left + ", " + right + ")"
     final val count: Int = 1 + left.count + right.count
   }
   
   final case object Leaf extends Tree[Nothing] {
-    def key: A = throw new UnsupportedOperationException
     def value: Nothing = throw new UnsupportedOperationException
     def left: Tree[Nothing] = throw new UnsupportedOperationException
     def right: Tree[Nothing] = throw new UnsupportedOperationException
