@@ -13,6 +13,21 @@ sealed abstract class VolumeTree[+B] extends Serializable {
   def count: Int
 }
 
+final case class VolumeRed[+B](left: VolumeTree[B], value: B, right: VolumeTree[B]) extends VolumeTree[B] {
+  override def black: VolumeTree[B] = VolumeBlack(left, value, right)
+  override def red: VolumeTree[B] = this
+  override def toString: String = "VolumeRed(" + value + ", " + left + ", " + right + ")"
+  final val count: Int = 1 + left.count + right.count
+}
+
+final case class VolumeBlack[+B](left: VolumeTree[B], value: B, right: VolumeTree[B]) extends VolumeTree[B] {
+  override def black: VolumeTree[B] = this
+  override def red: VolumeTree[B] = VolumeRed(left, value, right)
+  override def toString: String = "VolumeBlack(" + value + ", " + left + ", " + right + ")"
+  final val count: Int = 1 + left.count + right.count
+}
+
+
 final case object VolumeLeaf extends VolumeTree[Nothing] {
   def value: Nothing = throw new UnsupportedOperationException
   def left: VolumeTree[Nothing] = throw new UnsupportedOperationException
@@ -84,33 +99,33 @@ object VolumeTree {
 
   def isBlack(tree: VolumeTree[_]) = (tree == VolumeLeaf) || isBlackTree(tree)
 
-  private[this] def isRedTree(tree: VolumeTree[_]) = tree.isInstanceOf[RedTree[_]]
-  private[this] def isBlackTree(tree: VolumeTree[_]) = tree.isInstanceOf[BlackTree[_]]
+  private[this] def isRedTree(tree: VolumeTree[_]) = tree.isInstanceOf[VolumeRed[_]]
+  private[this] def isBlackTree(tree: VolumeTree[_]) = tree.isInstanceOf[VolumeBlack[_]]
 
   private[this] def blacken[B](t: VolumeTree[B]): VolumeTree[B] = if (t == VolumeLeaf) VolumeLeaf else t.black
 
   private[this] def mkTree[B](isBlack: Boolean, v: B, l: VolumeTree[B], r: VolumeTree[B]) =
-    if (isBlack) BlackTree(l, v, r) else RedTree(l, v, r)
+    if (isBlack) VolumeBlack(l, v, r) else VolumeRed(l, v, r)
 
   private[this] def balanceLeft[B, B1 >: B](isBlack: Boolean, zv: B, l: VolumeTree[B1], d: VolumeTree[B1]): VolumeTree[B1] = {
     if (isRedTree(l) && isRedTree(l.left))
-      RedTree(BlackTree(l.left.left, l.left.value, l.left.right), l.value, BlackTree(l.right, zv, d))
+      VolumeRed(VolumeBlack(l.left.left, l.left.value, l.left.right), l.value, VolumeBlack(l.right, zv, d))
     else if (isRedTree(l) && isRedTree(l.right))
-      RedTree(BlackTree(l.left, l.value, l.right.left), l.right.value, BlackTree(l.right.right, zv, d))
+      VolumeRed(VolumeBlack(l.left, l.value, l.right.left), l.right.value, VolumeBlack(l.right.right, zv, d))
     else
       mkTree(isBlack, zv, l, d)
   }
   private[this] def balanceRight[B, B1 >: B](isBlack: Boolean, xv: B, a: VolumeTree[B1], r: VolumeTree[B1]): VolumeTree[B1] = {
     if (isRedTree(r) && isRedTree(r.left))
-      RedTree(BlackTree(a, xv, r.left.left), r.left.value, BlackTree(r.left.right, r.value, r.right))
+      VolumeRed(VolumeBlack(a, xv, r.left.left), r.left.value, VolumeBlack(r.left.right, r.value, r.right))
     else if (isRedTree(r) && isRedTree(r.right))
-      RedTree(BlackTree(a, xv, r.left), r.value, BlackTree(r.right.left, r.right.value, r.right.right))
+      VolumeRed(VolumeBlack(a, xv, r.left), r.value, VolumeBlack(r.right.left, r.right.value, r.right.right))
     else
       mkTree(isBlack, xv, a, r)
   }
   private[this] def ins[B, B1 >: B](tree: VolumeTree[B], index: Int, v: B1): VolumeTree[B1] = {
     if (tree == VolumeLeaf) {
-      RedTree(VolumeLeaf, v, VolumeLeaf)
+      VolumeRed(VolumeLeaf, v, VolumeLeaf)
     } else {
       if (index <= tree.left.count) {
         balanceLeft(isBlackTree(tree), tree.value, ins(tree.left, index, v), tree.right)
@@ -122,7 +137,7 @@ object VolumeTree {
     }
   }
   private[this] def upd[B, B1 >: B](tree: VolumeTree[B], index: Int, v: B1, overwrite: Boolean): VolumeTree[B1] = if (tree == VolumeLeaf) {
-//    RedTree(v, VolumeLeaf, VolumeLeaf)
+//    VolumeRed(v, VolumeLeaf, VolumeLeaf)
     throw new IndexOutOfBoundsException
   } else {
     if (index < tree.left.count) balanceLeft(isBlackTree(tree), tree.value, upd(tree.left, index, v, overwrite), tree.right)
@@ -131,7 +146,7 @@ object VolumeTree {
     else tree
   }
   private[this] def updNth[B, B1 >: B](tree: VolumeTree[B], idx: Int, index: Int, v: B1, overwrite: Boolean): VolumeTree[B1] = if (tree == VolumeLeaf) {
-    RedTree(VolumeLeaf, v, VolumeLeaf)
+    VolumeRed(VolumeLeaf, v, VolumeLeaf)
   } else {
     val rank = tree.left.count + 1
     if (idx < rank) balanceLeft(isBlackTree(tree), tree.value, updNth(tree.left, idx, index, v, overwrite), tree.right)
@@ -145,49 +160,49 @@ object VolumeTree {
   private[this] def del[B](tree: VolumeTree[B], index: Int): VolumeTree[B] = if (tree == VolumeLeaf) VolumeLeaf else {
     def balance(xv: B, tl: VolumeTree[B], tr: VolumeTree[B]) = if (isRedTree(tl)) {
       if (isRedTree(tr)) {
-        RedTree(tl.black, xv, tr.black)
+        VolumeRed(tl.black, xv, tr.black)
       } else if (isRedTree(tl.left)) {
-        RedTree(tl.left.black, tl.value, BlackTree(tl.right, xv, tr))
+        VolumeRed(tl.left.black, tl.value, VolumeBlack(tl.right, xv, tr))
       } else if (isRedTree(tl.right)) {
-        RedTree(BlackTree(tl.left, tl.value, tl.right.left), tl.right.value, BlackTree(tl.right.right, xv, tr))
+        VolumeRed(VolumeBlack(tl.left, tl.value, tl.right.left), tl.right.value, VolumeBlack(tl.right.right, xv, tr))
       } else {
-        BlackTree(tl, xv, tr)
+        VolumeBlack(tl, xv, tr)
       }
     } else if (isRedTree(tr)) {
       if (isRedTree(tr.right)) {
-        RedTree(BlackTree(tl, xv, tr.left), tr.value, tr.right.black)
+        VolumeRed(VolumeBlack(tl, xv, tr.left), tr.value, tr.right.black)
       } else if (isRedTree(tr.left)) {
-        RedTree(BlackTree(tl, xv, tr.left.left), tr.left.value, BlackTree(tr.left.right, tr.value, tr.right))
+        VolumeRed(VolumeBlack(tl, xv, tr.left.left), tr.left.value, VolumeBlack(tr.left.right, tr.value, tr.right))
       } else {
-        BlackTree(tl, xv, tr)
+        VolumeBlack(tl, xv, tr)
       }
     } else {
-      BlackTree(tl, xv, tr)
+      VolumeBlack(tl, xv, tr)
     }
     def subl(t: VolumeTree[B]) =
-      if (t.isInstanceOf[BlackTree[_]]) t.red
+      if (t.isInstanceOf[VolumeBlack[_]]) t.red
       else sys.error("Defect: invariance violation; expected black, got "+t)
 
     def balLeft(xv: B, tl: VolumeTree[B], tr: VolumeTree[B]) = if (isRedTree(tl)) {
-      RedTree(tl.black, xv, tr)
+      VolumeRed(tl.black, xv, tr)
     } else if (isBlackTree(tr)) {
       balance(xv, tl, tr.red)
     } else if (isRedTree(tr) && isBlackTree(tr.left)) {
-      RedTree(BlackTree(tl, xv, tr.left.left), tr.left.value, balance(tr.value, tr.left.right, subl(tr.right)))
+      VolumeRed(VolumeBlack(tl, xv, tr.left.left), tr.left.value, balance(tr.value, tr.left.right, subl(tr.right)))
     } else {
       sys.error("Defect: invariance violation")
     }
     def balRight(xv: B, tl: VolumeTree[B], tr: VolumeTree[B]) = if (isRedTree(tr)) {
-      RedTree(tl, xv, tr.black)
+      VolumeRed(tl, xv, tr.black)
     } else if (isBlackTree(tl)) {
       balance(xv, tl.red, tr)
     } else if (isRedTree(tl) && isBlackTree(tl.right)) {
-      RedTree(balance(tl.value, subl(tl.left), tl.right.left), tl.right.value, BlackTree(tl.right.right, xv, tr))
+      VolumeRed(balance(tl.value, subl(tl.left), tl.right.left), tl.right.value, VolumeBlack(tl.right.right, xv, tr))
     } else {
       sys.error("Defect: invariance violation")
     }
-    def delLeft = if (isBlackTree(tree.left)) balLeft(tree.value, del(tree.left, index), tree.right) else RedTree(del(tree.left, index), tree.value, tree.right)
-    def delRight = if (isBlackTree(tree.right)) balRight(tree.value, tree.left, del(tree.right, index - tree.left.count - 1)) else RedTree(tree.left, tree.value, del(tree.right, index - tree.left.count - 1))
+    def delLeft = if (isBlackTree(tree.left)) balLeft(tree.value, del(tree.left, index), tree.right) else VolumeRed(del(tree.left, index), tree.value, tree.right)
+    def delRight = if (isBlackTree(tree.right)) balRight(tree.value, tree.left, del(tree.right, index - tree.left.count - 1)) else VolumeRed(tree.left, tree.value, del(tree.right, index - tree.left.count - 1))
     def append(tl: VolumeTree[B], tr: VolumeTree[B]): VolumeTree[B] = if (tl == VolumeLeaf) {
       tr
     } else if (tr == VolumeLeaf) {
@@ -195,21 +210,21 @@ object VolumeTree {
     } else if (isRedTree(tl) && isRedTree(tr)) {
       val bc = append(tl.right, tr.left)
       if (isRedTree(bc)) {
-        RedTree(RedTree(tl.left, tl.value, bc.left), bc.value, RedTree(bc.right, tr.value, tr.right))
+        VolumeRed(VolumeRed(tl.left, tl.value, bc.left), bc.value, VolumeRed(bc.right, tr.value, tr.right))
       } else {
-        RedTree(tl.left, tl.value, RedTree(bc, tr.value, tr.right))
+        VolumeRed(tl.left, tl.value, VolumeRed(bc, tr.value, tr.right))
       }
     } else if (isBlackTree(tl) && isBlackTree(tr)) {
       val bc = append(tl.right, tr.left)
       if (isRedTree(bc)) {
-        RedTree(BlackTree(tl.left, tl.value, bc.left), bc.value, BlackTree(bc.right, tr.value, tr.right))
+        VolumeRed(VolumeBlack(tl.left, tl.value, bc.left), bc.value, VolumeBlack(bc.right, tr.value, tr.right))
       } else {
-        balLeft(tl.value, tl.left, BlackTree(bc, tr.value, tr.right))
+        balLeft(tl.value, tl.left, VolumeBlack(bc, tr.value, tr.right))
       }
     } else if (isRedTree(tr)) {
-      RedTree(append(tl, tr.left), tr.value, tr.right)
+      VolumeRed(append(tl, tr.left), tr.value, tr.right)
     } else if (isRedTree(tl)) {
-      RedTree(tl.left, tl.value, append(tl.right, tr))
+      VolumeRed(tl.left, tl.value, append(tl.right, tr))
     } else {
       sys.error("unmatched tree on append: " + tl + ", " + tr)
     }
@@ -353,13 +368,13 @@ object VolumeTree {
     val (zipper, levelled, leftMost, smallerDepth) = compareDepth(blkNewLeft, blkNewRight)
 
     if (levelled) {
-      BlackTree(blkNewLeft, tree.value, blkNewRight)
+      VolumeBlack(blkNewLeft, tree.value, blkNewRight)
     } else {
       val zipFrom = findDepth(zipper, smallerDepth)
       val union = if (leftMost) {
-        RedTree(blkNewLeft, tree.value, zipFrom.head)
+        VolumeRed(blkNewLeft, tree.value, zipFrom.head)
       } else {
-        RedTree(zipFrom.head, tree.value, blkNewRight)
+        VolumeRed(zipFrom.head, tree.value, blkNewRight)
       }
       val zippedTree = zipFrom.tail.foldLeft(union: VolumeTree[B]) { (tree, node) =>
         if (leftMost)
@@ -371,20 +386,6 @@ object VolumeTree {
     }
   }
 
-  final case class RedTree[+B](left: VolumeTree[B], value: B, right: VolumeTree[B]) extends VolumeTree[B] {
-    override def black: VolumeTree[B] = BlackTree(left, value, right)
-    override def red: VolumeTree[B] = this
-    override def toString: String = "RedTree(" + value + ", " + left + ", " + right + ")"
-    final val count: Int = 1 + left.count + right.count
-  }
-  
-  final case class BlackTree[+B](left: VolumeTree[B], value: B, right: VolumeTree[B]) extends VolumeTree[B] {
-    override def black: VolumeTree[B] = this
-    override def red: VolumeTree[B] = RedTree(left, value, right)
-    override def toString: String = "BlackTree(" + value + ", " + left + ", " + right + ")"
-    final val count: Int = 1 + left.count + right.count
-  }
-  
   private[this] abstract class TreeIterator[B, R](tree: VolumeTree[B]) extends Iterator[R] {
     protected[this] def nextResult(tree: VolumeTree[B]): R
 
