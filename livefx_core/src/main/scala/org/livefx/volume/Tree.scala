@@ -37,7 +37,23 @@ sealed abstract class Tree[+B] extends Serializable {
 
   final def is(color: Color): Boolean = this.color == color
 
-  @inline final def insert[B1 >: B](index: Int, v: B1): Tree[B1] = this.ins(index, v).blacken
+  @inline final def insert[B1 >: B](index: Int, v: B1): Tree[B1] = {
+    def ins[B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = {
+      if (tree == Leaf) {
+        Red(Leaf, v, Leaf)
+      } else {
+        if (index <= tree.left.count) {
+          tree.color.balanceLeft(ins(tree.left, index, v), tree.value, tree.right)
+        } else if (index > tree.left.count) {
+          tree.color.balanceRight(tree.left, tree.value, ins(tree.right, index - tree.left.count - 1, v))
+        } else {
+          tree.color(this.left, v, this.right)
+        }
+      }
+    }
+    
+    ins(this, index, v).blacken
+  }
   @inline final def update[B1 >: B](index: Int, v: B1): Tree[B1] = {
     def upd[B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = if (tree == Leaf) {
       throw new IndexOutOfBoundsException
@@ -75,20 +91,6 @@ sealed abstract class Tree[+B] extends Serializable {
     if (n < count) this.left.nth(n)
     else if (n > count) this.right.nth(n - count - 1)
     else this
-  }
-
-  private[volume] def ins[B1 >: B](index: Int, v: B1): Tree[B1] = {
-    if (this == Leaf) {
-      Red(Leaf, v, Leaf)
-    } else {
-      if (index <= this.left.count) {
-        this.color.balanceLeft(this.left.ins(index, v), this.value, this.right)
-      } else if (index > this.left.count) {
-        this.color.balanceRight(this.left, this.value, this.right.ins(index - this.left.count - 1, v))
-      } else {
-        this.color(this.left, v, this.right)
-      }
-    }
   }
 
   /* Based on Stefan Kahrs' Haskell version of Okasaki's Red&Black Trees
