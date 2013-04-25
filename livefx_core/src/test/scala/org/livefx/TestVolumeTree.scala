@@ -39,7 +39,5 @@ class TestVolumeTree {
       println(s"--> tree: $tree")
       Assert.assertEquals(list.toList, Tree.iterator(tree).toList)
     }
-
-    Assert.assertEquals(list.slice(10, 15), Tree.iterator(Tree.range(tree, 10, 15)).toList)
   }
 }

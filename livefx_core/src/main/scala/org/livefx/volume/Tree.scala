@@ -204,34 +204,6 @@ final case object Leaf extends Tree[Nothing] {
 }
 
 object Tree {
-  def rangeImpl[B](tree: Tree[B], from: Option[Int], until: Option[Int]): Tree[B] = (from, until) match {
-    case (Some(from), Some(until)) => this.range(tree, from, until)
-    case (Some(from), None)        => this.from(tree, from)
-    case (None,       Some(until)) => this.until(tree, until)
-    case (None,       None)        => tree
-  }
-  def range[B](tree: Tree[B], from: Int, until: Int): Tree[B] = doRange(tree, from, until).blacken
-  def from[B](tree: Tree[B], from: Int): Tree[B] = doFrom(tree, from).blacken
-  def to[B](tree: Tree[B], to: Int): Tree[B] = doTo(tree, to).blacken
-  def until[B](tree: Tree[B], key: Int): Tree[B] = doUntil(tree, key).blacken
-
-  def drop[B](tree: Tree[B], n: Int): Tree[B] = doDrop(tree, n).blacken
-  def take[B](tree: Tree[B], n: Int): Tree[B] = doTake(tree, n).blacken
-  def slice[B](tree: Tree[B], from: Int, until: Int): Tree[B] = doSlice(tree, from, until).blacken
-
-  def smallest[B](tree: Tree[B]): Tree[B] = {
-    if (tree == Leaf) throw new NoSuchElementException("empty map")
-    var result = tree
-    while (result.left != Leaf) result = result.left
-    result
-  }
-  def greatest[B](tree: Tree[B]): Tree[B] = {
-    if (tree == Leaf) throw new NoSuchElementException("empty map")
-    var result = tree
-    while (result.right != Leaf) result = result.right
-    result
-  }
-
   def foreach[B, U](tree: Tree[B], f: B => U): Unit = if (tree != Leaf) {
     if (tree.left != Leaf) foreach(tree.left, f)
     f(tree.value)
@@ -239,75 +211,6 @@ object Tree {
   }
 
   def iterator[_, B](tree: Tree[B]): Iterator[B] = new ValuesIterator(tree)
-
-  private[this] def doFrom[B](tree: Tree[B], from: Int): Tree[B] = {
-    if (tree == Leaf) return Leaf
-    if (tree.left.count < from) return doFrom(tree.right, from - tree.left.count - 1)
-    val newLeft = doFrom(tree.left, from)
-    if (newLeft eq tree.left) tree
-    else if (newLeft == Leaf) tree.right.upd(0, tree.value, false)
-    else rebalance(tree, newLeft, tree.right)
-  }
-  private[this] def doTo[B](tree: Tree[B], to: Int): Tree[B] = {
-    if (tree == Leaf) return Leaf
-    if (to < tree.left.count) return doTo(tree.left, to)
-    val newRight = doTo(tree.right, to)
-    if (newRight eq tree.right) tree
-    else if (newRight == Leaf) tree.left.upd(0, tree.value, false)
-    else rebalance(tree, tree.left, newRight)
-  }
-  private[this] def doUntil[B](tree: Tree[B], until: Int): Tree[B] = {
-    if (tree == Leaf) return Leaf
-    if (until <= tree.left.count) return doUntil(tree.left, until)
-    val newRight = doUntil(tree.right, until)
-    if (newRight eq tree.right) tree
-    else if (newRight == Leaf) tree.left.upd(0, tree.value, false)
-    else rebalance(tree, tree.left, newRight)
-  }
-  private[this] def doRange[B](tree: Tree[B], from: Int, until: Int): Tree[B] = {
-    if (tree == Leaf) return Leaf
-    if (tree.left.count < from) return doRange(tree.right, from - tree.left.count - 1, until - tree.left.count - 1)
-    if (until <= tree.left.count) return doRange(tree.left, from, until)
-    val newLeft = doFrom(tree.left, from)
-    val newRight = doUntil(tree.right, until - tree.left.count - 1)
-    if ((newLeft eq tree.left) && (newRight eq tree.right)) tree
-    else if (newLeft == Leaf) newRight.upd(0, tree.value, false)
-    else if (newRight == Leaf) newLeft.upd(0, tree.value, false)
-    else rebalance(tree, newLeft, newRight)
-  }
-
-  private[this] def doDrop[B](tree: Tree[B], n: Int): Tree[B] = {
-    if (n <= 0) return tree
-    if (n >= tree.count) return Leaf
-    val count = tree.left.count
-    if (n > count) return doDrop(tree.right, n - count - 1)
-    val newLeft = doDrop(tree.left, n)
-    if (newLeft eq tree.left) tree
-    else if (newLeft == Leaf) tree.right.updNth(n - count - 1, 0, tree.value, false)
-    else rebalance(tree, newLeft, tree.right)
-  }
-  private[this] def doTake[B](tree: Tree[B], n: Int): Tree[B] = {
-    if (n <= 0) return Leaf
-    if (n >= tree.count) return tree
-    val count = tree.left.count
-    if (n <= count) return doTake(tree.left, n)
-    val newRight = doTake(tree.right, n - count - 1)
-    if (newRight eq tree.right) tree
-    else if (newRight == Leaf) tree.left.updNth(n, 0, tree.value, false)
-    else rebalance(tree, tree.left, newRight)
-  }
-  private[this] def doSlice[B](tree: Tree[B], from: Int, until: Int): Tree[B] = {
-    if (tree == Leaf) return Leaf
-    val count = tree.left.count
-    if (from > count) return doSlice(tree.right, from - count - 1, until - count - 1)
-    if (until <= count) return doSlice(tree.left, from, until)
-    val newLeft = doDrop(tree.left, from)
-    val newRight = doTake(tree.right, until - count - 1)
-    if ((newLeft eq tree.left) && (newRight eq tree.right)) tree
-    else if (newLeft == Leaf) newRight.updNth(from - count - 1, 0, tree.value, false)
-    else if (newRight == Leaf) newLeft.updNth(until, 0, tree.value, false)
-    else rebalance(tree, newLeft, newRight)
-  }
 
   // The zipper returned might have been traversed left-most (always the left child)
   // or right-most (always the right child). Left trees are traversed right-most,
@@ -356,40 +259,6 @@ object Tree {
       }
     }
     unzipBoth(left, right, Nil, Nil, 0)
-  }
-
-  private[this] def rebalance[B](tree: Tree[B], newLeft: Tree[B], newRight: Tree[B]) = {
-    // This is like drop(n-1), but only counting black nodes
-    def  findDepth(zipper: List[Tree[B]], depth: Int): List[Tree[B]] = zipper match {
-      case head :: tail if head.is(Black) =>
-        if (depth == 1) zipper else findDepth(tail, depth - 1)
-      case _ :: tail => findDepth(tail, depth)
-      case Nil => sys.error("Defect: unexpected empty zipper while computing range")
-    }
-
-    // Blackening the smaller tree avoids balancing problems on union;
-    // this can't be done later, though, or it would change the result of compareDepth
-    val blkNewLeft = newLeft.blacken
-    val blkNewRight = newRight.blacken
-    val (zipper, levelled, leftMost, smallerDepth) = compareDepth(blkNewLeft, blkNewRight)
-
-    if (levelled) {
-      Black(blkNewLeft, tree.value, blkNewRight)
-    } else {
-      val zipFrom = findDepth(zipper, smallerDepth)
-      val union = if (leftMost) {
-        Red(blkNewLeft, tree.value, zipFrom.head)
-      } else {
-        Red(zipFrom.head, tree.value, blkNewRight)
-      }
-      val zippedTree = zipFrom.tail.foldLeft(union: Tree[B]) { (tree, node) =>
-        if (leftMost)
-          node.color.balanceLeft(tree, node.value, node.right)
-        else
-          node.color.balanceRight(node.left, node.value, tree)
-      }
-      zippedTree
-    }
   }
 
   private[this] abstract class TreeIterator[B, R](tree: Tree[B]) extends Iterator[R] {
