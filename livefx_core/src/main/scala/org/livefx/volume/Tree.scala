@@ -212,55 +212,6 @@ object Tree {
 
   def iterator[_, B](tree: Tree[B]): Iterator[B] = new ValuesIterator(tree)
 
-  // The zipper returned might have been traversed left-most (always the left child)
-  // or right-most (always the right child). Left trees are traversed right-most,
-  // and right trees are traversed leftmost.
-
-  // Returns the zipper for the side with deepest black nodes depth, a flag
-  // indicating whether the trees were unbalanced at all, and a flag indicating
-  // whether the zipper was traversed left-most or right-most.
-
-  // If the trees were balanced, returns an empty zipper
-  private[this] def compareDepth[B](left: Tree[B], right: Tree[B]): (List[Tree[B]], Boolean, Boolean, Int) = {
-    // Once a side is found to be deeper, unzip it to the bottom
-    def unzip(zipper: List[Tree[B]], leftMost: Boolean): List[Tree[B]] = {
-      val next = if (leftMost) zipper.head.left else zipper.head.right
-      next match {
-        case Leaf => zipper
-        case node => unzip(node :: zipper, leftMost)
-      }
-    }
-
-    // Unzip left tree on the rightmost side and right tree on the leftmost side until one is
-    // found to be deeper, or the bottom is reached
-    def unzipBoth(left: Tree[B],
-                  right: Tree[B],
-                  leftZipper: List[Tree[B]],
-                  rightZipper: List[Tree[B]],
-                  smallerDepth: Int): (List[Tree[B]], Boolean, Boolean, Int) = {
-      if (left.is(Black) && right.is(Black)) {
-        unzipBoth(left.right, right.left, left :: leftZipper, right :: rightZipper, smallerDepth + 1)
-      } else if (left.is(Red) && right.is(Red)) {
-        unzipBoth(left.right, right.left, left :: leftZipper, right :: rightZipper, smallerDepth)
-      } else if (right.is(Red)) {
-        unzipBoth(left, right.left, leftZipper, right :: rightZipper, smallerDepth)
-      } else if (left.is(Red)) {
-        unzipBoth(left.right, right, left :: leftZipper, rightZipper, smallerDepth)
-      } else if (left == Leaf && (right == Leaf)) {
-        (Nil, true, false, smallerDepth)
-      } else if (left == Leaf && right.is(Black)) {
-        val leftMost = true
-        (unzip(right :: rightZipper, leftMost), false, leftMost, smallerDepth)
-      } else if (left.is(Black) && right == Leaf) {
-        val leftMost = false
-        (unzip(left :: leftZipper, leftMost), false, leftMost, smallerDepth)
-      } else {
-        sys.error("unmatched trees in unzip: " + left + ", " + right)
-      }
-    }
-    unzipBoth(left, right, Nil, Nil, 0)
-  }
-
   private[this] abstract class TreeIterator[B, R](tree: Tree[B]) extends Iterator[R] {
     protected[this] def nextResult(tree: Tree[B]): R
 
