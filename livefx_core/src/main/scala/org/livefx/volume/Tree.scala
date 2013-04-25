@@ -85,14 +85,6 @@ sealed abstract class Tree[+B] extends Serializable {
     else this
   }
 
-  @tailrec
-  final def nth(n: Int): Tree[B] = {
-    val count = this.left.count
-    if (n < count) this.left.nth(n)
-    else if (n > count) this.right.nth(n - count - 1)
-    else this
-  }
-
   /* Based on Stefan Kahrs' Haskell version of Okasaki's Red&Black Trees
    * http://www.cse.unsw.edu.au/~dons/data/RedBlackTree.html */
   private def del(index: Int): Tree[B] = if (this == Leaf) Leaf else {
