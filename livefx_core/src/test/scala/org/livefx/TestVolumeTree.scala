@@ -23,7 +23,7 @@ class TestVolumeTree {
             val index = random.nextInt(list.size)
             println(s"--> (${list.size})update($index, $i)")
             list(index) = i
-            tree = tree.update(index, i, true)
+            tree = tree.update(index, i)
           }
       }
 
