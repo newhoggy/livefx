@@ -67,16 +67,6 @@ sealed abstract class Tree[+B] extends Serializable {
     else this
   }
 
-  def updNth[B1 >: B](idx: Int, index: Int, v: B1, overwrite: Boolean): Tree[B1] = if (this == Leaf) {
-    Red(Leaf, v, Leaf)
-  } else {
-    val rank = this.left.count + 1
-    if (idx < rank) this.color.balanceLeft(this.left.updNth(idx, index, v, overwrite), this.value, this.right)
-    else if (idx > rank) this.color.balanceRight(this.left, this.value, this.right.updNth(idx - rank, index, v, overwrite))
-    else if (overwrite) this.color(this.left, v, this.right)
-    else this
-  }
-
   private[volume] def ins[B1 >: B](index: Int, v: B1): Tree[B1] = {
     if (this == Leaf) {
       Red(Leaf, v, Leaf)
