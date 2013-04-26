@@ -4,31 +4,162 @@ import org.livefx.Debug
 import org.livefx.debug._
 import org.livefx.LeftOrRight
 
-case class Leaf[A](valuesL: Items[A], valuesR: Items[A]) extends Tree[A] {
-  type Self = Leaf[A]
-
-  final def getL: A = valuesL.head
-
-  final def getR: A = valuesR.head
-
-  final def empty: Branch[A] = Branch[A](TreesNil, Leaf[A](), TreesNil)
-
-  final override def sizeL = valuesL.count
-
-  final override def sizeR = valuesR.count
-
-  final def itemL: A = valuesL.head
-
-  final def itemR: A = valuesR.head
-
-  final override def remainingCapacity(implicit config: Config): Int = config.nodeCapacity - size
-
-  final override def size: Int = sizeL + sizeR
-
-  def pretty(inFocus: Boolean): String = s"${(s"$sizeL)" :: valuesL.toList.reverse.map(_.toString) ::: (if (inFocus) "*-*" else "*") :: valuesR.toList.map(_.toString) ::: s"($sizeR" :: List()).mkString("[", ", ", "]")}"
+trait Leaf[+A] extends Tree[A] {
+  override def insert[B >: A](index: Int, value: B): Leaf[B]
+  override def takeCount(count: Int): Leaf[A]
+  override def dropCount(count: Int): Leaf[A]
 }
 
-object Leaf {
-  def apply[A](valuesL: List[A], valuesR: List[A]): Leaf[A] = Leaf[A](valuesL.foldRight(ItemsNil: Items[A])((a, b) => a::b), valuesR.foldRight(ItemsNil: Items[A])((a, b) => a::b))
-  def apply[A](): Leaf[A] = Leaf[A](ItemsNil, ItemsNil)
+final case object Leaf0 extends Leaf[Nothing] {
+  final override def size: Int = 0
+  final override def count: Int = 0
+  final override def takeCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
+  final override def dropCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
+  
+  final override def insert[A](index: Int, value: A): Leaf[A] = index match {
+    case 0 => Leaf1(value)
+    case _ => throw new IndexOutOfBoundsException
+  }
+}
+
+final case class Leaf1[+A](a: A) extends Leaf[A] {
+  final override def size: Int = 1
+  final override def count: Int = 1
+
+  final override def takeCount(count: Int): Leaf[A] = count match {
+    case 0 => Leaf0
+    case 1 => this
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def dropCount(count: Int): Leaf[A] = count match {
+    case 0 => this
+    case 1 => Leaf0
+    case _ => throw new IndexOutOfBoundsException
+  }
+  
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+    case 0 => Leaf2(value, a)
+    case 1 => Leaf2(a, value)
+    case _ => throw new IndexOutOfBoundsException
+  }
+}
+
+final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
+  final override def size: Int = 2
+  final override def count: Int = 2
+
+  final override def takeCount(count: Int): Leaf[A] = count match {
+    case 0 => Leaf0
+    case 1 => Leaf1(a)
+    case 2 => this
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def dropCount(count: Int): Leaf[A] = count match {
+    case 0 => this
+    case 1 => Leaf1(b)
+    case 2 => Leaf0
+    case _ => throw new IndexOutOfBoundsException
+  }
+  
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+    case 0 => Leaf3(value, a, b)
+    case 1 => Leaf3(a, value, b)
+    case 2 => Leaf3(a, b, value)
+    case _ => throw new IndexOutOfBoundsException
+  }
+}
+
+final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
+  final override def size: Int = 3
+  final override def count: Int = 3
+
+  final override def takeCount(count: Int): Leaf[A] = count match {
+    case 0 => Leaf0
+    case 1 => Leaf1(a)
+    case 2 => Leaf2(a, b)
+    case 3 => this
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def dropCount(count: Int): Leaf[A] = count match {
+    case 0 => this
+    case 1 => Leaf2(b, c)
+    case 3 => Leaf1(c)
+    case 4 => Leaf0
+    case _ => throw new IndexOutOfBoundsException
+  }
+  
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+    case 0 => Leaf4(value, a, b, c)
+    case 1 => Leaf4(a, value, b, c)
+    case 2 => Leaf4(a, b, value, c)
+    case 3 => Leaf4(a, b, c, value)
+    case _ => throw new IndexOutOfBoundsException
+  }
+}
+
+final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
+  final override def size: Int = 4
+  final override def count: Int = 4
+
+  final override def takeCount(count: Int): Leaf[A] = count match {
+    case 0 => Leaf0
+    case 1 => Leaf1(a)
+    case 2 => Leaf2(a, b)
+    case 3 => Leaf3(a, b, c)
+    case 4 => this
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def dropCount(count: Int): Leaf[A] = count match {
+    case 0 => this
+    case 1 => Leaf3(b, c, d)
+    case 2 => Leaf2(c, d)
+    case 3 => Leaf1(d)
+    case 4 => Leaf0
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+    case 0 => LeafN(List(value, a, b, c, d), 5)
+    case 1 => LeafN(List(a, value, b, c, d), 5)
+    case 2 => LeafN(List(a, b, value, c, d), 5)
+    case 3 => LeafN(List(a, b, c, value, d), 5)
+    case 3 => LeafN(List(a, b, c, d, value), 5)
+    case _ => throw new IndexOutOfBoundsException
+  }
+}
+
+final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
+  assert(vs.size == size)
+
+  final override def count: Int = size
+
+  final override def takeCount(count: Int): Leaf[A] = Leaf(vs.take(count), count)
+
+  final override def dropCount(count: Int): Leaf[A] = Leaf(vs.drop(count), this.count - count)
+
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = {
+    LeafN(vs.take(index) ::: value :: vs.drop(index), size + 1)
+  }
+}
+
+final object LeafN {
+  def apply[A](vs: List[A]): LeafN[A] = LeafN(vs, vs.size)
+}
+
+final object Leaf {
+  def apply[A](vs: List[A], count: Int): Leaf[A] = {
+    assert(count == vs.size)
+    count match {
+      case 0 => Leaf0
+      case 1 => vs match { case List(a)           => Leaf1(a)           }
+      case 2 => vs match { case List(a, b)        => Leaf2(a, b)        }
+      case 3 => vs match { case List(a, b, c)     => Leaf3(a, b, c)     }
+      case 4 => vs match { case List(a, b, c, d)  => Leaf4(a, b, c, d)  }
+      case count => LeafN(vs, count)
+    }
+  }
 }
