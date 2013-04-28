@@ -12,6 +12,7 @@ trait Branch[+A] extends Tree[A] {
 final object Branch0 extends Branch[Nothing] {
   final override val size: Int = 0
   final override def count: Int = 0
+  final override def toList[B](acc: List[B]): List[B] = acc
 
   final override def takeCount(count: Int): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
   final override def dropCount(count: Int): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
@@ -22,6 +23,7 @@ final object Branch0 extends Branch[Nothing] {
 final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
   final override val size: Int = a.size
   final override def count: Int = 1
+  final override def toList[B >: A](acc: List[B]): List[B] = a.toList(acc)
 
   final override def takeCount(count: Int): Branch[A] = count match {
     case 0 => Branch0
@@ -54,6 +56,7 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
 final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   final override val size: Int = a.size + b.size
   final override def count: Int = 2
+  final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(acc))
 
   final override def takeCount(count: Int): Branch[A] = count match {
     case 0 => Branch0
@@ -97,6 +100,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
 final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[A] {
   final override val size: Int = a.size + b.size + c.size
   final override def count: Int = 3
+  final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(c.toList(acc)))
 
   final override def takeCount(count: Int): Branch[A] = count match {
     case 0 => Branch0
@@ -151,6 +155,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
 final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) extends Branch[A] {
   final override val size: Int = a.size + b.size + c.size + d.size
   final override def count: Int = 4
+  final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(c.toList(d.toList(acc))))
 
   final override def takeCount(count: Int): Branch[A] = count match {
     case 0 => Branch0
@@ -221,6 +226,8 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
   final override def takeCount(count: Int): Branch[A] = Branch(ts.take(count), count)
 
   final override def dropCount(count: Int): Branch[A] = Branch(ts.drop(count), this.count - count)
+  
+  final override def toList[B >: A](acc: List[B]): List[B] = ts.foldRight(acc)((t, acc) => t.toList(acc))
 
   final override def insert[B >: A](index: Int, value: B): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException

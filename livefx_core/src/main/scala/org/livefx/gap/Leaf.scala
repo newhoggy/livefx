@@ -15,6 +15,7 @@ final case object Leaf0 extends Leaf[Nothing] {
   final override def count: Int = 0
   final override def takeCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
   final override def dropCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
+  final override def toList[B](acc: List[B]): List[B] = acc
   
   final override def insert[A](index: Int, value: A): Leaf[A] = index match {
     case 0 => Leaf1(value)
@@ -25,6 +26,7 @@ final case object Leaf0 extends Leaf[Nothing] {
 final case class Leaf1[+A](a: A) extends Leaf[A] {
   final override def size: Int = 1
   final override def count: Int = 1
+  final override def toList[B >: A](acc: List[B]): List[B] = a::acc
 
   final override def takeCount(count: Int): Leaf[A] = count match {
     case 0 => Leaf0
@@ -48,6 +50,7 @@ final case class Leaf1[+A](a: A) extends Leaf[A] {
 final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
   final override def size: Int = 2
   final override def count: Int = 2
+  final override def toList[B >: A](acc: List[B]): List[B] = a::b::acc
 
   final override def takeCount(count: Int): Leaf[A] = count match {
     case 0 => Leaf0
@@ -74,6 +77,7 @@ final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
 final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
   final override def size: Int = 3
   final override def count: Int = 3
+  final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::acc
 
   final override def takeCount(count: Int): Leaf[A] = count match {
     case 0 => Leaf0
@@ -103,6 +107,7 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
 final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
   final override def size: Int = 4
   final override def count: Int = 4
+  final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::d::acc
 
   final override def takeCount(count: Int): Leaf[A] = count match {
     case 0 => Leaf0
@@ -140,6 +145,8 @@ final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
   final override def takeCount(count: Int): Leaf[A] = Leaf(vs.take(count), count)
 
   final override def dropCount(count: Int): Leaf[A] = Leaf(vs.drop(count), this.count - count)
+
+  final override def toList[B >: A](acc: List[B]): List[B] = vs:::acc
 
   final override def insert[B >: A](index: Int, value: B): Leaf[B] = {
     LeafN(vs.take(index) ::: value :: vs.drop(index), size + 1)

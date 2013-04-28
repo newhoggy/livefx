@@ -10,4 +10,5 @@ trait Tree[+A] {
   def insert[B >: A](index: Int, value: B): Tree[B]
   def takeCount(count: Int): Tree[A]
   def dropCount(count: Int): Tree[A]
+  def toList[B >: A](acc: List[B] = Nil): List[B]
 }
