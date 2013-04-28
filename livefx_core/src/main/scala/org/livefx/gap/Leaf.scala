@@ -66,11 +66,14 @@ final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
   
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
-    case 0 => Leaf3(value, a, b)
-    case 1 => Leaf3(a, value, b)
-    case 2 => Leaf3(a, b, value)
-    case _ => throw new IndexOutOfBoundsException
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = {
+    println(s"--> Leaf2.insert($index, $value)")
+    index match {
+      case 0 => Leaf3(value, a, b)
+      case 1 => Leaf3(a, value, b)
+      case 2 => Leaf3(a, b, value)
+      case _ => throw new IndexOutOfBoundsException
+    }
   }
 }
 
@@ -132,7 +135,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
     case 1 => LeafN(List(a, value, b, c, d), 5)
     case 2 => LeafN(List(a, b, value, c, d), 5)
     case 3 => LeafN(List(a, b, c, value, d), 5)
-    case 3 => LeafN(List(a, b, c, d, value), 5)
+    case 4 => LeafN(List(a, b, c, d, value), 5)
     case _ => throw new IndexOutOfBoundsException
   }
 }

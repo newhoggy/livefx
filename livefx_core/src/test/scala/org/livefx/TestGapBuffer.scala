@@ -9,7 +9,7 @@ class TestGapBuffer {
   def test1(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    var tree: Tree[Int] = Leaf0
+    var tree: Root[Int] = Root[Int]()
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {

@@ -43,8 +43,9 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
     var i = index
     
     if (i <= a.size) {
-      return a.insert(index, value) match {
-        case Branch4(a, b, c, d) => Branch2(Branch2(a, b), Branch2(c, d))
+      return a.insert(i, value) match {
+        case Branch4(ca, cb, cc, cd) => Branch2(Branch2(ca, cb), Branch2(cc, cd))
+        case Leaf4(ca, cb, cc, cd) => Branch2(Leaf2(ca, cb), Leaf2(cc, cd))
         case newA => Branch1(newA)
       }
     }
@@ -73,13 +74,15 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   }
 
   final override def insert[B >: A](index: Int, value: B): Branch[B] = {
+    println(s"Branch2($a, $b).insert($index, $value)")
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
     
     if (i <= a.size) {
-      return a.insert(index, value) match {
+      return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch3(Branch2(ca, cb), Branch2(cc, cd), b)
+        case Leaf4(ca, cb, cc, cd) => Branch3(Leaf2(ca, cb), Leaf2(cc, cd), b)
         case na => Branch2(na, b)
       }
     }
@@ -87,8 +90,9 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
     i -= a.size
 
     if (i <= b.size) {
-      return b.insert(index, value) match {
+      return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch3(a, Branch2(ca, cb), Branch2(cc, cd))
+        case Leaf4(ca, cb, cc, cd) => Branch3(a, Leaf2(ca, cb), Leaf2(cc, cd))
         case nb => Branch2(a, nb)
       }
     }
@@ -124,8 +128,9 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     var i = index
     
     if (i <= a.size) {
-      return a.insert(index, value) match {
+      return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch4(Branch2(ca, cb), Branch2(cc, cd), b, c)
+        case Leaf4(ca, cb, cc, cd) => Branch4(Leaf2(ca, cb), Leaf2(cc, cd), b, c)
         case na => Branch3(na, b, c)
       }
     }
@@ -133,8 +138,9 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     i -= a.size
 
     if (i <= b.size) {
-      return b.insert(index, value) match {
+      return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch4(a, Branch2(ca, cb), Branch2(cc, cd), c)
+        case Leaf4(ca, cb, cc, cd) => Branch4(a, Leaf2(ca, cb), Leaf2(cc, cd), c)
         case nb => Branch3(a, nb, c)
       }
     }
@@ -142,8 +148,9 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     i -= b.size
 
     if (i <= c.size) {
-      return c.insert(index, value) match {
+      return c.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch4(a, b, Branch2(ca, cb), Branch2(cc, cd))
+        case Leaf4(ca, cb, cc, cd) => Branch4(a, b, Leaf2(ca, cb), Leaf2(cc, cd))
         case nc => Branch3(a, b, nc)
       }
     }
@@ -181,8 +188,9 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     var i = index
     
     if (i <= a.size) {
-      return a.insert(index, value) match {
+      return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(Branch2(ca, cb), Branch2(cc, cd), b, c, d), 5)
+        case Leaf4(ca, cb, cc, cd) => BranchN(List(Leaf2(ca, cb), Leaf2(cc, cd), b, c, d), 5)
         case na => Branch3(na, b, c)
       }
     }
@@ -190,8 +198,9 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     i -= a.size
 
     if (i <= b.size) {
-      return b.insert(index, value) match {
+      return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, Branch2(ca, cb), Branch2(cc, cd), c, d), 5)
+        case Leaf4(ca, cb, cc, cd) => BranchN(List(a, Leaf2(ca, cb), Leaf2(cc, cd), c, d), 5)
         case nb => Branch3(a, nb, c)
       }
     }
@@ -199,8 +208,9 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     i -= b.size
 
     if (i <= c.size) {
-      return c.insert(index, value) match {
+      return c.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, Branch2(ca, cb), Branch2(cc, cd), d), 5)
+        case Leaf4(ca, cb, cc, cd) => BranchN(List(a, b, Leaf2(ca, cb), Leaf2(cc, cd), d), 5)
         case nc => Branch3(a, b, nc)
       }
     }
@@ -208,8 +218,9 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     i -= c.size
 
     if (i <= d.size) {
-      return d.insert(index, value) match {
-        case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, Branch2(ca, cb), Branch2(cc, cd), d), 5)
+      return d.insert(i, value) match {
+        case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, c, Branch2(ca, cb), Branch2(cc, cd), d), 5)
+        case Leaf4(ca, cb, cc, cd) => BranchN(List(a, b, c, Leaf2(ca, cb), Leaf2(cc, cd)), 5)
         case nc => Branch3(a, b, nc)
       }
     }
@@ -236,8 +247,9 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
     
     val nts = ts.flatMap { t =>
       val result = if (i <= t.size) {
-        t.insert(index, value) match {
+        t.insert(i, value) match {
           case Branch4(ca, cb, cc, cd) => List(Branch2(ca, cb), Branch2(cc, cd))
+          case Leaf4(ca, cb, cc, cd) => List(Leaf2(ca, cb), Leaf2(cc, cd))
           case na => List(na)
         }
       } else {
