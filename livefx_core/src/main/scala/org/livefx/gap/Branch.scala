@@ -21,7 +21,10 @@ final object Branch0 extends Branch[Nothing] {
 
   final override def update[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
 
-  final override def remove(index: Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
+  final override def remove(index: Int): (Nothing, Tree[Nothing]) = {
+    println(s"--> Branch0.remove($index) from $this")
+    throw new IndexOutOfBoundsException
+  }
 }
 
 final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
@@ -70,11 +73,14 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
   }
 
   final override def remove(index: Int): (A, Tree[A]) = {
+    println(s"--> Branch1.remove($index) from $this")
     val (v, na) = a.remove(index)
 
-    if (na.count == 0) throw new IndexOutOfBoundsException
-    
-    (v, Branch1(na))
+    if (na.count == 0) {
+      (v, Branch0)
+    } else {
+      (v, Branch1(na))
+    }
   }
 }
 
@@ -143,20 +149,21 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   }
 
   final override def remove(index: Int): (A, Tree[A]) = {
+    println(s"--> Branch2.remove($index) from $this")
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
     
     if (i < a.size) {
-      val (v, na) = a.remove(index)
+      val (v, na) = a.remove(i)
       return if (na.count == 0) (v, Branch1(b)) else (v, Branch2(na, b))
     }
 
     i -= a.size
 
     if (i < b.size) {
-      val (v, nb) = b.remove(index)
-      return if (nb.count == 0) (v, Branch1(b)) else (v, Branch2(a, nb))
+      val (v, nb) = b.remove(i)
+      return if (nb.count == 0) (v, Branch1(a)) else (v, Branch2(a, nb))
     }
 
     throw new IndexOutOfBoundsException
@@ -245,27 +252,28 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
   }
 
   final override def remove(index: Int): (A, Tree[A]) = {
+    println(s"--> Branch3.remove($index) from $this")
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
     
     if (i < a.size) {
-      val (v, na) = a.remove(index)
-      return if (na.count == 0) (v, Branch1(b)) else (v, Branch3(na, b, c))
+      val (v, na) = a.remove(i)
+      return if (na.count == 0) (v, Branch2(b, c)) else (v, Branch3(na, b, c))
     }
 
     i -= a.size
 
     if (i < b.size) {
-      val (v, nb) = b.remove(index)
-      return if (nb.count == 0) (v, Branch1(b)) else (v, Branch3(a, nb, c))
+      val (v, nb) = b.remove(i)
+      return if (nb.count == 0) (v, Branch2(a, c)) else (v, Branch3(a, nb, c))
     }
 
     i -= b.size
 
     if (i < c.size) {
-      val (v, nc) = c.remove(index)
-      return if (nc.count == 0) (v, Branch1(b)) else (v, Branch3(a, b, nc))
+      val (v, nc) = c.remove(i)
+      return if (nc.count == 0) (v, Branch2(a, b)) else (v, Branch3(a, b, nc))
     }
 
     throw new IndexOutOfBoundsException
@@ -372,34 +380,35 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
   }
 
   final override def remove(index: Int): (A, Tree[A]) = {
+    println(s"--> Branch4.remove($index) from $this")
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
     
     if (i < a.size) {
-      val (v, na) = a.remove(index)
-      return if (na.count == 0) (v, Branch1(b)) else (v, Branch4(na, b, c, d))
+      val (v, na) = a.remove(i)
+      return if (na.count == 0) (v, Branch3(b, c, d)) else (v, Branch4(na, b, c, d))
     }
 
     i -= a.size
 
     if (i < b.size) {
-      val (v, nb) = b.remove(index)
-      return if (nb.count == 0) (v, Branch1(b)) else (v, Branch4(a, nb, c, d))
+      val (v, nb) = b.remove(i)
+      return if (nb.count == 0) (v, Branch3(a, c, d)) else (v, Branch4(a, nb, c, d))
     }
 
     i -= b.size
 
     if (i < c.size) {
-      val (v, nc) = c.remove(index)
-      return if (nc.count == 0) (v, Branch1(b)) else (v, Branch4(a, b, nc, d))
+      val (v, nc) = c.remove(i)
+      return if (nc.count == 0) (v, Branch3(a, b, d)) else (v, Branch4(a, b, nc, d))
     }
 
     i -= c.size
 
     if (i < d.size) {
-      val (v, nd) = d.remove(index)
-      return if (nd.count == 0) (v, Branch1(b)) else (v, Branch4(a, b, c, nd))
+      val (v, nd) = d.remove(i)
+      return if (nd.count == 0) (v, Branch3(a, b, c)) else (v, Branch4(a, b, c, nd))
     }
 
     throw new IndexOutOfBoundsException
@@ -468,6 +477,7 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
   }
   
   final override def remove(index: Int): (A, Tree[A]) = {
+    println(s"--> BranchN.remove($index) from $this")
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index

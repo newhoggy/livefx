@@ -31,13 +31,13 @@ class TestGapBuffer {
       Assert.assertEquals(list.toList, tree.toList(Nil))
     }
 
-//    for (i <- 0 to list.size - 1) {
-//      val index = random.nextInt(list.size)
-//      println(s"--> [$i] remove($index)")
-//      list.remove(index)
-//      tree = tree.delete(index)
-//      println(s"--> tree: $tree")
-//      Assert.assertEquals(list.toList, Tree.iterator(tree).toList)
-//    }
+    for (i <- 0 to list.size - 1) {
+      val index = random.nextInt(list.size)
+      println(s"--> [$i] remove($index) from $tree")
+      list.remove(index)
+      tree = tree.remove(index)._2
+      println(s"--> tree: $tree")
+      Assert.assertEquals(list.toList, tree.toList(Nil))
+    }
   }
 }
