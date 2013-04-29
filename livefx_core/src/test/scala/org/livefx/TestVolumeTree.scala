@@ -1,6 +1,6 @@
 package org.livefx
 
-import org.livefx.volume._
+import org.livefx.old.volume.redblack._
 import org.junit.Test
 import org.junit.Assert
 

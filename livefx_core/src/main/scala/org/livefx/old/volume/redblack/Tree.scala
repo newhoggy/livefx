@@ -1,4 +1,4 @@
-package org.livefx.volume
+package org.livefx.old.volume.redblack
 
 import scala.annotation.tailrec
 import scalaz.Monoid
