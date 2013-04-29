@@ -13,7 +13,7 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   
   def updates: Events[Pub, Update[A]]
 
-  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B) = {
+  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): LiveValue[B] = {
     val source = this
     new LiveBinding[B] {
       val ref = source.spoils.subscribeWeak((_, spoilEvent) => spoil(spoilEvent))
