@@ -89,13 +89,10 @@ final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
     }
   }
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = {
-    println(s"$this.update($index, $value)")
-    index match {
-      case 0 => Leaf2(value, b)
-      case 1 => Leaf2(a, value)
-      case _ => throw new IndexOutOfBoundsException
-    }
+  final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
+    case 0 => Leaf2(value, b)
+    case 1 => Leaf2(a, value)
+    case _ => throw new IndexOutOfBoundsException
   }
 
   final override def remove(index: Int): (A, Tree[A]) = index match {
