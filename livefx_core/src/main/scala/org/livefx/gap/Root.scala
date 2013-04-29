@@ -12,4 +12,5 @@ final case class Root[+A](child: Tree[A] = Leaf0) {
   })
 
   final def update[B >: A](index: Int, value: B): Root[B] = Root(child.update(index, value))
+  final def remove(index: Int): (A, Root[A]) = child.remove(index) match { case (value, nc) => (value, Root(nc)) }
 }

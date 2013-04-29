@@ -17,12 +17,14 @@ final case object Leaf0 extends Leaf[Nothing] {
   final override def dropCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
   final override def toList[B](acc: List[B]): List[B] = acc
   
-  final override def insert[A](index: Int, value: A): Leaf[A] = index match {
+  final override def insert[B](index: Int, value: B): Leaf[B] = index match {
     case 0 => Leaf1(value)
     case _ => throw new IndexOutOfBoundsException
   }
   
-  final override def update[A](index: Int, value: A): Leaf[A] = throw new IndexOutOfBoundsException
+  final override def update[B](index: Int, value: B): Leaf[B] = throw new IndexOutOfBoundsException
+
+  final override def remove(index: Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
 }
 
 final case class Leaf1[+A](a: A) extends Leaf[A] {
@@ -50,6 +52,11 @@ final case class Leaf1[+A](a: A) extends Leaf[A] {
 
   final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
     case 0 => Leaf1(value)
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def remove(index: Int): (A, Tree[A]) = index match {
+    case 0 => (a, Leaf0)
     case _ => throw new IndexOutOfBoundsException
   }
 }
@@ -90,6 +97,12 @@ final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
       case _ => throw new IndexOutOfBoundsException
     }
   }
+
+  final override def remove(index: Int): (A, Tree[A]) = index match {
+    case 0 => (a, Leaf1(b))
+    case 1 => (b, Leaf1(a))
+    case _ => throw new IndexOutOfBoundsException
+  }
 }
 
 final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
@@ -125,6 +138,13 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
     case 0 => Leaf3(value, b, c)
     case 1 => Leaf3(a, value, c)
     case 2 => Leaf3(a, b, value)
+    case _ => throw new IndexOutOfBoundsException
+  }
+
+  final override def remove(index: Int): (A, Tree[A]) = index match {
+    case 0 => (a, Leaf2(b, c))
+    case 1 => (b, Leaf2(a, c))
+    case 2 => (c, Leaf2(a, b))
     case _ => throw new IndexOutOfBoundsException
   }
 }
@@ -168,6 +188,14 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
     case 3 => Leaf4(a, b, c, value)
     case _ => throw new IndexOutOfBoundsException
   }
+
+  final override def remove(index: Int): (A, Tree[A]) = index match {
+    case 0 => (a, Leaf3(b, c, d))
+    case 1 => (b, Leaf3(a, c, d))
+    case 2 => (c, Leaf3(a, b, d))
+    case 3 => (d, Leaf3(a, b, c))
+    case _ => throw new IndexOutOfBoundsException
+  }
 }
 
 final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
@@ -187,6 +215,12 @@ final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
 
   final override def update[B >: A](index: Int, value: B): Leaf[B] = {
     LeafN(vs.take(index) ::: value :: vs.drop(index + 1), size)
+  }
+
+  final override def remove(index: Int): (A, Tree[A]) = {
+    val myInit = vs.take(index)
+    val myTail = vs.drop(index)
+    (myTail.head, LeafN(myInit ::: myTail.tail, count - 1))
   }
 }
 

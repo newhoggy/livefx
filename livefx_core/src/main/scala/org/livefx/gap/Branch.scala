@@ -20,6 +20,8 @@ final object Branch0 extends Branch[Nothing] {
   final override def insert[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
 
   final override def update[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
+
+  final override def remove(index: Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
 }
 
 final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
@@ -65,6 +67,14 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
     }
 
     throw new IndexOutOfBoundsException
+  }
+
+  final override def remove(index: Int): (A, Tree[A]) = {
+    val (v, na) = a.remove(index)
+
+    if (na.count == 0) throw new IndexOutOfBoundsException
+    
+    (v, Branch1(na))
   }
 }
 
@@ -127,6 +137,26 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
 
     if (i < b.size) {
       return Branch2(a, b.update(i, value))
+    }
+
+    throw new IndexOutOfBoundsException
+  }
+
+  final override def remove(index: Int): (A, Tree[A]) = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      val (v, na) = a.remove(index)
+      return if (na.count == 0) (v, Branch1(b)) else (v, Branch2(na, b))
+    }
+
+    i -= a.size
+
+    if (i < b.size) {
+      val (v, nb) = b.remove(index)
+      return if (nb.count == 0) (v, Branch1(b)) else (v, Branch2(a, nb))
     }
 
     throw new IndexOutOfBoundsException
@@ -209,6 +239,33 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
 
     if (i < c.size) {
       return Branch3(a, b, c.update(i, value))
+    }
+
+    throw new IndexOutOfBoundsException
+  }
+
+  final override def remove(index: Int): (A, Tree[A]) = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      val (v, na) = a.remove(index)
+      return if (na.count == 0) (v, Branch1(b)) else (v, Branch3(na, b, c))
+    }
+
+    i -= a.size
+
+    if (i < b.size) {
+      val (v, nb) = b.remove(index)
+      return if (nb.count == 0) (v, Branch1(b)) else (v, Branch3(a, nb, c))
+    }
+
+    i -= b.size
+
+    if (i < c.size) {
+      val (v, nc) = c.remove(index)
+      return if (nc.count == 0) (v, Branch1(b)) else (v, Branch3(a, b, nc))
     }
 
     throw new IndexOutOfBoundsException
@@ -313,6 +370,40 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
 
     throw new IndexOutOfBoundsException
   }
+
+  final override def remove(index: Int): (A, Tree[A]) = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      val (v, na) = a.remove(index)
+      return if (na.count == 0) (v, Branch1(b)) else (v, Branch4(na, b, c, d))
+    }
+
+    i -= a.size
+
+    if (i < b.size) {
+      val (v, nb) = b.remove(index)
+      return if (nb.count == 0) (v, Branch1(b)) else (v, Branch4(a, nb, c, d))
+    }
+
+    i -= b.size
+
+    if (i < c.size) {
+      val (v, nc) = c.remove(index)
+      return if (nc.count == 0) (v, Branch1(b)) else (v, Branch4(a, b, nc, d))
+    }
+
+    i -= c.size
+
+    if (i < d.size) {
+      val (v, nd) = d.remove(index)
+      return if (nd.count == 0) (v, Branch1(b)) else (v, Branch4(a, b, c, nd))
+    }
+
+    throw new IndexOutOfBoundsException
+  }
 }
 
 final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
@@ -371,6 +462,39 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
     
     if (i >= 0) {
       Branch(nts)
+    } else {
+      throw new IndexOutOfBoundsException
+    }
+  }
+  
+  final override def remove(index: Int): (A, Tree[A]) = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    var v: Option[A] = None
+    
+    val nts = ts.flatMap { t =>
+      val result = if (i <= t.size) {
+        val (nv, nt) = t.remove(i)
+        v = Some(nv)
+        if (nt.count == 0) {
+          List()
+        } else {
+          List(nt)
+        }
+      } else {
+        List(t)
+      }
+      
+      i -= t.size
+      result
+    }
+    
+    if (i >= 0) {
+      v match {
+        case Some(v) => (v, Branch(nts))
+        case _ => throw new IndexOutOfBoundsException
+      }
     } else {
       throw new IndexOutOfBoundsException
     }
