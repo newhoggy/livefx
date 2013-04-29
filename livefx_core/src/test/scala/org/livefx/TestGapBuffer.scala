@@ -19,15 +19,15 @@ class TestGapBuffer {
           list.insert(index, i)
           tree = tree.insert(index, i)
         case 1 =>
-//          if (list.size > 0) {
-//            val index = random.nextInt(list.size)
-//            println(s"--> (${list.size})update($index, $i)")
-//            list(index) = i
-//            tree = tree.update(index, i)
-//          }
+          if (list.size > 0) {
+            val index = random.nextInt(list.size)
+            println(s"--> ($list.update($index, $i)")
+            list(index) = i
+            tree = tree.update(index, i)
+          }
       }
 
-      println(s"--> tree: $tree")
+      println(s"--> tree: $tree, ${tree.toList(Nil)}, $list")
       Assert.assertEquals(list.toList, tree.toList(Nil))
     }
 

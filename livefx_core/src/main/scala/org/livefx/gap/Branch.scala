@@ -18,6 +18,8 @@ final object Branch0 extends Branch[Nothing] {
   final override def dropCount(count: Int): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
 
   final override def insert[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
+
+  final override def update[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
 }
 
 final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
@@ -36,7 +38,7 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
     case 1 => Branch0
     case _ => throw new IndexOutOfBoundsException
   }
-  
+
   final override def insert[B >: A](index: Int, value: B): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
@@ -48,6 +50,18 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
         case Leaf4(ca, cb, cc, cd) => Branch2(Leaf2(ca, cb), Leaf2(cc, cd))
         case newA => Branch1(newA)
       }
+    }
+
+    throw new IndexOutOfBoundsException
+  }
+
+  final override def update[B >: A](index: Int, value: B): Branch[B] = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      return Branch1(a.update(i, value))
     }
 
     throw new IndexOutOfBoundsException
@@ -74,7 +88,6 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   }
 
   final override def insert[B >: A](index: Int, value: B): Branch[B] = {
-    println(s"Branch2($a, $b).insert($index, $value)")
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -95,6 +108,25 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
         case Leaf4(ca, cb, cc, cd) => Branch3(a, Leaf2(ca, cb), Leaf2(cc, cd))
         case nb => Branch2(a, nb)
       }
+    }
+
+    throw new IndexOutOfBoundsException
+  }
+
+  final override def update[B >: A](index: Int, value: B): Branch[B] = {
+    println(s"Branch2($a, $b).update($index, $value)")
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      return Branch2(a.update(i, value), b)
+    }
+
+    i -= a.size
+
+    if (i < b.size) {
+      return Branch2(a, b.update(i, value))
     }
 
     throw new IndexOutOfBoundsException
@@ -157,6 +189,30 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
 
     throw new IndexOutOfBoundsException
   }
+
+  final override def update[B >: A](index: Int, value: B): Branch[B] = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      return Branch3(a.update(i, value), b, c)
+    }
+
+    i -= a.size
+
+    if (i < b.size) {
+      return Branch3(a, b.update(i, value), c)
+    }
+
+    i -= b.size
+
+    if (i < c.size) {
+      return Branch3(a, b, c.update(i, value))
+    }
+
+    throw new IndexOutOfBoundsException
+  }
 }
 
 final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) extends Branch[A] {
@@ -191,7 +247,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
       return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(Branch2(ca, cb), Branch2(cc, cd), b, c, d), 5)
         case Leaf4(ca, cb, cc, cd) => BranchN(List(Leaf2(ca, cb), Leaf2(cc, cd), b, c, d), 5)
-        case na => Branch3(na, b, c)
+        case na => Branch4(na, b, c, d)
       }
     }
 
@@ -201,7 +257,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
       return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, Branch2(ca, cb), Branch2(cc, cd), c, d), 5)
         case Leaf4(ca, cb, cc, cd) => BranchN(List(a, Leaf2(ca, cb), Leaf2(cc, cd), c, d), 5)
-        case nb => Branch3(a, nb, c)
+        case nb => Branch4(a, nb, c, d)
       }
     }
 
@@ -211,7 +267,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
       return c.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, Branch2(ca, cb), Branch2(cc, cd), d), 5)
         case Leaf4(ca, cb, cc, cd) => BranchN(List(a, b, Leaf2(ca, cb), Leaf2(cc, cd), d), 5)
-        case nc => Branch3(a, b, nc)
+        case nc => Branch4(a, b, nc, d)
       }
     }
 
@@ -221,8 +277,38 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
       return d.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, c, Branch2(ca, cb), Branch2(cc, cd), d), 5)
         case Leaf4(ca, cb, cc, cd) => BranchN(List(a, b, c, Leaf2(ca, cb), Leaf2(cc, cd)), 5)
-        case nc => Branch3(a, b, nc)
+        case nd => Branch4(a, b, c, nd)
       }
+    }
+
+    throw new IndexOutOfBoundsException
+  }
+
+  final override def update[B >: A](index: Int, value: B): Branch[B] = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    if (i < a.size) {
+      return Branch4(a.update(i, value), b, c, d)
+    }
+
+    i -= a.size
+
+    if (i < b.size) {
+      return Branch4(a, b.update(i, value), c, d)
+    }
+
+    i -= b.size
+
+    if (i < c.size) {
+      return Branch4(a, b, c.update(i, value), d)
+    }
+
+    i -= c.size
+
+    if (i < d.size) {
+      return Branch4(a, b, c, d.update(i, value))
     }
 
     throw new IndexOutOfBoundsException
@@ -254,6 +340,29 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
         }
       } else {
         Nil
+      }
+      
+      i -= t.size
+      result
+    }
+    
+    if (i >= 0) {
+      Branch(nts)
+    } else {
+      throw new IndexOutOfBoundsException
+    }
+  }
+
+  final override def update[B >: A](index: Int, value: B): Branch[B] = {
+    if (index < 0) throw new IndexOutOfBoundsException
+    
+    var i = index
+    
+    val nts = ts.map { t =>
+      val result = if (i <= t.size) {
+        t.update(i, value)
+      } else {
+        t
       }
       
       i -= t.size
