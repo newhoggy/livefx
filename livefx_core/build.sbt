@@ -13,6 +13,8 @@ ProguardKeys.options in Proguard ++= Seq("-dontnote", "-dontwarn", "-ignorewarni
 ProguardKeys.options in Proguard += ProguardOptions.keepMain("org.livefx.*")
 
 // From http://www.scala-sbt.org/release/docs/Community/Using-Sonatype.html
+// https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+// https://github.com/harrah/xsbt/wiki/Publishing
 
 publishMavenStyle := true
 
