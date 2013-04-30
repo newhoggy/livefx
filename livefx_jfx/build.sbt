@@ -53,3 +53,10 @@ pomExtra := (
     </developer>
   </developers>)
 
+JFX.mainClass := Some("org.livefx.app.Main")
+
+JFX.devKit := JFX.jdk(System.getenv("JAVA_HOME"))
+
+JFX.addJfxrtToClasspath := true
+
+jfxSettings
