@@ -4,3 +4,5 @@ resolvers += Resolver.url("sbt-plugin-snapshots", url("http://repo.scala-sbt.org
  
 addSbtPlugin("com.typesafe.sbt" % "sbt-proguard" % "0.2.1")
 
+addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8")
+
