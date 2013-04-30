@@ -15,8 +15,11 @@ object XSDK extends Build {
     .aggregate(livefx_core).settings(commonSettings: _*)
     .aggregate(livefx_jfx).settings(commonSettings: _*)
 
-  lazy val livefx_core = Project(id = "livefx_core", base = file("livefx_core")).settings(commonSettings: _*)
+  lazy val livefx_core = Project(id = "livefx_core", base = file("livefx_core"))
+    .settings(commonSettings: _*)
 
-  lazy val livefx_jfx = Project(id = "livefx_jfx", base = file("livefx_jfx")).settings(commonSettings: _*)
+  lazy val livefx_jfx = Project(id = "livefx_jfx", base = file("livefx_jfx"))
+    .settings(commonSettings: _*)
+    .dependsOn(livefx_core)
 }
 
