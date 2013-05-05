@@ -3,7 +3,7 @@ import Keys._
 
 object XSDK extends Build {
   lazy val buildSettings = Seq(
-      organization := "com.github.kevinwright.macroflection",
+      organization := "com.timesprint",
       scalaVersion := "2.10.1",
       scalacOptions := Seq("-feature", "-deprecation", "-unchecked", "-Xlint", "-Yrangepos", "-encoding", "utf8"),
       scalacOptions in (console) += "-Yrangepos"
@@ -11,7 +11,7 @@ object XSDK extends Build {
 
   lazy val commonSettings = Defaults.defaultSettings ++ buildSettings
 
-  lazy val root = Project(id = "observesfx", base = file("."))
+  lazy val root = Project(id = "livefx", base = file("."))
     .aggregate(livefx_core).settings(commonSettings: _*)
     .aggregate(livefx_jfx).settings(commonSettings: _*)
 
