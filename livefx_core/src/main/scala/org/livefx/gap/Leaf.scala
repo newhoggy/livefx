@@ -5,82 +5,85 @@ import org.livefx.debug._
 import org.livefx.LeftOrRight
 
 trait Leaf[+A] extends Tree[A] {
-  override def insert[B >: A](index: Int, value: B): Leaf[B]
-  override def takeCount(count: Int): Leaf[A]
-  override def dropCount(count: Int): Leaf[A]
+  override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B]
+  override def takeCount(count: Int)(implicit vg: A => Int): Leaf[A]
+  override def dropCount(count: Int)(implicit vg: A => Int): Leaf[A]
 }
 
 final case object Leaf0 extends Leaf[Nothing] {
   final override def size: Int = 0
   final override def count: Int = 0
-  final override def takeCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
-  final override def dropCount(count: Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
+  final override def volume: Int = 0
+  final override def takeCount(count: Int)(implicit vg: Nothing => Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
+  final override def dropCount(count: Int)(implicit vg: Nothing => Int): this.type = if (count == 0) this else throw new IndexOutOfBoundsException
   final override def toList[B](acc: List[B]): List[B] = acc
   
-  final override def insert[B](index: Int, value: B): Leaf[B] = index match {
+  final override def insert[B](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf1(value)
     case _ => throw new IndexOutOfBoundsException
   }
   
-  final override def update[B](index: Int, value: B): Leaf[B] = throw new IndexOutOfBoundsException
+  final override def update[B](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = throw new IndexOutOfBoundsException
 
-  final override def remove(index: Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
+  final override def remove(index: Int)(implicit vg: Nothing => Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
 }
 
-final case class Leaf1[+A](a: A) extends Leaf[A] {
+final case class Leaf1[+A](a: A)(implicit vg: A => Int) extends Leaf[A] {
   final override def size: Int = 1
   final override def count: Int = 1
+  final override val volume: Int = vg(a) 
   final override def toList[B >: A](acc: List[B]): List[B] = a::acc
 
-  final override def takeCount(count: Int): Leaf[A] = count match {
+  final override def takeCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => Leaf0
     case 1 => this
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int): Leaf[A] = count match {
+  final override def dropCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => this
     case 1 => Leaf0
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf2(value, a)
     case 1 => Leaf2(a, value)
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf1(value)
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int): (A, Tree[A]) = index match {
+  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = index match {
     case 0 => (a, Leaf0)
     case _ => throw new IndexOutOfBoundsException
   }
 }
 
-final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
+final case class Leaf2[+A](a: A, b: A)(implicit vg: A => Int) extends Leaf[A] {
   final override def size: Int = 2
   final override def count: Int = 2
+  final override val volume: Int = vg(a) + vg(b)
   final override def toList[B >: A](acc: List[B]): List[B] = a::b::acc
 
-  final override def takeCount(count: Int): Leaf[A] = count match {
+  final override def takeCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => Leaf0
     case 1 => Leaf1(a)
     case 2 => this
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int): Leaf[A] = count match {
+  final override def dropCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => this
     case 1 => Leaf1(b)
     case 2 => Leaf0
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = {
     index match {
       case 0 => Leaf3(value, a, b)
       case 1 => Leaf3(a, value, b)
@@ -89,25 +92,26 @@ final case class Leaf2[+A](a: A, b: A) extends Leaf[A] {
     }
   }
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf2(value, b)
     case 1 => Leaf2(a, value)
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int): (A, Tree[A]) = index match {
+  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = index match {
     case 0 => (a, Leaf1(b))
     case 1 => (b, Leaf1(a))
     case _ => throw new IndexOutOfBoundsException
   }
 }
 
-final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
+final case class Leaf3[+A](a: A, b: A, c: A)(implicit vg: A => Int) extends Leaf[A] {
   final override def size: Int = 3
   final override def count: Int = 3
+  final override val volume: Int = vg(a) + vg(b)
   final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::acc
 
-  final override def takeCount(count: Int): Leaf[A] = count match {
+  final override def takeCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => Leaf0
     case 1 => Leaf1(a)
     case 2 => Leaf2(a, b)
@@ -115,7 +119,7 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int): Leaf[A] = count match {
+  final override def dropCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => this
     case 1 => Leaf2(b, c)
     case 3 => Leaf1(c)
@@ -123,7 +127,7 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf4(value, a, b, c)
     case 1 => Leaf4(a, value, b, c)
     case 2 => Leaf4(a, b, value, c)
@@ -131,14 +135,14 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf3(value, b, c)
     case 1 => Leaf3(a, value, c)
     case 2 => Leaf3(a, b, value)
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int): (A, Tree[A]) = index match {
+  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = index match {
     case 0 => (a, Leaf2(b, c))
     case 1 => (b, Leaf2(a, c))
     case 2 => (c, Leaf2(a, b))
@@ -146,12 +150,13 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
   }
 }
 
-final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
+final case class Leaf4[+A](a: A, b: A, c: A, d: A)(implicit vg: A => Int) extends Leaf[A] {
   final override def size: Int = 4
   final override def count: Int = 4
+  final override val volume: Int = vg(a) + vg(b) + vg(c) + vg(d)
   final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::d::acc
 
-  final override def takeCount(count: Int): Leaf[A] = count match {
+  final override def takeCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => Leaf0
     case 1 => Leaf1(a)
     case 2 => Leaf2(a, b)
@@ -160,7 +165,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int): Leaf[A] = count match {
+  final override def dropCount(count: Int)(implicit vg: A => Int): Leaf[A] = count match {
     case 0 => this
     case 1 => Leaf3(b, c, d)
     case 2 => Leaf2(c, d)
@@ -169,7 +174,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => LeafN(List(value, a, b, c, d), 5)
     case 1 => LeafN(List(a, value, b, c, d), 5)
     case 2 => LeafN(List(a, b, value, c, d), 5)
@@ -178,7 +183,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
+  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = index match {
     case 0 => Leaf4(value, b, c, d)
     case 1 => Leaf4(a, value, c, d)
     case 2 => Leaf4(a, b, value, d)
@@ -186,7 +191,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int): (A, Tree[A]) = index match {
+  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = index match {
     case 0 => (a, Leaf3(b, c, d))
     case 1 => (b, Leaf3(a, c, d))
     case 2 => (c, Leaf3(a, b, d))
@@ -195,26 +200,27 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
   }
 }
 
-final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
+final case class LeafN[+A](vs: List[A], size: Int)(implicit vg: A => Int) extends Leaf[A] {
   assert(vs.size == size)
-
+  final override val volume: Int = vs.foldLeft(0)(_ + vg(_))
+  
   final override def count: Int = size
 
-  final override def takeCount(count: Int): Leaf[A] = Leaf(vs.take(count), count)
+  final override def takeCount(count: Int)(implicit vg: A => Int): Leaf[A] = Leaf(vs.take(count), count)
 
-  final override def dropCount(count: Int): Leaf[A] = Leaf(vs.drop(count), this.count - count)
+  final override def dropCount(count: Int)(implicit vg: A => Int): Leaf[A] = Leaf(vs.drop(count), this.count - count)
 
   final override def toList[B >: A](acc: List[B]): List[B] = vs:::acc
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = {
     LeafN(vs.take(index) ::: value :: vs.drop(index), size + 1)
   }
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = {
+  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B] = {
     LeafN(vs.take(index) ::: value :: vs.drop(index + 1), size)
   }
 
-  final override def remove(index: Int): (A, Tree[A]) = {
+  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = {
     val myInit = vs.take(index)
     val myTail = vs.drop(index)
     (myTail.head, LeafN(myInit ::: myTail.tail, count - 1))
@@ -222,11 +228,11 @@ final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
 }
 
 final object LeafN {
-  def apply[A](vs: List[A]): LeafN[A] = LeafN(vs, vs.size)
+  def apply[A](vs: List[A])(implicit vg: A => Int): LeafN[A] = LeafN(vs, vs.size)
 }
 
 final object Leaf {
-  def apply[A](vs: List[A], count: Int): Leaf[A] = {
+  def apply[A](vs: List[A], count: Int)(implicit vg: A => Int): Leaf[A] = {
     assert(count == vs.size)
     count match {
       case 0 => Leaf0
