@@ -1,4 +1,4 @@
-package org.livefx.gap
+package org.livefx.volume
 
 final case class Root[+A](child: Tree[A] = Leaf0)(implicit vg: A => Int) {
   final def size: Int = child.size

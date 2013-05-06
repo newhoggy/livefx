@@ -1,8 +1,6 @@
-package org.livefx.gap
+package org.livefx.volume
 
-import org.livefx.Debug
 import org.livefx.debug._
-import org.livefx.LeftOrRight
 
 trait Leaf[+A] extends Tree[A] {
   override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Leaf[B]

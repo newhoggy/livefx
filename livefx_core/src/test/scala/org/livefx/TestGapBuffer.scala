@@ -2,7 +2,7 @@ package org.livefx
 
 import org.junit.Test
 import org.junit.Assert
-import org.livefx.gap._
+import org.livefx.volume._
 
 class TestGapBuffer {
   @Test

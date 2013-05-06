@@ -1,6 +1,5 @@
-package org.livefx.gap
+package org.livefx.volume
 
-import org.livefx.Debug
 import org.livefx.debug._
 
 trait Branch[+A] extends Tree[A] {

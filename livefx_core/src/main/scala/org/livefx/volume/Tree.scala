@@ -1,8 +1,6 @@
-package org.livefx.gap
+package org.livefx.volume
 
 import org.livefx.debug._
-import scala.annotation.tailrec
-import org.livefx.LeftOrRight
 
 trait Tree[+A] {
   def size: Int
