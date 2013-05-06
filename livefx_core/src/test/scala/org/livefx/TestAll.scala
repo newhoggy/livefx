@@ -7,5 +7,6 @@ import org.junit.runners.Suite
 @Suite.SuiteClasses(Array(
     classOf[TestGapBuffer],
     classOf[TestObservableSeq],
-    classOf[TestSimpleProperty]))
+    classOf[TestSimpleProperty],
+    classOf[TestOldVolumeTree]))
 class TestAll

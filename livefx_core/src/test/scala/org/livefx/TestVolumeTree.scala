@@ -4,7 +4,7 @@ import org.livefx.old.volume.redblack._
 import org.junit.Test
 import org.junit.Assert
 
-class TestVolumeTree {
+class TestOldVolumeTree {
   @Test
   def test1(): Unit = {
     val random = new scala.util.Random(0)
