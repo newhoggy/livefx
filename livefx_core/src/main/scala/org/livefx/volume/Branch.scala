@@ -3,9 +3,9 @@ package org.livefx.volume
 import org.livefx.debug._
 
 trait Branch[+A] extends Tree[A] {
-  override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B]
-  override def takeCount(count: Int)(implicit vg: A => Int): Branch[A]
-  override def dropCount(count: Int)(implicit vg: A => Int): Branch[A]
+  override def insert[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B]
+  override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A]
+  override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A]
 }
 
 final object Branch0 extends Branch[Nothing] {
@@ -14,35 +14,35 @@ final object Branch0 extends Branch[Nothing] {
   final override val volume: Int = 0
   final override def toList[B](acc: List[B]): List[B] = acc
 
-  final override def takeCount(count: Int)(implicit vg: Nothing => Int): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
-  final override def dropCount(count: Int)(implicit vg: Nothing => Int): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[Nothing, Int]): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[Nothing, Int]): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
 
-  final override def insert[B](index: Int, value: B)(implicit vg: B => Int): Branch[B] = throw new IndexOutOfBoundsException
+  final override def insert[B](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = throw new IndexOutOfBoundsException
 
-  final override def update[B](index: Int, value: B)(implicit vg: B => Int): Branch[B] = throw new IndexOutOfBoundsException
+  final override def update[B](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = throw new IndexOutOfBoundsException
 
-  final override def remove(index: Int)(implicit vg: Nothing => Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
+  final override def remove(index: Int)(implicit hm: HasMonoid[Nothing, Int]): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
 }
 
-final case class Branch1[+A](a: Tree[A])(implicit vg: A => Int) extends Branch[A] {
+final case class Branch1[+A](a: Tree[A])(implicit hm: HasMonoid[A, Int]) extends Branch[A] {
   final override val size: Int = a.size
   final override def count: Int = 1
   final override val volume: Int = a.volume
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(acc)
 
-  final override def takeCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => Branch0
     case 1 => this
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => this
     case 1 => Branch0
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -58,7 +58,7 @@ final case class Branch1[+A](a: Tree[A])(implicit vg: A => Int) extends Branch[A
     throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def update[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -70,7 +70,7 @@ final case class Branch1[+A](a: Tree[A])(implicit vg: A => Int) extends Branch[A
     throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = {
+  final override def remove(index: Int)(implicit hm: HasMonoid[A, Int]): (A, Tree[A]) = {
     val (v, na) = a.remove(index)
 
     if (na.count == 0) {
@@ -87,21 +87,21 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   final override val volume: Int = a.volume + b.volume
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(acc))
 
-  final override def takeCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => Branch0
     case 1 => Branch1(a)
     case 2 => this
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => this
     case 1 => Branch1(b)
     case 2 => Branch0
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -127,7 +127,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
     throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def update[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -145,7 +145,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
     throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = {
+  final override def remove(index: Int)(implicit hm: HasMonoid[A, Int]): (A, Tree[A]) = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -172,7 +172,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
   final override val volume: Int = a.volume + b.volume + c.volume
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(c.toList(acc)))
 
-  final override def takeCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => Branch0
     case 1 => Branch1(a)
     case 2 => Branch2(a, b)
@@ -180,7 +180,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => this
     case 1 => Branch2(b, c)
     case 2 => Branch1(c)
@@ -188,7 +188,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -224,7 +224,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def update[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -248,7 +248,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = {
+  final override def remove(index: Int)(implicit hm: HasMonoid[A, Int]): (A, Tree[A]) = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -282,7 +282,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
   final override val volume: Int = a.volume + b.volume + c.volume + d.volume
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(c.toList(d.toList(acc))))
 
-  final override def takeCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => Branch0
     case 1 => Branch1(a)
     case 2 => Branch2(a, b)
@@ -291,7 +291,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def dropCount(count: Int)(implicit vg: A => Int): Branch[A] = count match {
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => this
     case 1 => Branch3(b, c, d)
     case 2 => Branch2(c, d)
@@ -300,7 +300,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     case _ => throw new IndexOutOfBoundsException
   }
 
-  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -346,7 +346,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     throw new IndexOutOfBoundsException
   }
 
-  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def update[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -376,7 +376,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     throw new IndexOutOfBoundsException
   }
 
-  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = {
+  final override def remove(index: Int)(implicit hm: HasMonoid[A, Int]): (A, Tree[A]) = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -418,13 +418,13 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
   
   final override val volume: Int = ts.foldRight(0)(_.volume + _)
 
-  final override def takeCount(count: Int)(implicit vg: A => Int): Branch[A] = Branch(ts.take(count), count)
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = Branch(ts.take(count), count)
 
-  final override def dropCount(count: Int)(implicit vg: A => Int): Branch[A] = Branch(ts.drop(count), this.count - count)
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = Branch(ts.drop(count), this.count - count)
   
   final override def toList[B >: A](acc: List[B]): List[B] = ts.foldRight(acc)((t, acc) => t.toList(acc))
 
-  final override def insert[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def insert[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -451,7 +451,7 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
     }
   }
 
-  final override def update[B >: A](index: Int, value: B)(implicit vg: B => Int): Branch[B] = {
+  final override def update[B >: A](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -474,7 +474,7 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
     }
   }
   
-  final override def remove(index: Int)(implicit vg: A => Int): (A, Tree[A]) = {
+  final override def remove(index: Int)(implicit hm: HasMonoid[A, Int]): (A, Tree[A]) = {
     if (index < 0) throw new IndexOutOfBoundsException
     
     var i = index
@@ -509,7 +509,7 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
 }
 
 final object Branch {
-  def apply[A](ts: List[Tree[A]], count: Int)(implicit vg: A => Int): Branch[A] = ts match {
+  def apply[A](ts: List[Tree[A]], count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = ts match {
     case List() => Branch0
     case List(a) => Branch1(a)
     case List(a, b) => Branch2(a, b)
@@ -518,7 +518,7 @@ final object Branch {
     case ts => BranchN(ts, count)
   }
 
-  def apply[A](ts: List[Tree[A]])(implicit vg: A => Int): Branch[A] = ts match {
+  def apply[A](ts: List[Tree[A]])(implicit hm: HasMonoid[A, Int]): Branch[A] = ts match {
     case List() => Branch0
     case List(a) => Branch1(a)
     case List(a, b) => Branch2(a, b)

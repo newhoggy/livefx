@@ -8,6 +8,11 @@ class TestGapBuffer {
   @Test
   def test1(): Unit = {
     val random = new scala.util.Random(0)
+    implicit val hm: HasMonoid[Int, Int] = new HasMonoid[Int, Int] {
+      final override def monoidOf(value: Int): Int = value
+      final override def append(a: Int, b: => Int): Int = a + b
+      final override val zero: Int = 0
+    }
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
     var tree: Root[Int] = Root[Int]()
 
