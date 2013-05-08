@@ -3,17 +3,18 @@ package org.livefx
 import org.junit.Test
 import org.junit.Assert
 import org.livefx.volume._
+import scalaz._
 
 class TestGapBuffer {
   @Test
   def test1(): Unit = {
     val random = new scala.util.Random(0)
-    implicit val hm: HasMonoid[Int, Int] = new HasMonoid[Int, Int] {
-      final override def monoidOf(value: Int): Int = value
-      final override def append(a: Int, b: => Int): Int = a + b
-      final override val zero: Int = 0
-    }
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
+    implicit def size(a: Int): Int = a
+    implicit object IntMonoid extends Monoid[Int] {
+      override def append(a: Int, b: => Int): Int = a + b
+      override def zero: Int = 0
+    }
     var tree: Root[Int, Int] = Root[Int, Int]()
 
     for (i <- 0 to 100) {
