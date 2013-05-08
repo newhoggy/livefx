@@ -9,7 +9,7 @@ trait Leaf[+A, M] extends Tree[A, M] {
   override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A, M]
 }
 
-final case class Leaf0[M]() extends Leaf[Nothing, M] {
+final case class Leaf0[M: Monoid]() extends Leaf[Nothing, M] {
   final override def size: Int = 0
   final override def count: Int = 0
   final override def volume: Int = 0
@@ -27,7 +27,7 @@ final case class Leaf0[M]() extends Leaf[Nothing, M] {
   final override def remove(index: Int)(implicit hm: HasMonoid[Nothing, Int]): (Nothing, Tree[Nothing, M]) = throw new IndexOutOfBoundsException
 }
 
-final case class Leaf1[+A, M](a: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
+final case class Leaf1[+A, M: Monoid](a: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
   final override def size: Int = 1
   final override def count: Int = 1
   final override val volume: Int = hm.monoidOf(a)
@@ -62,7 +62,7 @@ final case class Leaf1[+A, M](a: A)(implicit hm: HasMonoid[A, Int]) extends Leaf
   }
 }
 
-final case class Leaf2[+A, M](a: A, b: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
+final case class Leaf2[+A, M: Monoid](a: A, b: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
   final override def size: Int = 2
   final override def count: Int = 2
   final override val volume: Int = hm.monoidOf(a) + hm.monoidOf(b)
@@ -104,7 +104,7 @@ final case class Leaf2[+A, M](a: A, b: A)(implicit hm: HasMonoid[A, Int]) extend
   }
 }
 
-final case class Leaf3[+A, M](a: A, b: A, c: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
+final case class Leaf3[+A, M: Monoid](a: A, b: A, c: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
   final override def size: Int = 3
   final override def count: Int = 3
   final override val volume: Int = hm.monoidOf(a) + hm.monoidOf(b)
@@ -149,7 +149,7 @@ final case class Leaf3[+A, M](a: A, b: A, c: A)(implicit hm: HasMonoid[A, Int]) 
   }
 }
 
-final case class Leaf4[+A, M](a: A, b: A, c: A, d: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
+final case class Leaf4[+A, M: Monoid](a: A, b: A, c: A, d: A)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
   final override def size: Int = 4
   final override def count: Int = 4
   final override val volume: Int = hm.monoidOf(a) + hm.monoidOf(b) + hm.monoidOf(c) + hm.monoidOf(d)
@@ -199,7 +199,7 @@ final case class Leaf4[+A, M](a: A, b: A, c: A, d: A)(implicit hm: HasMonoid[A, 
   }
 }
 
-final case class LeafN[+A, M](vs: List[A], size: Int)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
+final case class LeafN[+A, M: Monoid](vs: List[A], size: Int)(implicit hm: HasMonoid[A, Int]) extends Leaf[A, M] {
   assert(vs.size == size)
   final override val volume: Int = vs.foldLeft(0)(_ + hm.monoidOf(_))
   
@@ -227,11 +227,11 @@ final case class LeafN[+A, M](vs: List[A], size: Int)(implicit hm: HasMonoid[A, 
 }
 
 final object LeafN {
-  def apply[A, M](vs: List[A])(implicit hm: HasMonoid[A, Int]): LeafN[A, M] = LeafN(vs, vs.size)
+  def apply[A, M: Monoid](vs: List[A])(implicit hm: HasMonoid[A, Int]): LeafN[A, M] = LeafN(vs, vs.size)
 }
 
 final object Leaf {
-  def apply[A, M](vs: List[A], count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A, M] = {
+  def apply[A, M: Monoid](vs: List[A], count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A, M] = {
     assert(count == vs.size)
     count match {
       case 0 => Leaf0()

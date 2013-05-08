@@ -14,7 +14,7 @@ class TestGapBuffer {
       final override val zero: Int = 0
     }
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    var tree: Root[Int] = Root[Int]()
+    var tree: Root[Int, Int] = Root[Int, Int]()
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {
