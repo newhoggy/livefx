@@ -1,3 +1,5 @@
+EclipseKeys.withSource := true
+
 javaHome := Some(file(System.getenv("JAVA_HOME")))
 
 resolvers += "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots/"

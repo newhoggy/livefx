@@ -1,5 +1,7 @@
 scalaVersion in ThisBuild := "2.10.0"
 
+EclipseKeys.withSource := true
+
 javaHome in ThisBuild := Some(file {
    Option(System.getenv("JAVA_HOME")).getOrElse {
      println("Warning: JAVA_HOME not defined")
