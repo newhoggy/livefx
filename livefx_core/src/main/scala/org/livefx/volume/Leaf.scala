@@ -9,7 +9,7 @@ trait Leaf[+A] extends Tree[A] {
   override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A]
 }
 
-final case object Leaf0 extends Leaf[Nothing] {
+final case class Leaf0() extends Leaf[Nothing] {
   final override def size: Int = 0
   final override def count: Int = 0
   final override def volume: Int = 0
@@ -34,14 +34,14 @@ final case class Leaf1[+A, V](a: A)(implicit hm: HasMonoid[A, Int]) extends Leaf
   final override def toList[B >: A](acc: List[B]): List[B] = a::acc
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = count match {
-    case 0 => Leaf0
+    case 0 => Leaf0()
     case 1 => this
     case _ => throw new IndexOutOfBoundsException
   }
 
   final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = count match {
     case 0 => this
-    case 1 => Leaf0
+    case 1 => Leaf0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -57,7 +57,7 @@ final case class Leaf1[+A, V](a: A)(implicit hm: HasMonoid[A, Int]) extends Leaf
   }
 
   final override def remove(index: Int)(implicit hm: HasMonoid[A, Int]): (A, Tree[A]) = index match {
-    case 0 => (a, Leaf0)
+    case 0 => (a, Leaf0())
     case _ => throw new IndexOutOfBoundsException
   }
 }
@@ -69,7 +69,7 @@ final case class Leaf2[+A](a: A, b: A)(implicit hm: HasMonoid[A, Int]) extends L
   final override def toList[B >: A](acc: List[B]): List[B] = a::b::acc
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = count match {
-    case 0 => Leaf0
+    case 0 => Leaf0()
     case 1 => Leaf1(a)
     case 2 => this
     case _ => throw new IndexOutOfBoundsException
@@ -78,7 +78,7 @@ final case class Leaf2[+A](a: A, b: A)(implicit hm: HasMonoid[A, Int]) extends L
   final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = count match {
     case 0 => this
     case 1 => Leaf1(b)
-    case 2 => Leaf0
+    case 2 => Leaf0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -111,7 +111,7 @@ final case class Leaf3[+A](a: A, b: A, c: A)(implicit hm: HasMonoid[A, Int]) ext
   final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::acc
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = count match {
-    case 0 => Leaf0
+    case 0 => Leaf0()
     case 1 => Leaf1(a)
     case 2 => Leaf2(a, b)
     case 3 => this
@@ -122,7 +122,7 @@ final case class Leaf3[+A](a: A, b: A, c: A)(implicit hm: HasMonoid[A, Int]) ext
     case 0 => this
     case 1 => Leaf2(b, c)
     case 3 => Leaf1(c)
-    case 4 => Leaf0
+    case 4 => Leaf0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -156,7 +156,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A)(implicit hm: HasMonoid[A, Int
   final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::d::acc
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = count match {
-    case 0 => Leaf0
+    case 0 => Leaf0()
     case 1 => Leaf1(a)
     case 2 => Leaf2(a, b)
     case 3 => Leaf3(a, b, c)
@@ -169,7 +169,7 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A)(implicit hm: HasMonoid[A, Int
     case 1 => Leaf3(b, c, d)
     case 2 => Leaf2(c, d)
     case 3 => Leaf1(d)
-    case 4 => Leaf0
+    case 4 => Leaf0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -234,7 +234,7 @@ final object Leaf {
   def apply[A](vs: List[A], count: Int)(implicit hm: HasMonoid[A, Int]): Leaf[A] = {
     assert(count == vs.size)
     count match {
-      case 0 => Leaf0
+      case 0 => Leaf0()
       case 1 => vs match { case List(a)           => Leaf1(a)           }
       case 2 => vs match { case List(a, b)        => Leaf2(a, b)        }
       case 3 => vs match { case List(a, b, c)     => Leaf3(a, b, c)     }

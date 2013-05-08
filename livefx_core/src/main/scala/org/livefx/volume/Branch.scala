@@ -8,14 +8,14 @@ trait Branch[+A] extends Tree[A] {
   override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A]
 }
 
-final object Branch0 extends Branch[Nothing] {
+final case class Branch0() extends Branch[Nothing] {
   final override val size: Int = 0
   final override def count: Int = 0
   final override val volume: Int = 0
   final override def toList[B](acc: List[B]): List[B] = acc
 
-  final override def takeCount(count: Int)(implicit hm: HasMonoid[Nothing, Int]): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
-  final override def dropCount(count: Int)(implicit hm: HasMonoid[Nothing, Int]): Branch[Nothing] = if (count == 0) Branch0 else throw new IndexOutOfBoundsException
+  final override def takeCount(count: Int)(implicit hm: HasMonoid[Nothing, Int]): Branch[Nothing] = if (count == 0) Branch0() else throw new IndexOutOfBoundsException
+  final override def dropCount(count: Int)(implicit hm: HasMonoid[Nothing, Int]): Branch[Nothing] = if (count == 0) Branch0() else throw new IndexOutOfBoundsException
 
   final override def insert[B](index: Int, value: B)(implicit hm: HasMonoid[B, Int]): Branch[B] = throw new IndexOutOfBoundsException
 
@@ -31,14 +31,14 @@ final case class Branch1[+A](a: Tree[A])(implicit hm: HasMonoid[A, Int]) extends
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(acc)
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
-    case 0 => Branch0
+    case 0 => Branch0()
     case 1 => this
     case _ => throw new IndexOutOfBoundsException
   }
 
   final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => this
-    case 1 => Branch0
+    case 1 => Branch0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -74,7 +74,7 @@ final case class Branch1[+A](a: Tree[A])(implicit hm: HasMonoid[A, Int]) extends
     val (v, na) = a.remove(index)
 
     if (na.count == 0) {
-      (v, Branch0)
+      (v, Branch0())
     } else {
       (v, Branch1(na))
     }
@@ -88,7 +88,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(acc))
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
-    case 0 => Branch0
+    case 0 => Branch0()
     case 1 => Branch1(a)
     case 2 => this
     case _ => throw new IndexOutOfBoundsException
@@ -97,7 +97,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
   final override def dropCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
     case 0 => this
     case 1 => Branch1(b)
-    case 2 => Branch0
+    case 2 => Branch0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -173,7 +173,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(c.toList(acc)))
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
-    case 0 => Branch0
+    case 0 => Branch0()
     case 1 => Branch1(a)
     case 2 => Branch2(a, b)
     case 3 => this
@@ -184,7 +184,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     case 0 => this
     case 1 => Branch2(b, c)
     case 2 => Branch1(c)
-    case 3 => Branch0
+    case 3 => Branch0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -283,7 +283,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
   final override def toList[B >: A](acc: List[B]): List[B] = a.toList(b.toList(c.toList(d.toList(acc))))
 
   final override def takeCount(count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = count match {
-    case 0 => Branch0
+    case 0 => Branch0()
     case 1 => Branch1(a)
     case 2 => Branch2(a, b)
     case 3 => Branch3(a, b, c)
@@ -296,7 +296,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     case 1 => Branch3(b, c, d)
     case 2 => Branch2(c, d)
     case 3 => Branch1(d)
-    case 4 => Branch0
+    case 4 => Branch0()
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -510,7 +510,7 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
 
 final object Branch {
   def apply[A](ts: List[Tree[A]], count: Int)(implicit hm: HasMonoid[A, Int]): Branch[A] = ts match {
-    case List() => Branch0
+    case List() => Branch0()
     case List(a) => Branch1(a)
     case List(a, b) => Branch2(a, b)
     case List(a, b, c) => Branch3(a, b, c)
@@ -519,7 +519,7 @@ final object Branch {
   }
 
   def apply[A](ts: List[Tree[A]])(implicit hm: HasMonoid[A, Int]): Branch[A] = ts match {
-    case List() => Branch0
+    case List() => Branch0()
     case List(a) => Branch1(a)
     case List(a, b) => Branch2(a, b)
     case List(a, b, c) => Branch3(a, b, c)
