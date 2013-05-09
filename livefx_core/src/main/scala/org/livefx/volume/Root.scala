@@ -5,6 +5,7 @@ import scalaz.Monoid
 final case class Root[+A <% M, M: Monoid](child: Tree[A, M]) {
   final def size: Int = child.size
   final def count: Int = 0
+  final def volume: M = child.volume
   final def toList[B >: A](acc: List[B]): List[B] = child.toList(acc)
 
   final def insert[B >: A <% M](index: Int, value: B): Root[B, M] = Root(child.insert(index, value) match {
