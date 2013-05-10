@@ -125,10 +125,10 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
   }
 
   final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
-    case 0 => Leaf4(value, a, b, c)
-    case 1 => Leaf4(a, value, b, c)
-    case 2 => Leaf4(a, b, value, c)
-    case 3 => Leaf4(a, b, c, value)
+    case 0 => Leaf(value, a, b, c)
+    case 1 => Leaf(a, value, b, c)
+    case 2 => Leaf(a, b, value, c)
+    case 3 => Leaf(a, b, c, value)
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -143,55 +143,6 @@ final case class Leaf3[+A](a: A, b: A, c: A) extends Leaf[A] {
     case 0 => (a, Leaf2(b, c))
     case 1 => (b, Leaf2(a, c))
     case 2 => (c, Leaf2(a, b))
-    case _ => throw new IndexOutOfBoundsException
-  }
-}
-
-final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
-  final override def size: Int = 4
-  final override def count: Int = 4
-  final override def toList[B >: A](acc: List[B]): List[B] = a::b::c::d::acc
-
-  final override def takeCount(count: Int): Leaf[A] = count match {
-    case 0 => Leaf0
-    case 1 => Leaf1(a)
-    case 2 => Leaf2(a, b)
-    case 3 => Leaf3(a, b, c)
-    case 4 => this
-    case _ => throw new IndexOutOfBoundsException
-  }
-
-  final override def dropCount(count: Int): Leaf[A] = count match {
-    case 0 => this
-    case 1 => Leaf3(b, c, d)
-    case 2 => Leaf2(c, d)
-    case 3 => Leaf1(d)
-    case 4 => Leaf0
-    case _ => throw new IndexOutOfBoundsException
-  }
-
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
-    case 0 => LeafN(List(value, a, b, c, d))
-    case 1 => LeafN(List(a, value, b, c, d))
-    case 2 => LeafN(List(a, b, value, c, d))
-    case 3 => LeafN(List(a, b, c, value, d))
-    case 4 => LeafN(List(a, b, c, d, value))
-    case _ => throw new IndexOutOfBoundsException
-  }
-
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = index match {
-    case 0 => Leaf4(value, b, c, d)
-    case 1 => Leaf4(a, value, c, d)
-    case 2 => Leaf4(a, b, value, d)
-    case 3 => Leaf4(a, b, c, value)
-    case _ => throw new IndexOutOfBoundsException
-  }
-
-  final override def remove(index: Int): (A, Tree[A]) = index match {
-    case 0 => (a, Leaf3(b, c, d))
-    case 1 => (b, Leaf3(a, c, d))
-    case 2 => (c, Leaf3(a, b, d))
-    case 3 => (d, Leaf3(a, b, c))
     case _ => throw new IndexOutOfBoundsException
   }
 }
@@ -228,11 +179,30 @@ final object Leaf {
   def apply[A](vs: List[A]): Leaf[A] = {
     vs match {
       case List()           => Leaf0
-      case List(a)          => vs match { case List(a)           => Leaf1(a)           }
-      case List(a, b)       => vs match { case List(a, b)        => Leaf2(a, b)        }
-      case List(a, b, c)    => vs match { case List(a, b, c)     => Leaf3(a, b, c)     }
-      case List(a, b, c, d) => vs match { case List(a, b, c, d)  => Leaf4(a, b, c, d)  }
+      case List(a)          => Leaf1(a)
+      case List(a, b)       => Leaf2(a, b)
+      case List(a, b, c)    => Leaf3(a, b, c)
+      case List(a, b, c, d) => LeafN(a, b, c, d)
       case _ => LeafN(vs)
     }
+  }
+  
+  def apply[A](vs: A*): Leaf[A] = {
+    vs match {
+      case List()           => Leaf0
+      case List(a)          => vs match { case List(a)           => Leaf1(a)       }
+      case List(a, b)       => vs match { case List(a, b)        => Leaf2(a, b)    }
+      case List(a, b, c)    => vs match { case List(a, b, c)     => Leaf3(a, b, c) }
+      case List(a, b, c, d) => vs match { case List(a, b, c, d)  => Leaf(vs: _*)   }
+      case _ => LeafN(vs: _*)
+    }
+  }
+  
+  def unapplySeq[A](leaf: Leaf[A]) = leaf match {
+    case Leaf0          => Some(Nil)
+    case Leaf1(a)       => Some(List(a))
+    case Leaf2(a, b)    => Some(List(a, b))
+    case Leaf3(a, b, c) => Some(List(a, b, c))
+    case LeafN(vs)      => Some(vs)
   }
 }
