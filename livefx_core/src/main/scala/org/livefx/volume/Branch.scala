@@ -11,21 +11,6 @@ trait Branch[+A] extends Tree[A] {
   override def dropCount(count: Int): Branch[A]
 }
 
-final case class Branch0() extends Branch[Nothing] {
-  final override val size: Int = 0
-  final override def count: Int = 0
-  final override def toList[B](acc: List[B]): List[B] = acc
-
-  final override def takeCount(count: Int): Branch[Nothing] = if (count == 0) Branch0() else throw new IndexOutOfBoundsException
-  final override def dropCount(count: Int): Branch[Nothing] = if (count == 0) Branch0() else throw new IndexOutOfBoundsException
-
-  final override def insert[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
-
-  final override def update[B](index: Int, value: B): Branch[B] = throw new IndexOutOfBoundsException
-
-  final override def remove(index: Int): (Nothing, Tree[Nothing]) = throw new IndexOutOfBoundsException
-}
-
 final class BranchN[+A](val ts: List[Tree[A]]) extends Branch[A] {
   final override def count = ts.size
 
@@ -131,7 +116,7 @@ object BranchN {
 
 final object Branch {
   def apply[A](ts: List[Tree[A]], count: Int): Branch[A] = ts match {
-    case List()           => Branch0()
+    case List()           => BranchN()
     case List(a)          => BranchN(a)
     case List(a, b)       => BranchN(a, b)
     case List(a, b, c)    => BranchN(a, b, c)
@@ -140,7 +125,7 @@ final object Branch {
   }
 
   def apply[A](ts: List[Tree[A]]): Branch[A] = ts match {
-    case List()           => Branch0()
+    case List()           => BranchN()
     case List(a)          => BranchN(a)
     case List(a, b)       => BranchN(a, b)
     case List(a, b, c)    => BranchN(a, b, c)
@@ -149,7 +134,7 @@ final object Branch {
   }
   
   def apply[A](ts: Tree[A]*): Branch[A] = ts.size match {
-    case 0 => Branch0()
+    case 0 => BranchN()
     case 1 => BranchN(ts(0))
     case 2 => BranchN(ts(0), ts(1))
     case 3 => BranchN(ts(0), ts(1), ts(2))
