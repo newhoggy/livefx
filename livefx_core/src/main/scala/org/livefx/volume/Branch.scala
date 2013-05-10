@@ -4,21 +4,14 @@ import org.livefx.debug._
 import scalaz._
 import Scalaz._
 
-trait Branch[+A] extends Tree[A] {
-  override def insert[B >: A](index: Int, value: B): Branch[B]
-  override def update[B >: A](index: Int, value: B): Branch[B]
-  override def takeCount(count: Int): Branch[A]
-  override def dropCount(count: Int): Branch[A]
-}
-
-final class BranchN[+A](val ts: List[Tree[A]]) extends Branch[A] {
+final class Branch[+A](val ts: List[Tree[A]]) extends Tree[A] {
   final override def count = ts.size
 
   final override val size: Int = ts.foldRight(0)(_.size + _)
 
-  final override def takeCount(count: Int): Branch[A] = Branch(ts.take(count), count)
+  final override def takeCount(count: Int): Branch[A] = Branch(ts.take(count))
 
-  final override def dropCount(count: Int): Branch[A] = Branch(ts.drop(count), this.count - count)
+  final override def dropCount(count: Int): Branch[A] = Branch(ts.drop(count))
   
   final override def toList[B >: A](acc: List[B]): List[B] = ts.foldRight(acc)((t, acc) => t.toList(acc))
 
@@ -30,7 +23,7 @@ final class BranchN[+A](val ts: List[Tree[A]]) extends Branch[A] {
     val nts: List[Tree[B]] = ts.flatMap { t =>
       val result = if (i <= t.size) {
         (t.insert(i, value) match {
-          case BranchN(ca, cb, cc, cd) => List(BranchN(ca, cb), BranchN(cc, cd))
+          case Branch(ca, cb, cc, cd) => List(Branch(ca, cb), Branch(cc, cd))
           case Leaf(ca, cb, cc, cd) => List(Leaf(ca, cb), Leaf(cc, cd))
           case na: Tree[B] => List(na)
         }): List[Tree[B]]
@@ -106,39 +99,11 @@ final class BranchN[+A](val ts: List[Tree[A]]) extends Branch[A] {
   }
 }
 
-object BranchN {
-  def apply[A](ts: Tree[A]*) = new BranchN(List(ts: _*))
+object Branch {
+  def apply[A](ts: Tree[A]*) = new Branch(List(ts: _*))
 
-  def apply[A](ts: List[Tree[A]]) = new BranchN(ts)
+  def apply[A](ts: List[Tree[A]]) = new Branch(ts)
   
-  def unapplySeq[A](branch: BranchN[A]) = List.unapplySeq(branch.ts)
+  def unapplySeq[A](branch: Branch[A]) = List.unapplySeq(branch.ts)
 }
 
-final object Branch {
-  def apply[A](ts: List[Tree[A]], count: Int): Branch[A] = ts match {
-    case List()           => BranchN()
-    case List(a)          => BranchN(a)
-    case List(a, b)       => BranchN(a, b)
-    case List(a, b, c)    => BranchN(a, b, c)
-    case List(a, b, c, d) => BranchN(a, b, c, d)
-    case ts => BranchN(ts)
-  }
-
-  def apply[A](ts: List[Tree[A]]): Branch[A] = ts match {
-    case List()           => BranchN()
-    case List(a)          => BranchN(a)
-    case List(a, b)       => BranchN(a, b)
-    case List(a, b, c)    => BranchN(a, b, c)
-    case List(a, b, c, d) => BranchN(a, b, c, d)
-    case ts => BranchN(ts)
-  }
-  
-  def apply[A](ts: Tree[A]*): Branch[A] = ts.size match {
-    case 0 => BranchN()
-    case 1 => BranchN(ts(0))
-    case 2 => BranchN(ts(0), ts(1))
-    case 3 => BranchN(ts(0), ts(1), ts(2))
-    case 4 => BranchN(ts(0), ts(1), ts(2), ts(3))
-    case n => BranchN(ts.toList)
-  }
-}
