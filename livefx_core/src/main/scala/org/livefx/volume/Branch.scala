@@ -51,7 +51,7 @@ final case class Branch1[+A](a: Tree[A]) extends Branch[A] {
     if (i <= a.size) {
       return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch2(Branch2(ca, cb), Branch2(cc, cd))
-        case Leaf(ca, cb, cc, cd) => Branch2(Leaf2(ca, cb), Leaf2(cc, cd))
+        case Leaf(ca, cb, cc, cd) => Branch2(Leaf(ca, cb), Leaf(cc, cd))
         case newA => Branch1(newA)
       }
     }
@@ -109,7 +109,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
     if (i <= a.size) {
       return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch3(Branch2(ca, cb), Branch2(cc, cd), b)
-        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf2(ca, cb), Leaf2(cc, cd), b)
+        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf(ca, cb), Leaf(cc, cd), b)
         case na => Branch2(na, b)
       }
     }
@@ -119,7 +119,7 @@ final case class Branch2[+A](a: Tree[A], b: Tree[A]) extends Branch[A] {
     if (i <= b.size) {
       return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch3(a, Branch2(ca, cb), Branch2(cc, cd))
-        case Leaf(ca, cb, cc, cd) => Branch[B](a, Leaf2(ca, cb), Leaf2(cc, cd))
+        case Leaf(ca, cb, cc, cd) => Branch[B](a, Leaf(ca, cb), Leaf(cc, cd))
         case nb => Branch2(a, nb)
       }
     }
@@ -195,7 +195,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     if (i <= a.size) {
       return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch4(Branch2(ca, cb), Branch2(cc, cd), b, c)
-        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf2(ca, cb), Leaf2(cc, cd), b, c)
+        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf(ca, cb), Leaf(cc, cd), b, c)
         case na => Branch3(na, b, c)
       }
     }
@@ -205,7 +205,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     if (i <= b.size) {
       return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch4(a, Branch2(ca, cb), Branch2(cc, cd), c)
-        case Leaf(ca, cb, cc, cd) => Branch[B](a, Leaf2(ca, cb), Leaf2(cc, cd), c)
+        case Leaf(ca, cb, cc, cd) => Branch[B](a, Leaf(ca, cb), Leaf(cc, cd), c)
         case nb => Branch3(a, nb, c)
       }
     }
@@ -215,7 +215,7 @@ final case class Branch3[+A](a: Tree[A], b: Tree[A], c: Tree[A]) extends Branch[
     if (i <= c.size) {
       return c.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => Branch4(a, b, Branch2(ca, cb), Branch2(cc, cd))
-        case Leaf(ca, cb, cc, cd) => Branch[B](a, b, Leaf2(ca, cb), Leaf2(cc, cd))
+        case Leaf(ca, cb, cc, cd) => Branch[B](a, b, Leaf(ca, cb), Leaf(cc, cd))
         case nc => Branch3(a, b, nc)
       }
     }
@@ -306,7 +306,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     if (i <= a.size) {
       return a.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(Branch2(ca, cb), Branch2(cc, cd), b, c, d), 5)
-        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf2(ca, cb), Leaf2(cc, cd), b, c, d)
+        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf(ca, cb), Leaf(cc, cd), b, c, d)
         case na => Branch4(na, b, c, d)
       }
     }
@@ -316,7 +316,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     if (i <= b.size) {
       return b.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, Branch2(ca, cb), Branch2(cc, cd), c, d), 5)
-        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf2(ca, cb), Leaf2(cc, cd), c, d)
+        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf(ca, cb), Leaf(cc, cd), c, d)
         case nb => Branch4(a, nb, c, d)
       }
     }
@@ -326,7 +326,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     if (i <= c.size) {
       return c.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, Branch2(ca, cb), Branch2(cc, cd), d), 5)
-        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf2(ca, cb), Leaf2(cc, cd), d)
+        case Leaf(ca, cb, cc, cd) => Branch[B](Leaf(ca, cb), Leaf(cc, cd), d)
         case nc => Branch4(a, b, nc, d)
       }
     }
@@ -336,7 +336,7 @@ final case class Branch4[+A](a: Tree[A], b: Tree[A], c: Tree[A], d: Tree[A]) ext
     if (i <= d.size) {
       return d.insert(i, value) match {
         case Branch4(ca, cb, cc, cd) => BranchN(List(a, b, c, Branch2(ca, cb), Branch2(cc, cd), d), 5)
-        case Leaf(ca, cb, cc, cd) => Branch[B](a, b, c, Leaf2(ca, cb), Leaf2(cc, cd))
+        case Leaf(ca, cb, cc, cd) => Branch[B](a, b, c, Leaf(ca, cb), Leaf(cc, cd))
         case nd => Branch4(a, b, c, nd)
       }
     }
@@ -429,7 +429,7 @@ final case class BranchN[+A](ts: List[Tree[A]], count: Int) extends Branch[A] {
       val result = if (i <= t.size) {
         (t.insert(i, value) match {
           case Branch4(ca, cb, cc, cd) => List(Branch2(ca, cb), Branch2(cc, cd))
-          case Leaf(ca, cb, cc, cd) => List(Leaf2(ca, cb), Leaf2(cc, cd))
+          case Leaf(ca, cb, cc, cd) => List(Leaf(ca, cb), Leaf(cc, cd))
           case na: Tree[B] => List(na)
         }): List[Tree[B]]
       } else {
