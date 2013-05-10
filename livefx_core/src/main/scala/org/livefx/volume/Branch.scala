@@ -6,6 +6,7 @@ import Scalaz._
 
 trait Branch[+A] extends Tree[A] {
   override def insert[B >: A](index: Int, value: B): Branch[B]
+  override def update[B >: A](index: Int, value: B): Branch[B]
   override def takeCount(count: Int): Branch[A]
   override def dropCount(count: Int): Branch[A]
 }
