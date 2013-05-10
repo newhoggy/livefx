@@ -11,11 +11,6 @@ class TestGapBuffer {
     import scala.language.implicitConversions
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    implicit def size(a: Int): Int = a
-    implicit object IntMonoid extends Monoid[Int] {
-      override def append(a: Int, b: => Int): Int = a + b
-      override def zero: Int = 0
-    }
     var tree: Root[Int] = Root[Int]()
 
     for (i <- 0 to 100) {
