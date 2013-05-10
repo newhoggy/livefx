@@ -5,6 +5,9 @@ import scalaz._
 import Scalaz._
 
 final class Branch[+A](val ts: List[Tree[A]]) extends Tree[A] {
+  assert(ts.size < 5)
+  println("------")
+  
   final override def count = ts.size
 
   final override val size: Int = ts.foldRight(0)(_.size + _)

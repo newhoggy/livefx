@@ -9,15 +9,15 @@ final class Leaf[+A](val vs: List[A]) extends Tree[A] {
   
   final override def size: Int = vs.size
 
-  final override def takeCount(count: Int): Leaf[A] = new Leaf(vs.take(count))
+  final override def takeCount(count: Int): Leaf[A] = Leaf(vs.take(count))
 
-  final override def dropCount(count: Int): Leaf[A] = new Leaf(vs.drop(count))
+  final override def dropCount(count: Int): Leaf[A] = Leaf(vs.drop(count))
 
   final override def toList[B >: A](acc: List[B]): List[B] = vs:::acc
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = new Leaf(vs.take(index) ::: value :: vs.drop(index))
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = Leaf(vs.take(index) ::: value :: vs.drop(index))
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = new Leaf(vs.take(index) ::: value :: vs.drop(index + 1))
+  final override def update[B >: A](index: Int, value: B): Leaf[B] = Leaf(vs.take(index) ::: value :: vs.drop(index + 1))
 
   final override def remove(index: Int): (A, Tree[A]) = {
     val myInit = vs.take(index)
