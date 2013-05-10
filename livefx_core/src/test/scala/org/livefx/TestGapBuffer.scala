@@ -11,7 +11,7 @@ class TestGapBuffer {
     import scala.language.implicitConversions
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    var tree: volume.Tree[Int] = Leaf0
+    var tree: volume.Tree[Int] = Leaf()
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {
