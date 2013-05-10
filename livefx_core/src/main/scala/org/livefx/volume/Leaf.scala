@@ -171,11 +171,11 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
   }
 
   final override def insert[B >: A](index: Int, value: B): Leaf[B] = index match {
-    case 0 => LeafN(List(value, a, b, c, d), 5)
-    case 1 => LeafN(List(a, value, b, c, d), 5)
-    case 2 => LeafN(List(a, b, value, c, d), 5)
-    case 3 => LeafN(List(a, b, c, value, d), 5)
-    case 4 => LeafN(List(a, b, c, d, value), 5)
+    case 0 => LeafN(List(value, a, b, c, d))
+    case 1 => LeafN(List(a, value, b, c, d))
+    case 2 => LeafN(List(a, b, value, c, d))
+    case 3 => LeafN(List(a, b, c, value, d))
+    case 4 => LeafN(List(a, b, c, d, value))
     case _ => throw new IndexOutOfBoundsException
   }
 
@@ -196,46 +196,43 @@ final case class Leaf4[+A](a: A, b: A, c: A, d: A) extends Leaf[A] {
   }
 }
 
-final case class LeafN[+A](vs: List[A], size: Int) extends Leaf[A] {
-  assert(vs.size == size)
+final case class LeafN[+A](vs: List[A]) extends Leaf[A] {
+  final override def count: Int = vs.size
   
-  final override def count: Int = size
+  final override def size: Int = vs.size
 
-  final override def takeCount(count: Int): Leaf[A] = Leaf(vs.take(count), count)
+  final override def takeCount(count: Int): Leaf[A] = Leaf(vs.take(count))
 
-  final override def dropCount(count: Int): Leaf[A] = Leaf(vs.drop(count), this.count - count)
+  final override def dropCount(count: Int): Leaf[A] = Leaf(vs.drop(count))
 
   final override def toList[B >: A](acc: List[B]): List[B] = vs:::acc
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = {
-    LeafN(vs.take(index) ::: value :: vs.drop(index), size + 1)
-  }
+  final override def insert[B >: A](index: Int, value: B): Leaf[B] = LeafN(vs.take(index) ::: value :: vs.drop(index))
 
-  final override def update[B >: A](index: Int, value: B): Leaf[B] = {
-    LeafN(vs.take(index) ::: value :: vs.drop(index + 1), size)
-  }
+  final override def update[B >: A](index: Int, value: B): Leaf[B] = LeafN(vs.take(index) ::: value :: vs.drop(index + 1))
 
   final override def remove(index: Int): (A, Tree[A]) = {
     val myInit = vs.take(index)
     val myTail = vs.drop(index)
-    (myTail.head, LeafN(myInit ::: myTail.tail, count - 1))
+    (myTail.head, LeafN(myInit ::: myTail.tail))
   }
 }
 
 final object LeafN {
-  def apply[A](vs: List[A]): LeafN[A] = LeafN(vs, vs.size)
+  def apply[A](vs: A*): LeafN[A] = LeafN(vs.toList)
+  
+  def unapplySeq[A](leaf: LeafN[A]) = List.unapplySeq(leaf.vs)
 }
 
 final object Leaf {
-  def apply[A](vs: List[A], count: Int): Leaf[A] = {
-    assert(count == vs.size)
-    count match {
-      case 0 => Leaf0
-      case 1 => vs match { case List(a)           => Leaf1(a)           }
-      case 2 => vs match { case List(a, b)        => Leaf2(a, b)        }
-      case 3 => vs match { case List(a, b, c)     => Leaf3(a, b, c)     }
-      case 4 => vs match { case List(a, b, c, d)  => Leaf4(a, b, c, d)  }
-      case count => LeafN(vs, count)
+  def apply[A](vs: List[A]): Leaf[A] = {
+    vs match {
+      case List()           => Leaf0
+      case List(a)          => vs match { case List(a)           => Leaf1(a)           }
+      case List(a, b)       => vs match { case List(a, b)        => Leaf2(a, b)        }
+      case List(a, b, c)    => vs match { case List(a, b, c)     => Leaf3(a, b, c)     }
+      case List(a, b, c, d) => vs match { case List(a, b, c, d)  => Leaf4(a, b, c, d)  }
+      case _ => LeafN(vs)
     }
   }
 }
