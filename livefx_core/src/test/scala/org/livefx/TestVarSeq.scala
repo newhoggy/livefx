@@ -17,7 +17,7 @@ class TestVarSeq {
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
     val tree: VarSeq[Int] = new VarSeq[Int]()
     var change: Option[Change[Int]] = None
-    tree.changes.subscribe{(p, e) => println(e); change = Some(e)}
+    tree.changes.subscribe{(p, e) => change = Some(e)}
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {
@@ -55,12 +55,12 @@ class TestVarSeq {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
     val tree: VarSeq[Int] = new VarSeq[Int]()
+    var updateCount = 0
     val sum: LiveValue[Int] = tree.fold(new Monoid[Int] {
       override def zero: Int = 0
       override def append(a: Int, b: => Int): Int = a + b
     })
-    tree.spoils.subscribe({(p, e) => println(s"--> tree: ${tree.value}")})
-    sum.updates.subscribe({(p, e) => println(s"--> sum: ${sum.value}")})
+    sum.updates.subscribe{(p, e) => updateCount += 1; Assert.assertEquals(list.sum, sum.value)}
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {
@@ -68,12 +68,14 @@ class TestVarSeq {
           val index = random.nextInt(list.size + 1)
           list.insert(index, i)
           tree.insert(index, i)
+          updateCount -= 1
         case 1 =>
           if (list.size > 0) {
             val index = random.nextInt(list.size)
             val oldValue = list(index)
             list(index) = i
             tree(index) = i
+            updateCount -= 1
           }
       }
     }
@@ -83,6 +85,9 @@ class TestVarSeq {
       val oldValue = list(index)
       list.remove(index)
       tree.remove(index)
+      updateCount -= 1
     }
+    
+    Assert.assertEquals(0, updateCount)
   }
 }

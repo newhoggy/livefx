@@ -8,13 +8,9 @@ abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
   type Pub <: LiveBinding[A]
   
   lazy val _updates = new EventSource[Pub, Update[A]](publisher) {
-    lazy val spoilHandler = { (_: Any, spoilEvent: Spoil) =>
-      println("--> update spoiled")
-      this.publish(Update(NoLo, value, value))
-    }
+    lazy val spoilHandler = { (_: Any, spoilEvent: Spoil) => LiveBinding.this.value: Unit }
     
     override def subscribe(subscriber: (Pub, Update[A]) => Unit): Disposable = {
-      println("--> subscribe")
       LiveBinding.this.spoils.subscribe(spoilHandler)
       LiveBinding.this.value
       super.subscribe(subscriber)

@@ -84,10 +84,7 @@ class VarSeq[A](private var _value: Tree[A] = Leaf) extends LiveValue[Tree[A]] {
   final def fold(implicit monoid: Monoid[A]): LiveValue[A] = {
     val outer = this
     new LiveBinding[A] {
-      val spoilHandler = { (_: Any, spoilEvent: Spoil) =>
-        println("--> spoil event")
-        spoil(spoilEvent)
-      }
+      val spoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
       outer.spoils.subscribeWeak(spoilHandler)
       val foldImpl: Tree[A] => A = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
         import scalaz.Scalaz._
