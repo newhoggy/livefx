@@ -31,7 +31,7 @@ sealed abstract class Tree[+B] extends Serializable {
   def right: Tree[B]
   def blacken: Tree[B]
   def redden: Tree[B]
-  def count: Int
+  def size: Int
   def color: Color
 
   final def is(color: Color): Boolean = this.color == color
@@ -41,10 +41,10 @@ sealed abstract class Tree[+B] extends Serializable {
       if (tree == Leaf) {
         Red(Leaf, v, Leaf)
       } else {
-        if (index <= tree.left.count) {
+        if (index <= tree.left.size) {
           tree.color.balanceLeft(ins(tree.left, index, v), tree.value, tree.right)
-        } else if (index > tree.left.count) {
-          tree.color.balanceRight(tree.left, tree.value, ins(tree.right, index - tree.left.count - 1, v))
+        } else if (index > tree.left.size) {
+          tree.color.balanceRight(tree.left, tree.value, ins(tree.right, index - tree.left.size - 1, v))
         } else {
           tree.color(this.left, v, this.right)
         }
@@ -57,8 +57,8 @@ sealed abstract class Tree[+B] extends Serializable {
     def upd[B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = if (tree == Leaf) {
       throw new IndexOutOfBoundsException
     } else {
-      if (index < tree.left.count) tree.color.balanceLeft(upd(tree.left, index, v), tree.value, tree.right)
-      else if (index > tree.left.count) tree.color.balanceRight(tree.left, tree.value, upd(tree.right, index - tree.left.count - 1, v))
+      if (index < tree.left.size) tree.color.balanceLeft(upd(tree.left, index, v), tree.value, tree.right)
+      else if (index > tree.left.size) tree.color.balanceRight(tree.left, tree.value, upd(tree.right, index - tree.left.size - 1, v))
       else tree.color(tree.left, v, tree.right)
     }
 
@@ -79,8 +79,8 @@ sealed abstract class Tree[+B] extends Serializable {
   @tailrec
   final def lookup(index: Int): Tree[B] = {
     if (this == Leaf) Leaf
-    else if (index < this.left.count) this.left.lookup(index)
-    else if (index > this.left.count) this.right.lookup(index)
+    else if (index < this.left.size) this.left.lookup(index)
+    else if (index > this.left.size) this.right.lookup(index)
     else this
   }
 
@@ -128,7 +128,7 @@ sealed abstract class Tree[+B] extends Serializable {
       sys.error("Defect: invariance violation")
     }
     def delLeft = if (this.left.is(Black)) balLeft(this.left.del(index), this.value, this.right) else Red(this.left.del(index), this.value, this.right)
-    def delRight = if (this.right.is(Black)) balRight(this.left, this.value, this.right.del(index - this.left.count - 1)) else Red(this.left, this.value, this.right.del(index - this.left.count - 1))
+    def delRight = if (this.right.is(Black)) balRight(this.left, this.value, this.right.del(index - this.left.size - 1)) else Red(this.left, this.value, this.right.del(index - this.left.size - 1))
     def append(tl: Tree[B], tr: Tree[B]): Tree[B] = if (tl == Leaf) {
       tr
     } else if (tr == Leaf) {
@@ -155,8 +155,8 @@ sealed abstract class Tree[+B] extends Serializable {
       sys.error("unmatched tree on append: " + tl + ", " + tr)
     }
 
-    if (index < this.left.count) delLeft
-    else if (index > this.left.count) delRight
+    if (index < this.left.size) delLeft
+    else if (index > this.left.size) delRight
     else append(this.left, this.right)
   }
 }
@@ -166,7 +166,7 @@ final case class Red[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree[B
   override def redden: Tree[B] = this
   override def toString: String = "Red(" + value + ", " + left + ", " + right + ")"
   override def color: Color = Red
-  final val count: Int = 1 + left.count + right.count
+  final val size: Int = 1 + left.size + right.size
 }
 
 final case class Black[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree[B] {
@@ -174,14 +174,14 @@ final case class Black[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree
   override def redden: Tree[B] = Red(left, value, right)
   override def toString: String = "Black(" + value + ", " + left + ", " + right + ")"
   override def color: Color = Black
-  final val count: Int = 1 + left.count + right.count
+  final val size: Int = 1 + left.size + right.size
 }
 
 final case object Leaf extends Tree[Nothing] {
   def value: Nothing = throw new UnsupportedOperationException
   def left: Tree[Nothing] = throw new UnsupportedOperationException
   def right: Tree[Nothing] = throw new UnsupportedOperationException
-  def count: Int = 0
+  def size: Int = 0
   def blacken: Tree[Nothing] = Leaf.this
   def redden: Tree[Nothing] = throw new UnsupportedOperationException
   override def color: Color = Black
@@ -252,7 +252,7 @@ object Tree {
        *
        * We also don't store the deepest nodes in the path so the maximum path length is further reduced by one.
        */
-      val maximumHeight = 2 * (32 - Integer.numberOfLeadingZeros(tree.count + 2 - 1)) - 2 - 1
+      val maximumHeight = 2 * (32 - Integer.numberOfLeadingZeros(tree.size + 2 - 1)) - 2 - 1
       new Array[Tree[B]](maximumHeight)
     }
     private[this] var index = 0
