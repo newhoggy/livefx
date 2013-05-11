@@ -24,7 +24,7 @@ final case object Black extends Color
 final case object Red extends Color
 
 sealed abstract class Tree[+B] extends Serializable {
-  val id = new Object
+  val id = org.livefx.util.Memoize.objectId(this)
   def value: B
   def left: Tree[B]
   def right: Tree[B]
