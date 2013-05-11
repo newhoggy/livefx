@@ -3,8 +3,8 @@ package org.livefx
 import org.livefx.trees.indexed._
 import org.livefx.script._
 
-class VarTreeSeq[A](private var _value: Tree[A]) extends LiveValue[Tree[A]] {
-  type Pub <: VarTreeSeq[A]
+class VarSeq[A](private var _value: Tree[A]) extends LiveValue[Tree[A]] {
+  type Pub <: VarSeq[A]
   
   lazy val _updates = new EventSource[Pub, Update[Tree[A]]](publisher)
 
