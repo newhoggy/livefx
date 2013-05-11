@@ -19,13 +19,12 @@ sealed trait Color {
   }
 }
 
-final case object Black extends Color {
-}
+final case object Black extends Color
 
-final case object Red extends Color {
-}
+final case object Red extends Color
 
 sealed abstract class Tree[+B] extends Serializable {
+  val id = new Object
   def value: B
   def left: Tree[B]
   def right: Tree[B]
