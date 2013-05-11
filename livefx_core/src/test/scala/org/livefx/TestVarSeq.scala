@@ -3,6 +3,11 @@ package org.livefx
 import org.junit.Test
 import org.junit.Assert
 import org.livefx.trees.indexed.Tree
+import org.livefx.script.Change
+import org.livefx.script.Include
+import org.livefx.script.Index
+import org.livefx.script.Update
+import org.livefx.script.Remove
 
 class TestVarSeq {
   @Test
@@ -10,6 +15,8 @@ class TestVarSeq {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
     val tree: VarSeq[Int] = new VarSeq[Int]()
+    var change: Option[Change[Int]] = None
+    tree.changes.subscribe{(p, e) => println(e); change = Some(e)}
 
     for (i <- 0 to 100) {
       random.nextInt(2) match {
@@ -17,11 +24,14 @@ class TestVarSeq {
           val index = random.nextInt(list.size + 1)
           list.insert(index, i)
           tree.insert(index, i)
+          Assert.assertEquals(Some(Include(Index(index), i)), change)
         case 1 =>
           if (list.size > 0) {
             val index = random.nextInt(list.size)
+            val oldValue = list(index)
             list(index) = i
             tree(index) = i
+            Assert.assertEquals(Some(Update(Index(index), i, oldValue)), change)
           }
       }
 
@@ -30,8 +40,11 @@ class TestVarSeq {
 
     for (i <- 0 to list.size - 1) {
       val index = random.nextInt(list.size)
+      val oldValue = list(index)
       list.remove(index)
       tree.remove(index)
+      Assert.assertEquals(Some(Remove(Index(index), oldValue)), change)
+      
       Assert.assertEquals(list.toList, Tree.iterator(tree.value).toList)
     }
   }
