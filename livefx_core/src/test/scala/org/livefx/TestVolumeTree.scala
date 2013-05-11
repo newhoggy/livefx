@@ -3,9 +3,10 @@ package org.livefx
 import org.livefx.old.volume.redblack._
 import org.junit.Test
 import org.junit.Assert
+import org.junit.Ignore
 
 class TestOldVolumeTree {
-  @Test
+  @Test @Ignore
   def test1(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()

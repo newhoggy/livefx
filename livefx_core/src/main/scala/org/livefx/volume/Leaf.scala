@@ -5,6 +5,8 @@ import scalaz._
 import Scalaz._
 
 final class Leaf[+A](val vs: List[A]) extends Tree[A] {
+  assert(vs.size < 5)
+  
   final override def count: Int = vs.size
   
   final override def size: Int = vs.size
@@ -15,15 +17,30 @@ final class Leaf[+A](val vs: List[A]) extends Tree[A] {
 
   final override def toList[B >: A](acc: List[B]): List[B] = vs:::acc
 
-  final override def insert[B >: A](index: Int, value: B): Leaf[B] = Leaf(vs.take(index) ::: value :: vs.drop(index))
+  final override def insert[B >: A](index: Int, value: B): Tree[B] = Leaf(vs.take(index) ::: value :: vs.drop(index))
 
   final override def update[B >: A](index: Int, value: B): Leaf[B] = Leaf(vs.take(index) ::: value :: vs.drop(index + 1))
 
   final override def remove(index: Int): (A, Tree[A]) = {
+    println(s"--> ${this.toList(Nil)}.remove($index)")
     val myInit = vs.take(index)
     val myTail = vs.drop(index)
     (myTail.head, Leaf(myInit ::: myTail.tail))
   }
+  
+  final override def split: List[Tree[A]] = {
+    def build(list: List[A]): List[List[A]] = list match {
+      case a::b::c::tail => List(a, b, c)::build(tail)
+      case a::b::tail => List(a, b)::build(tail)
+      case a::tail => List(a)::build(tail)
+      case _ => Nil
+    }
+    build(vs).map(Leaf(_))
+  }
+  
+  final override def toString(): String = "Leaf" + vs.mkString("(", ", ", ")")
+  
+  def debugString: String = vs.mkString("(", ", ", ")")
 }
 
 final object Leaf {

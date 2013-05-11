@@ -11,4 +11,6 @@ trait Tree[+A] {
   def takeCount(count: Int): Tree[A]
   def dropCount(count: Int): Tree[A]
   def toList[B >: A](acc: List[B] = Nil): List[B]
+  def split: List[Tree[A]]
+  def debugString: String
 }

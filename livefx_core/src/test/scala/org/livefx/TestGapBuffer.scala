@@ -11,14 +11,16 @@ class TestGapBuffer {
     import scala.language.implicitConversions
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    var tree: volume.Tree[Int] = Leaf()
+    var tree: volume.Root[Int] = Root()
 
     for (i <- 0 to 100) {
+      println(s"----------- $i -------------")
       random.nextInt(2) match {
         case 0 =>
           val index = random.nextInt(list.size + 1)
           list.insert(index, i)
           tree = tree.insert(index, i)
+          println("--> tree insert: " + tree)
         case 1 =>
           if (list.size > 0) {
             val index = random.nextInt(list.size)
@@ -31,6 +33,7 @@ class TestGapBuffer {
     }
 
     for (i <- 0 to list.size - 1) {
+      println(s" ==== remove $i =====")
       val index = random.nextInt(list.size)
       list.remove(index)
       tree = tree.remove(index)._2
