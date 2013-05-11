@@ -1,8 +1,7 @@
-package org.livefx.old.volume.redblack
+package org.livefx.trees
 
 import scala.annotation.tailrec
-import scalaz.Monoid
-import scala.annotation.meta.getter
+import scala.Array.canBuildFrom
 
 sealed trait Color {
   def apply[T](l: Tree[T], v: T, r: Tree[T]): Tree[T]
@@ -264,5 +263,3 @@ object Tree {
     override def nextResult(tree: Tree[B]) = tree.value
   }
 }
-
-	

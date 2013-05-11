@@ -1,9 +1,11 @@
 package org.livefx
 
-import org.livefx.old.volume.redblack._
+import org.livefx.trees._
 import org.junit.Test
 import org.junit.Assert
 import org.junit.Ignore
+import org.livefx.trees.Tree
+import org.livefx.trees.Leaf
 
 class TestOldVolumeTree {
   @Test @Ignore
