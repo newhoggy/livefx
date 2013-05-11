@@ -4,11 +4,10 @@ import org.livefx.trees._
 import org.junit.Test
 import org.junit.Assert
 import org.junit.Ignore
-import org.livefx.trees.Tree
-import org.livefx.trees.Leaf
+import org.livefx.trees.indexed._
 
 class TestOldVolumeTree {
-  @Test @Ignore
+  @Test
   def test1(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()

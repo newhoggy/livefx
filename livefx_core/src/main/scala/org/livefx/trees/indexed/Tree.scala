@@ -1,4 +1,4 @@
-package org.livefx.trees
+package org.livefx.trees.indexed
 
 import scala.annotation.tailrec
 import scala.Array.canBuildFrom
