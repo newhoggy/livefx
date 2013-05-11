@@ -32,6 +32,8 @@ sealed abstract class Tree[+B] extends Serializable {
   def redden: Tree[B]
   def size: Int
   def color: Color
+  final def toList: List[B] = Tree.toList(this)
+  final def mkString[A](l: String, d: String, r: String): String = this.toList.mkString(l, d, r)
 
   final def is(color: Color): Boolean = this.color == color
 
@@ -75,11 +77,11 @@ sealed abstract class Tree[+B] extends Serializable {
     case tree => Some(tree.value)
   }
 
-  @tailrec
+//  @tailrec
   final def lookup(index: Int): Tree[B] = {
     if (this == Leaf) Leaf
     else if (index < this.left.size) this.left.lookup(index)
-    else if (index > this.left.size) this.right.lookup(index)
+    else if (index > this.left.size) this.right.lookup(index - this.left.size - 1)
     else this
   }
 
@@ -173,7 +175,7 @@ final case class Black[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree
   override def redden: Tree[B] = Red(left, value, right)
   override def toString: String = "Black(" + value + ", " + left + ", " + right + ")"
   override def color: Color = Black
-  final val size: Int = 1 + left.size + right.size
+  final override val size: Int = 1 + left.size + right.size
 }
 
 final case object Leaf extends Tree[Nothing] {
@@ -260,5 +262,16 @@ object Tree {
 
   private[this] class ValuesIterator[B](tree: Tree[B]) extends TreeIterator[B, B](tree) {
     override def nextResult(tree: Tree[B]) = tree.value
+  }
+  
+  def unapply[A](t: Tree[A]): Option[(Tree[A], A, Tree[A])] = t match {
+    case Black(l, v, r) => Some((l, v, r))
+    case Red(l, v, r) => Some((l, v, r))
+    case _ => None
+  }
+  
+  def toList[A](t: Tree[A], acc: List[A] = Nil): List[A] = t match {
+    case Tree(l, v, r) => toList(l, v::toList(r, acc))
+    case Leaf => acc
   }
 }

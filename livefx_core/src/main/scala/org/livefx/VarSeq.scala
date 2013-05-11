@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.trees.indexed._
 import org.livefx.script._
 
-class VarSeq[A](private var _value: Tree[A]) extends LiveValue[Tree[A]] {
+class VarSeq[A](private var _value: Tree[A] = Leaf) extends LiveValue[Tree[A]] {
   type Pub <: VarSeq[A]
   
   lazy val _updates = new EventSource[Pub, Update[Tree[A]]](publisher)
@@ -40,7 +40,7 @@ class VarSeq[A](private var _value: Tree[A]) extends LiveValue[Tree[A]] {
     this
   }
 
-  def apply(index: Int): A = _value.lookup(index).value
+  def apply(index: Int): A = this.value.lookup(index).value
 
   def update(index: Int, newElement: A): Unit = {
     val oldElement = apply(index)
@@ -76,4 +76,6 @@ class VarSeq[A](private var _value: Tree[A]) extends LiveValue[Tree[A]] {
     }
     _changes.publish(msg)
   }
+  
+  override def toString(): String = "VarSeq(" + _value.mkString("Tree(", ", ", ")") + ")"
 }
