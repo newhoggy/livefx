@@ -6,7 +6,7 @@ import org.junit.Assert
 import org.junit.Ignore
 import org.livefx.trees.indexed._
 
-class TestOldVolumeTree {
+class TestIndexedTree {
   @Test
   def test1(): Unit = {
     val random = new scala.util.Random(0)
