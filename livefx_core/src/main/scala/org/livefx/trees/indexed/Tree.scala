@@ -189,6 +189,8 @@ final case object Leaf extends Tree[Nothing] {
 }
 
 object Tree {
+  def idOf[A](tree: Tree[A]): Any = tree.id
+  
   def foreach[B, U](tree: Tree[B], f: B => U): Unit = if (tree != Leaf) {
     if (tree.left != Leaf) foreach(tree.left, f)
     f(tree.value)

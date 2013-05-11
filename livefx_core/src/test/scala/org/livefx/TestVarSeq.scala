@@ -8,6 +8,7 @@ import org.livefx.script.Include
 import org.livefx.script.Index
 import org.livefx.script.Update
 import org.livefx.script.Remove
+import scalaz.Monoid
 
 class TestVarSeq {
   @Test
@@ -46,6 +47,42 @@ class TestVarSeq {
       Assert.assertEquals(Some(Remove(Index(index), oldValue)), change)
       
       Assert.assertEquals(list.toList, Tree.iterator(tree.value).toList)
+    }
+  }
+
+  @Test
+  def testFold(): Unit = {
+    val random = new scala.util.Random(0)
+    var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
+    val tree: VarSeq[Int] = new VarSeq[Int]()
+    val sum: LiveValue[Int] = tree.fold(new Monoid[Int] {
+      override def zero: Int = 0
+      override def append(a: Int, b: => Int): Int = a + b
+    })
+    tree.spoils.subscribe({(p, e) => println(s"--> tree: ${tree.value}")})
+    sum.updates.subscribe({(p, e) => println(s"--> sum: ${sum.value}")})
+
+    for (i <- 0 to 100) {
+      random.nextInt(2) match {
+        case 0 =>
+          val index = random.nextInt(list.size + 1)
+          list.insert(index, i)
+          tree.insert(index, i)
+        case 1 =>
+          if (list.size > 0) {
+            val index = random.nextInt(list.size)
+            val oldValue = list(index)
+            list(index) = i
+            tree(index) = i
+          }
+      }
+    }
+
+    for (i <- 0 to list.size - 1) {
+      val index = random.nextInt(list.size)
+      val oldValue = list(index)
+      list.remove(index)
+      tree.remove(index)
     }
   }
 }

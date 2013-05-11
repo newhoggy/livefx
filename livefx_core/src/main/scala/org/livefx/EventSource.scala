@@ -22,4 +22,6 @@ class EventSource[P, E](val publisher: P) extends Events[P, E] with EventSink[E]
   override def publish(event: E): Unit = {
     subscribers.foreach { entry => entry._1(publisher, event) }
   }
+  
+  final def isEmpty: Boolean = subscribers.isEmpty
 }

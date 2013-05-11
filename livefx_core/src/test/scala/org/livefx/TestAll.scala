@@ -7,5 +7,6 @@ import org.junit.runners.Suite
 @Suite.SuiteClasses(Array(
     classOf[TestIndexedTree],
     classOf[TestObservableSeq],
-    classOf[TestSimpleProperty]))
+    classOf[TestSimpleProperty],
+    classOf[TestVarSeq]))
 class TestAll

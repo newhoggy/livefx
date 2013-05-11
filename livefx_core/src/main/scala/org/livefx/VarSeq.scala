@@ -2,6 +2,8 @@ package org.livefx
 
 import org.livefx.trees.indexed._
 import org.livefx.script._
+import org.livefx.util.Memoize
+import scalaz.Monoid
 
 class VarSeq[A](private var _value: Tree[A] = Leaf) extends LiveValue[Tree[A]] {
   type Pub <: VarSeq[A]
@@ -78,4 +80,27 @@ class VarSeq[A](private var _value: Tree[A] = Leaf) extends LiveValue[Tree[A]] {
   }
   
   override def toString(): String = "VarSeq(" + _value.mkString("Tree(", ", ", ")") + ")"
+  
+  final def fold(implicit monoid: Monoid[A]): LiveValue[A] = {
+    val outer = this
+    new LiveBinding[A] {
+      val spoilHandler = { (_: Any, spoilEvent: Spoil) =>
+        println("--> spoil event")
+        spoil(spoilEvent)
+      }
+      outer.spoils.subscribeWeak(spoilHandler)
+      val foldImpl: Tree[A] => A = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
+        import scalaz.Scalaz._
+        tree match {
+          case Tree(Leaf, v, Leaf) => v |+| monoid.zero
+          case Tree(l, v, Leaf) => foldImpl(l) |+| v |+| monoid.zero
+          case Tree(Leaf, v, r) => v |+| foldImpl(r) |+| monoid.zero
+          case Tree(l, v, r) => foldImpl(l) |+| v |+| foldImpl(r) |+| monoid.zero
+          case Leaf => monoid.zero
+        }
+      }
+      
+      override def computeValue: A = foldImpl(outer.value)
+    }
+  }
 }
