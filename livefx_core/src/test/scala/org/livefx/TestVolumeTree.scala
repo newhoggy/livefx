@@ -17,28 +17,23 @@ class TestOldVolumeTree {
       random.nextInt(2) match {
         case 0 =>
           val index = random.nextInt(list.size + 1)
-          println(s"--> (${list.size})insert($index, $i)")
           list.insert(index, i)
           tree = tree.insert(index, i)
         case 1 =>
           if (list.size > 0) {
             val index = random.nextInt(list.size)
-            println(s"--> (${list.size})update($index, $i)")
             list(index) = i
             tree = tree.update(index, i)
           }
       }
 
-      println(s"--> tree: $tree")
       Assert.assertEquals(list.toList, Tree.iterator(tree).toList)
     }
 
     for (i <- 0 to list.size - 1) {
       val index = random.nextInt(list.size)
-      println(s"--> [$i] remove($index)")
       list.remove(index)
       tree = tree.delete(index)
-      println(s"--> tree: $tree")
       Assert.assertEquals(list.toList, Tree.iterator(tree).toList)
     }
   }
