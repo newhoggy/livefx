@@ -14,8 +14,9 @@ class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) ext
 
   def value: A = _value
 
-  def value_=(newValue: A): Unit = {
-    val oldValue = _value
+  def value_=(newValue: A): Unit = updateValue(_value, newValue)
+  
+  protected def updateValue(oldValue: A, newValue: A): Unit = {
     _value = newValue
     spoil(Spoil())
     _updates.publish(Update(NoLo, oldValue, newValue))

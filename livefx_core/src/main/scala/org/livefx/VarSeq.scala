@@ -12,8 +12,19 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
 
   def changes: Events[Pub, Change[A]] = _changes
 
+  override def value_=(newValue: Tree[A]): Unit = {
+    updateValue(_value, newValue)
+    var curr = 0
+    val msg = newValue.toList.foldLeft(new Script[A]() += Reset) {
+      case (msg, elem) =>
+        curr += 1
+        msg += Include(Index(curr), elem)
+    }
+    _changes.publish(msg)
+  }
+  
   def +=(element: A): this.type = {
-    this.value = this.value.insert(this.value.size, element)
+    updateValue(_value, this.value.insert(this.value.size, element))
     _changes.publish(Include(End, element))
     this
   }
@@ -24,7 +35,7 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
   }
 
   def +=:(element: A): this.type = {
-    this.value = this.value.insert(0, element)
+    updateValue(_value, this.value.insert(0, element))
     _changes.publish(Include(Start, element))
     this
   }
@@ -33,29 +44,29 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
 
   def update(index: Int, newElement: A): Unit = {
     val oldElement = apply(index)
-    this.value = this.value.update(index, newElement)
+    updateValue(_value, this.value.update(index, newElement))
     _changes.publish(Update(Index(index), newElement, oldElement))
   }
 
   def remove(index: Int): A = {
     val oldElement = apply(index)
-    this.value = this.value.delete(index)
+    updateValue(_value, this.value.delete(index))
     _changes.publish(Remove(Index(index), oldElement))
     oldElement
   }
 
   def clear(): Unit = {
-    this.value = Leaf
+    updateValue(_value, Leaf)
     _changes.publish(Reset)
   }
 
   def insert(index: Int, elem: A): Unit = {
-    this.value = this.value.insert(index, elem)
+    updateValue(_value, this.value.insert(index, elem))
     _changes.publish(Include(Index(index), elem))
   }
 
   def insertAll(index: Int, elems: scala.collection.Traversable[A]): Unit = {
-    this.value = elems.foldRight(this.value)((e, t) => t.insert(index, e))
+    updateValue(_value, elems.foldRight(this.value)((e, t) => t.insert(index, e)))
     
     var curr = index - 1
     val msg = elems.foldLeft(new Script[A]()) {
