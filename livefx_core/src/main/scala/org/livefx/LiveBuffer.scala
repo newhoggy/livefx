@@ -2,7 +2,7 @@ package org.livefx
 
 import org.livefx.script._
 
-trait LiveBuffer[A] extends Buffer[A] with LiveSeq[A] with Publisher {
+trait LiveBuffer[A] extends Buffer[A] with OldLiveSeq[A] with Publisher {
   type Pub <: LiveBuffer[A]
   
   abstract override def +=(element: A): this.type = {

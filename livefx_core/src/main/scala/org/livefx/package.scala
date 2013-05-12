@@ -13,7 +13,7 @@ package object livefx {
   type Set[A] = mutable.Set[A]
   
   implicit class RichLiveBuffer[A](val self: Buffer[A] with LiveBuffer[A]) {
-    def asSeq: Seq[A] with LiveSeq[A] = self
+    def asSeq: Seq[A] with OldLiveSeq[A] = self
   }
   
   implicit class RichLiveValueBoolean(val self: LiveValue[Boolean]) {
