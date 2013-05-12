@@ -3,7 +3,6 @@ package org.livefx
 import org.livefx.script.Update
 import org.livefx.script.NoLo
 import org.livefx.script.Spoil
-import org.livefx.script.Change
 
 class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) extends LiveValue[A] {
   type Pub <: Var[A]

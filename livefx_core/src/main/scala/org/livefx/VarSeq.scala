@@ -78,24 +78,4 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveSe
   }
   
   override def toString(): String = "VarSeq(" + _value.mkString("Tree(", ", ", ")") + ")"
-  
-  final def fold(implicit monoid: Monoid[A]): LiveValue[A] = {
-    val outer = this
-    new LiveBinding[A] {
-      val spoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
-      outer.spoils.subscribeWeak(spoilHandler)
-      val foldImpl: Tree[A] => A = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
-        import scalaz.Scalaz._
-        tree match {
-          case Tree(Leaf, v, Leaf) => v |+| monoid.zero
-          case Tree(l, v, Leaf) => foldImpl(l) |+| v |+| monoid.zero
-          case Tree(Leaf, v, r) => v |+| foldImpl(r) |+| monoid.zero
-          case Tree(l, v, r) => foldImpl(l) |+| v |+| foldImpl(r) |+| monoid.zero
-          case Leaf => monoid.zero
-        }
-      }
-      
-      override def computeValue: A = foldImpl(outer.value)
-    }
-  }
 }
