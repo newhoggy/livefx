@@ -1,11 +1,11 @@
 package org.livefx
 
 import org.livefx.script.Change
-import org.livefx.trees.indexed.Tree
 import org.livefx.script.Update
 import org.livefx.util.Memoize
 import org.livefx.script.Spoil
 import scalaz.Monoid
+import org.livefx.trees.indexed.Tree
 import org.livefx.trees.indexed.Leaf
 
 trait LiveSeq[A] extends LiveValue[Tree[A]] {
@@ -35,41 +35,26 @@ trait LiveSeq[A] extends LiveValue[Tree[A]] {
     }
   }
   
-//  def liveMap[B](f: A => B): LiveSeq[B] = {
-//    val outer = this
-//    new LiveSeq[B] {
-//      private final def target = this
-//      private val ref = outer.changes.subscribeWeak { (pub: OldLiveSeq[A], change: Change[A]) =>
-//        def process(pub: OldLiveSeq[A], change: Change[A]): Unit = {
-//          change match {
-//            case Remove(location, oldElem) => location match {
-//              case Start => target.remove(0)
-//              case End => target.remove(target.size - 1)
-//              case Index(index) => target.remove(index)
-//              case NoLo => assert(false)
-//            }
-//            case Include(location, newElem) => location match {
-//              case Start => target.prepend(f(newElem))
-//              case End => target.append(f(newElem))
-//              case Index(index) => target.insert(index, f(newElem))
-//              case NoLo => assert(false)
-//            }
-//            case Update(location, newElem, oldElem) => location match {
-//              case Start => target(0) = f(newElem)
-//              case End => target(target.size - 1) = f(newElem)
-//              case Index(index) => target(index) = f(newElem)
-//              case NoLo => assert(false)
-//            }
-//            case Reset => target.clear()
-//            case s: Script[A] => for (e <- s) process(pub, e)
-//          }
-//        }
-//  
-//        process(pub, change)
-//      }
-//    }
-//  }
-//  
+  final def map[B](f: A => B): LiveSeq[B] = {
+    val outer = this
+    new LiveSeqBinding[B] {
+      val spoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
+      outer.spoils.subscribeWeak(spoilHandler)
+      val mapImpl: Tree[A] => Tree[B] = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
+        import scalaz.Scalaz._
+        tree match {
+          case t@Tree(Leaf, v, Leaf) => t.color(Leaf, f(v), Leaf)
+          case t@Tree(l, v, Leaf) => t.color(mapImpl(l), f(v), Leaf)
+          case t@Tree(Leaf, v, r) => t.color(Leaf, f(v), mapImpl(r))
+          case t@Tree(l, v, r) => t.color(mapImpl(l), f(v), mapImpl(r))
+          case Leaf => Leaf
+        }
+      }
+      
+      override def computeValue: Tree[B] = mapImpl(outer.value)
+    }
+  }
+  
 //  def liveCounted: Map[A, Int] with LiveMap[A, Int] = {
 //    val outer = this
 //    new HashMap[A, Int] with LiveMap[A, Int] {
