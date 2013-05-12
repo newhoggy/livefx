@@ -17,8 +17,9 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
     var curr = 0
     val msg = newValue.toList.foldLeft(new Script[A]() += Reset) {
       case (msg, elem) =>
+        val result = msg += Include(Index(curr), elem)
         curr += 1
-        msg += Include(Index(curr), elem)
+        result
     }
     _changes.publish(msg)
   }
