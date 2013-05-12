@@ -41,7 +41,6 @@ trait LiveSeq[A] extends LiveValue[Tree[A]] {
       val spoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
       outer.spoils.subscribeWeak(spoilHandler)
       val mapImpl: Tree[A] => Tree[B] = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
-        import scalaz.Scalaz._
         tree match {
           case t@Tree(Leaf, v, Leaf) => t.color(Leaf, f(v), Leaf)
           case t@Tree(l, v, Leaf) => t.color(mapImpl(l), f(v), Leaf)
