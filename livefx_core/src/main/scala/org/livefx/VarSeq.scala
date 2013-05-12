@@ -14,12 +14,11 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
 
   override def value_=(newValue: Tree[A]): Unit = {
     updateValue(_value, newValue)
-    var curr = 0
+    var curr = -1
     val msg = newValue.toList.foldLeft(new Script[A]() += Reset) {
       case (msg, elem) =>
-        val result = msg += Include(Index(curr), elem)
         curr += 1
-        result
+        msg += Include(Index(curr), elem)
     }
     _changes.publish(msg)
   }
