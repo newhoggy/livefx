@@ -101,7 +101,7 @@ class TestVarSeq {
       override def zero: Int = 0
       override def append(a: Int, b: => Int): Int = a + b
     })
-    tree.changes.subscribe{(p, e) => println(s"--> e: $e")}
+//    tree.changes.subscribe{(p, e) => println(s"--> e: $e")}
     sum.updates.subscribe{(p, e) => updateCount += 1; Assert.assertEquals(list.sum, sum.value)}
 
     for (i <- 0 to 100) {
