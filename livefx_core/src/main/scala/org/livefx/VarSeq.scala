@@ -5,7 +5,7 @@ import org.livefx.script._
 import org.livefx.util.Memoize
 import scalaz.Monoid
 
-class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
+class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveSeq[A] {
   type Pub <: VarSeq[A]
   
   lazy val _changes = new EventSource[Pub, Change[A]](publisher)
