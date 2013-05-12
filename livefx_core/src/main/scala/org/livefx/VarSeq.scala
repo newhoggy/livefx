@@ -5,25 +5,12 @@ import org.livefx.script._
 import org.livefx.util.Memoize
 import scalaz.Monoid
 
-class VarSeq[A](private var _value: Tree[A] = Leaf) extends LiveValue[Tree[A]] {
+class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) {
   type Pub <: VarSeq[A]
   
-  lazy val _updates = new EventSource[Pub, Update[Tree[A]]](publisher)
-
-  override def updates: Events[Pub, Update[Tree[A]]] = _updates
-
   lazy val _changes = new EventSource[Pub, Change[A]](publisher)
 
   def changes: Events[Pub, Change[A]] = _changes
-
-  def value: Tree[A] = _value
-
-  def value_=(newValue: Tree[A]): Unit = {
-    val oldValue = _value
-    _value = newValue
-    spoil(Spoil())
-    _updates.publish(Update(NoLo, oldValue, newValue))
-  }
 
   def +=(element: A): this.type = {
     this.value = this.value.insert(this.value.size, element)
