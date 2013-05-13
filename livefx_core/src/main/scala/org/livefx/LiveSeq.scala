@@ -7,7 +7,7 @@ import org.livefx.script._
 
 import scalaz.Monoid
 
-trait LiveSeq[A] extends LiveValue[Tree[A]] {
+trait LiveSeq[+A] extends LiveValue[Tree[A]] {
   type Pub <: LiveValue[Tree[A]]
   
   def value: Tree[A]
@@ -16,12 +16,12 @@ trait LiveSeq[A] extends LiveValue[Tree[A]] {
   
   def changes: Events[Pub, Change[A]]
 
-  final def fold(implicit monoid: Monoid[A]): LiveValue[A] = {
+  final def fold[B >: A](implicit monoid: Monoid[B]): LiveValue[B] = {
     val outer = this
-    new LiveBinding[A] {
+    new LiveBinding[B] {
       val spoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
       outer.spoils.subscribeWeak(spoilHandler)
-      val foldImpl: Tree[A] => A = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
+      val foldImpl: Tree[B] => B = Memoize.apply(Tree.idOf(_: Tree[B])) { tree =>
         import scalaz.Scalaz._
         tree match {
           case Tree(Leaf, v, Leaf) => v |+| monoid.zero
@@ -32,7 +32,7 @@ trait LiveSeq[A] extends LiveValue[Tree[A]] {
         }
       }
       
-      override def computeValue: A = foldImpl(outer.value)
+      override def computeValue: B = foldImpl(outer.value)
     }
   }
   
