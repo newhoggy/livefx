@@ -7,7 +7,7 @@ import org.livefx.script._
 
 import scalaz.Monoid
 
-trait LiveSeq[+A] extends LiveValue[Tree[A]] {
+trait LiveSeq[+A] extends Spoilable {
   type Pub <: LiveSeq[A]
   
   def value: Tree[A]
