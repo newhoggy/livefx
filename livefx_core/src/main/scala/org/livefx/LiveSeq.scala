@@ -15,6 +15,8 @@ trait LiveSeq[+A] extends Spoilable {
   def size: Int = value.size
   
   def changes: Events[Pub, Change[A]]
+  
+  def asLiveSeq: LiveSeq[A] = this
 
   final def fold[B >: A](implicit monoid: Monoid[B]): LiveValue[B] = {
     val outer = this

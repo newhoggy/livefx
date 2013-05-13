@@ -12,6 +12,8 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   //lazy val _updates = new EventSource[Pub, Update[A]](publisher)
   
   def updates: Events[Pub, Update[A]]
+  
+  def asliveValue: LiveValue[A] = this
 
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): LiveValue[B] = {
     val source = this
