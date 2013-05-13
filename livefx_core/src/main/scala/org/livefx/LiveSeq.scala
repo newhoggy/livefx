@@ -12,9 +12,11 @@ trait LiveSeq[+A] extends Spoilable {
   
   def value: Tree[A]
   
-  def size: Int = value.size
-  
   def changes: Events[Pub, Change[A]]
+  
+  lazy val size: LiveValue[Int] = for (tree <- asLiveValue) yield tree.size
+  
+  def asLiveValue: LiveValue[Tree[A]]
   
   def asLiveSeq: LiveSeq[A] = this
 
@@ -39,10 +41,11 @@ trait LiveSeq[+A] extends Spoilable {
   }
   
   final def map[B](f: A => B): LiveSeq[B] = {
+    Nil.flatMap(_ => Nil)
     val outer = this
     new LiveSeqBinding[B] {
       private var tree: Tree[B] = outer.value.map(f)
-
+      
       val changeSubscriber = { (_: Any, change: Change[A]) =>
         def handleChange(change: Change[A]): Unit = {
           change match {
@@ -54,7 +57,7 @@ trait LiveSeq[+A] extends Spoilable {
                   spoil(Spoil())
                 }
                 case End => {
-                  tree = tree.insert(outer.size, newElem)
+                  tree = tree.insert(outer.value.size, newElem)
                   spoil(Spoil())
                 }
                 case Index(index) => {
@@ -72,7 +75,7 @@ trait LiveSeq[+A] extends Spoilable {
                   spoil(Spoil())
                 }
                 case End => {
-                  tree = tree.update(outer.size, newB)
+                  tree = tree.update(outer.value.size, newB)
                   spoil(Spoil())
                 }
                 case Index(index) => {
@@ -88,7 +91,7 @@ trait LiveSeq[+A] extends Spoilable {
                 spoil(Spoil())
               }
               case End => {
-                tree = tree.delete(outer.size - 1)
+                tree = tree.delete(outer.value.size - 1)
                 spoil(Spoil())
               }
               case Index(index) => {

@@ -8,6 +8,8 @@ import scalaz.Monoid
 class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveSeq[A] {
   type Pub <: VarSeq[A]
   
+  override def asLiveValue: LiveValue[Tree[A]] = this
+  
   lazy val _changes = new EventSource[Pub, Change[A]](publisher)
 
   def changes: Events[Pub, Change[A]] = _changes

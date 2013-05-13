@@ -5,6 +5,8 @@ import org.livefx.script.Change
 
 trait LiveSeqBinding[A] extends LiveBinding[Tree[A]] with LiveSeq[A] {
   type Pub = LiveSeqBinding[A]
+  
+  def asLiveValue: LiveValue[Tree[A]] = this
 
   lazy val _changes = new EventSource[Pub, Change[A]](publisher)
 

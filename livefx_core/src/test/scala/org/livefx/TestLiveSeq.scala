@@ -63,12 +63,12 @@ class TestLiveSeq {
     for (i <- 0 to 100) {
       random.nextInt(2) match {
         case 0 =>
-          val index = random.nextInt(tree1.size + 1)
+          val index = random.nextInt(tree1.value.size + 1)
           tree1.insert(index, i)
           Assert.assertEquals(sum1.value * 10, sum2.value)
         case 1 =>
-          if (tree1.size > 0) {
-            val index = random.nextInt(tree1.size)
+          if (tree1.value.size > 0) {
+            val index = random.nextInt(tree1.size.value)
             val oldValue = tree1(index)
             tree1(index) = i
             Assert.assertEquals(sum1.value * 10, sum2.value)
@@ -76,8 +76,8 @@ class TestLiveSeq {
       }
     }
 
-    for (i <- 0 to tree1.size - 1) {
-      val index = random.nextInt(tree1.size)
+    for (i <- 0 to tree1.value.size - 1) {
+      val index = random.nextInt(tree1.value.size)
       val oldValue = tree1(index)
       tree1.remove(index)
       Assert.assertEquals(sum1.value * 10, sum2.value)
