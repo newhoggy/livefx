@@ -1,17 +1,18 @@
 package org.livefx
 
-import org.livefx.script.Change
-import org.livefx.script.Update
 import org.livefx.util.Memoize
-import org.livefx.script.Spoil
-import scalaz.Monoid
 import org.livefx.trees.indexed.Tree
 import org.livefx.trees.indexed.Leaf
+import org.livefx.script._
+
+import scalaz.Monoid
 
 trait LiveSeq[A] extends LiveValue[Tree[A]] {
   type Pub <: LiveValue[Tree[A]]
   
   def value: Tree[A]
+  
+  def size: Int = value.size
   
   def changes: Events[Pub, Change[A]]
 
@@ -38,19 +39,37 @@ trait LiveSeq[A] extends LiveValue[Tree[A]] {
   final def map[B](f: A => B): LiveSeq[B] = {
     val outer = this
     new LiveSeqBinding[B] {
-      val spoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
-      outer.spoils.subscribeWeak(spoilHandler)
-      val mapImpl: Tree[A] => Tree[B] = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
-        tree match {
-          case t@Tree(Leaf, v, Leaf) => t.color(Leaf, f(v), Leaf)
-          case t@Tree(l, v, Leaf) => t.color(mapImpl(l), f(v), Leaf)
-          case t@Tree(Leaf, v, r) => t.color(Leaf, f(v), mapImpl(r))
-          case t@Tree(l, v, r) => t.color(mapImpl(l), f(v), mapImpl(r))
-          case Leaf => Leaf
+      private var tree: Tree[B] = outer.value.map(f)
+
+      val changeSubscription = outer.changes.subscribeWeak { (_, change) =>
+        def handleChange(change: Change[A]): Unit = {
+          change match {
+            case Include(location, elem) => location match {
+              case Start => tree = tree.insert(0, f(elem))
+              case End => tree.insert(outer.size, f(elem))
+              case Index(index) => tree.insert(index, f(elem))
+              case _ => throw new IndexOutOfBoundsException
+            }
+            case Update(location, elem, oldElem) =>location match {
+              case Start => tree = tree.update(0, f(elem))
+              case End => tree.update(outer.size, f(elem))
+              case Index(index) => tree.update(index, f(elem))
+              case _ => throw new IndexOutOfBoundsException
+            }
+            case Remove(location, elem) => tree = location match {
+              case Start => tree.delete(0)
+              case End => tree.delete(outer.size - 1)
+              case Index(index) => tree.delete(index)
+              case _ => throw new IndexOutOfBoundsException
+            }
+            case Reset => tree = Leaf
+            case script: Script[A] => script.foreach(handleChange(_))
+          }
         }
+        handleChange(change)
       }
       
-      override def computeValue: Tree[B] = mapImpl(outer.value)
+      override def computeValue: Tree[B] = tree
     }
   }
   

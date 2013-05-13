@@ -23,22 +23,23 @@ final case object Black extends Color
 
 final case object Red extends Color
 
-sealed abstract class Tree[+B] extends Serializable {
+sealed abstract class Tree[+A] extends Serializable {
   val id = org.livefx.util.Memoize.objectId(this)
-  def value: B
-  def left: Tree[B]
-  def right: Tree[B]
-  def blacken: Tree[B]
-  def redden: Tree[B]
+  def value: A
+  def left: Tree[A]
+  def right: Tree[A]
+  def blacken: Tree[A]
+  def redden: Tree[A]
   def size: Int
   def color: Color
-  final def toList: List[B] = Tree.toList(this)
-  final def mkString[A](l: String, d: String, r: String): String = this.toList.mkString(l, d, r)
+  @inline final def toList: List[A] = Tree.toList(this)
+  @inline final def map[C](f: A => C): Tree[C] = Tree.map(this, f)
+  @inline final def mkString(l: String, d: String, r: String): String = this.toList.mkString(l, d, r)
 
   final def is(color: Color): Boolean = this.color == color
 
-  @inline final def insert[B1 >: B](index: Int, v: B1): Tree[B1] = {
-    def ins[B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = {
+  @inline final def insert[B >: A](index: Int, v: B): Tree[B] = {
+    def ins(tree: Tree[A], index: Int, v: B): Tree[B] = {
       if (tree == Leaf) {
         Red(Leaf, v, Leaf)
       } else {
@@ -54,8 +55,8 @@ sealed abstract class Tree[+B] extends Serializable {
     
     ins(this, index, v).blacken
   }
-  @inline final def update[B1 >: B](index: Int, v: B1): Tree[B1] = {
-    def upd[B1 >: B](tree: Tree[B], index: Int, v: B1): Tree[B1] = if (tree == Leaf) {
+  @inline final def update[B >: A](index: Int, v: B): Tree[B] = {
+    def upd(tree: Tree[A], index: Int, v: B): Tree[B] = if (tree == Leaf) {
       throw new IndexOutOfBoundsException
     } else {
       if (index < tree.left.size) tree.color.balanceLeft(upd(tree.left, index, v), tree.value, tree.right)
@@ -65,20 +66,20 @@ sealed abstract class Tree[+B] extends Serializable {
 
     upd(this, index, v).blacken
   }
-  @inline final def delete(index: Int): Tree[B] = this.del(index).blacken
+  @inline final def delete(index: Int): Tree[A] = this.del(index).blacken
 
-  final def subl: Tree[B] = {
+  final def subl: Tree[A] = {
     if (this.isInstanceOf[Black[_]]) this.redden
     else sys.error("Defect: invariance violation; expected black, got " + this)
   }
 
-  final def get(index: Int): Option[B] = this.lookup(index) match {
+  final def get(index: Int): Option[A] = this.lookup(index) match {
     case Leaf => None
     case tree => Some(tree.value)
   }
 
 //  @tailrec
-  final def lookup(index: Int): Tree[B] = {
+  final def lookup(index: Int): Tree[A] = {
     if (this == Leaf) Leaf
     else if (index < this.left.size) this.left.lookup(index)
     else if (index > this.left.size) this.right.lookup(index - this.left.size - 1)
@@ -87,8 +88,8 @@ sealed abstract class Tree[+B] extends Serializable {
 
   /* Based on Stefan Kahrs' Haskell version of Okasaki's Red&Black Trees
    * http://www.cse.unsw.edu.au/~dons/data/RedBlackTree.html */
-  private def del(index: Int): Tree[B] = if (this == Leaf) Leaf else {
-    def balance(tl: Tree[B], xv: B, tr: Tree[B]) = if (tl.is(Red)) {
+  private def del(index: Int): Tree[A] = if (this == Leaf) Leaf else {
+    def balance(tl: Tree[A], xv: A, tr: Tree[A]) = if (tl.is(Red)) {
       if (tr.is(Red)) {
         Red(tl.blacken, xv, tr.blacken)
       } else if (tl.left.is(Red)) {
@@ -110,7 +111,7 @@ sealed abstract class Tree[+B] extends Serializable {
       Black(tl, xv, tr)
     }
 
-    def balLeft(tl: Tree[B], xv: B, tr: Tree[B]) = if (tl.is(Red)) {
+    def balLeft(tl: Tree[A], xv: A, tr: Tree[A]) = if (tl.is(Red)) {
       Red(tl.blacken, xv, tr)
     } else if (tr.is(Black)) {
       balance(tl, xv, tr.redden)
@@ -119,7 +120,7 @@ sealed abstract class Tree[+B] extends Serializable {
     } else {
       sys.error("Defect: invariance violation")
     }
-    def balRight(tl: Tree[B], xv: B, tr: Tree[B]) = if (tr.is(Red)) {
+    def balRight(tl: Tree[A], xv: A, tr: Tree[A]) = if (tr.is(Red)) {
       Red(tl, xv, tr.blacken)
     } else if (tl.is(Black)) {
       balance(tl.redden, xv, tr)
@@ -130,7 +131,7 @@ sealed abstract class Tree[+B] extends Serializable {
     }
     def delLeft = if (this.left.is(Black)) balLeft(this.left.del(index), this.value, this.right) else Red(this.left.del(index), this.value, this.right)
     def delRight = if (this.right.is(Black)) balRight(this.left, this.value, this.right.del(index - this.left.size - 1)) else Red(this.left, this.value, this.right.del(index - this.left.size - 1))
-    def append(tl: Tree[B], tr: Tree[B]): Tree[B] = if (tl == Leaf) {
+    def append(tl: Tree[A], tr: Tree[A]): Tree[A] = if (tl == Leaf) {
       tr
     } else if (tr == Leaf) {
       tl
@@ -162,17 +163,17 @@ sealed abstract class Tree[+B] extends Serializable {
   }
 }
 
-final case class Red[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree[B] {
-  override def blacken: Tree[B] = Black(left, value, right)
-  override def redden: Tree[B] = this
+final case class Red[+A](left: Tree[A], value: A, right: Tree[A]) extends Tree[A] {
+  override def blacken: Tree[A] = Black(left, value, right)
+  override def redden: Tree[A] = this
   override def toString: String = "Red(" + value + ", " + left + ", " + right + ")"
   override def color: Color = Red
   final val size: Int = 1 + left.size + right.size
 }
 
-final case class Black[+B](left: Tree[B], value: B, right: Tree[B]) extends Tree[B] {
-  override def blacken: Tree[B] = this
-  override def redden: Tree[B] = Red(left, value, right)
+final case class Black[+A](left: Tree[A], value: A, right: Tree[A]) extends Tree[A] {
+  override def blacken: Tree[A] = this
+  override def redden: Tree[A] = Red(left, value, right)
   override def toString: String = "Black(" + value + ", " + left + ", " + right + ")"
   override def color: Color = Black
   final override val size: Int = 1 + left.size + right.size
@@ -191,16 +192,16 @@ final case object Leaf extends Tree[Nothing] {
 object Tree {
   def idOf[A](tree: Tree[A]): Any = tree.id
   
-  def foreach[B, U](tree: Tree[B], f: B => U): Unit = if (tree != Leaf) {
+  def foreach[A, U](tree: Tree[A], f: A => U): Unit = if (tree != Leaf) {
     if (tree.left != Leaf) foreach(tree.left, f)
     f(tree.value)
     if (tree.right != Leaf) foreach(tree.right, f)
   }
 
-  def iterator[_, B](tree: Tree[B]): Iterator[B] = new ValuesIterator(tree)
+  def iterator[B](tree: Tree[B]): Iterator[B] = new ValuesIterator(tree)
 
-  private[this] abstract class TreeIterator[B, R](tree: Tree[B]) extends Iterator[R] {
-    protected[this] def nextResult(tree: Tree[B]): R
+  private[this] abstract class TreeIterator[A, R](tree: Tree[A]) extends Iterator[R] {
+    protected[this] def nextResult(tree: Tree[A]): R
 
     override def hasNext: Boolean = next != Leaf
 
@@ -213,7 +214,7 @@ object Tree {
     }
 
     @tailrec
-    private[this] def findNext(tree: Tree[B]): Tree[B] = {
+    private[this] def findNext(tree: Tree[A]): Tree[A] = {
       if (tree == Leaf) popPath()
       else if (tree.left == Leaf) tree
       else {
@@ -222,7 +223,7 @@ object Tree {
       }
     }
 
-    private[this] def pushPath(tree: Tree[B]) {
+    private[this] def pushPath(tree: Tree[A]) {
       try {
         path(index) = tree
         index += 1
@@ -241,7 +242,7 @@ object Tree {
           pushPath(tree)
       }
     }
-    private[this] def popPath(): Tree[B] = if (index == 0) Leaf else {
+    private[this] def popPath(): Tree[A] = if (index == 0) Leaf else {
       index -= 1
       path(index)
     }
@@ -256,14 +257,14 @@ object Tree {
        * We also don't store the deepest nodes in the path so the maximum path length is further reduced by one.
        */
       val maximumHeight = 2 * (32 - Integer.numberOfLeadingZeros(tree.size + 2 - 1)) - 2 - 1
-      new Array[Tree[B]](maximumHeight)
+      new Array[Tree[A]](maximumHeight)
     }
     private[this] var index = 0
-    private[this] var next: Tree[B] = findNext(tree)
+    private[this] var next: Tree[A] = findNext(tree)
   }
 
-  private[this] class ValuesIterator[B](tree: Tree[B]) extends TreeIterator[B, B](tree) {
-    override def nextResult(tree: Tree[B]) = tree.value
+  private[this] class ValuesIterator[A](tree: Tree[A]) extends TreeIterator[A, A](tree) {
+    override def nextResult(tree: Tree[A]) = tree.value
   }
   
   def unapply[A](t: Tree[A]): Option[(Tree[A], A, Tree[A])] = t match {
@@ -275,5 +276,13 @@ object Tree {
   def toList[A](t: Tree[A], acc: List[A] = Nil): List[A] = t match {
     case Tree(l, v, r) => toList(l, v::toList(r, acc))
     case Leaf => acc
+  }
+
+  def map[A, B](tree: Tree[A], f: A => B): Tree[B] = tree match {
+    case t@Tree(Leaf, v, Leaf) => t.color(Leaf, f(v), Leaf)
+    case t@Tree(l, v, Leaf) => t.color(map(l, f), f(v), Leaf)
+    case t@Tree(Leaf, v, r) => t.color(Leaf, f(v), map(r, f))
+    case t@Tree(l, v, r) => t.color(map(l, f), f(v), map(r, f))
+    case Leaf => Leaf
   }
 }
