@@ -8,7 +8,7 @@ import org.livefx.script._
 import scalaz.Monoid
 
 trait LiveSeq[+A] extends LiveValue[Tree[A]] {
-  type Pub <: LiveValue[Tree[A]]
+  type Pub <: LiveSeq[A]
   
   def value: Tree[A]
   
