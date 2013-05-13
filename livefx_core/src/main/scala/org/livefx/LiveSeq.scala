@@ -44,7 +44,6 @@ trait LiveSeq[+A] extends Spoilable {
       private var tree: Tree[B] = outer.value.map(f)
 
       val changeSubscriber = { (_: Any, change: Change[A]) =>
-        println("--> change: " + change)
         def handleChange(change: Change[A]): Unit = {
           change match {
             case Include(location, elem) => {
