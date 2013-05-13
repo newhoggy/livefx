@@ -43,25 +43,59 @@ trait LiveSeq[+A] extends Spoilable {
     new LiveSeqBinding[B] {
       private var tree: Tree[B] = outer.value.map(f)
 
-      val changeSubscription = outer.changes.subscribeWeak { (_, change) =>
+      val changeSubscriber = { (_: Any, change: Change[A]) =>
+        println("--> change: " + change)
         def handleChange(change: Change[A]): Unit = {
           change match {
-            case Include(location, elem) => location match {
-              case Start => tree = tree.insert(0, f(elem))
-              case End => tree.insert(outer.size, f(elem))
-              case Index(index) => tree.insert(index, f(elem))
-              case _ => throw new IndexOutOfBoundsException
+            case Include(location, elem) => {
+              val newElem = f(elem)
+              location match {
+                case Start => {
+                  tree = tree.insert(0, newElem)
+                  spoil(Spoil())
+                }
+                case End => {
+                  tree = tree.insert(outer.size, newElem)
+                  spoil(Spoil())
+                }
+                case Index(index) => {
+                  tree = tree.insert(index, newElem)
+                  spoil(Spoil())
+                }
+                case _ => throw new IndexOutOfBoundsException
+              }
             }
-            case Update(location, elem, oldElem) =>location match {
-              case Start => tree = tree.update(0, f(elem))
-              case End => tree.update(outer.size, f(elem))
-              case Index(index) => tree.update(index, f(elem))
-              case _ => throw new IndexOutOfBoundsException
+            case Update(location, elem, oldElem) => {
+              val newB = f(elem)
+              location match {
+                case Start => {
+                  tree = tree.update(0, newB)
+                  spoil(Spoil())
+                }
+                case End => {
+                  tree = tree.update(outer.size, newB)
+                  spoil(Spoil())
+                }
+                case Index(index) => {
+                  tree = tree.update(index, newB)
+                  spoil(Spoil())
+                }
+                case _ => throw new IndexOutOfBoundsException
+              }
             }
-            case Remove(location, elem) => tree = location match {
-              case Start => tree.delete(0)
-              case End => tree.delete(outer.size - 1)
-              case Index(index) => tree.delete(index)
+            case Remove(location, elem) => location match {
+              case Start => {
+                tree = tree.delete(0)
+                spoil(Spoil())
+              }
+              case End => {
+                tree = tree.delete(outer.size - 1)
+                spoil(Spoil())
+              }
+              case Index(index) => {
+                tree = tree.delete(index)
+                spoil(Spoil())
+              }
               case _ => throw new IndexOutOfBoundsException
             }
             case Reset => tree = Leaf
@@ -70,6 +104,8 @@ trait LiveSeq[+A] extends Spoilable {
         }
         handleChange(change)
       }
+
+      outer.changes.subscribeWeak(changeSubscriber) 
       
       override def computeValue: Tree[B] = tree
     }
