@@ -42,7 +42,7 @@ trait LiveSeq[+A] extends Spoilable {
   
 //  final def flatMap[B](f: A => LiveSeq[B]): LiveSeq[B] = {
 //    val monoid = new Monoid[LiveValue[Int]] {
-//      
+//      override def zero: LiveValue[Int] = 
 //    }
 //    val seqs = map(f)
 //    val volumes = seqs.map(_.size)

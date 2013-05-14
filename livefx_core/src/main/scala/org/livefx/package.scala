@@ -73,4 +73,6 @@ package object livefx {
       protected def computeValue: V = liveValue.value
     }
   }
+
+  def const(value: Int): Const[Int] = Const(value)
 }

@@ -6,7 +6,13 @@ import org.livefx.script.Spoil
 
 abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
   type Pub <: LiveBinding[A]
+
+  private lazy val _spoils = new EventSource[Pub, Spoil](publisher)
   
+  protected override def spoilsSource: EventSink[Spoil] = _spoils
+  
+  override def spoils: Events[Pub, Spoil] = _spoils
+
   lazy val _updates = new EventSource[Pub, Update[A]](publisher) {
     lazy val spoilHandler = { (_: Any, spoilEvent: Spoil) => LiveBinding.this.value: Unit }
     

@@ -10,6 +10,12 @@ class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveSe
   
   override def asLiveValue: LiveValue[Tree[A]] = this
   
+  private lazy val _spoils = new EventSource[Pub, Spoil](publisher)
+  
+  protected override def spoilsSource: EventSink[Spoil] = _spoils
+  
+  override def spoils: Events[Pub, Spoil] = _spoils
+
   lazy val _changes = new EventSource[Pub, Change[A]](publisher)
 
   def changes: Events[Pub, Change[A]] = _changes

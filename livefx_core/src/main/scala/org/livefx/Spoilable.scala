@@ -4,12 +4,12 @@ import org.livefx.script.Spoil
 
 trait Spoilable extends Publisher {
   type Pub <: Spoilable
-  
-  lazy val _spoils = new EventSource[Pub, Spoil](publisher)
-  
-  def spoils: Events[Pub, Spoil] = _spoils
-  
+
+  protected def spoilsSource: EventSink[Spoil]
+
+  def spoils: Events[Pub, Spoil]
+
   def spoiled: Boolean = false
-  
-  protected def spoil(spoilEvent: Spoil): Unit = _spoils.publish(spoilEvent)
+
+  protected def spoil(spoilEvent: Spoil): Unit = spoilsSource.publish(spoilEvent)
 }
