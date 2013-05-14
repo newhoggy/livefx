@@ -41,12 +41,84 @@ trait LiveSeq[+A] extends Spoilable {
   }
   
 //  final def flatMap[B](f: A => LiveSeq[B]): LiveSeq[B] = {
+//    val outer = this
+//    
 //    val monoid = new Monoid[LiveValue[Int]] {
-//      override def zero: LiveValue[Int] = 
+//      override def zero: LiveValue[Int] = const(0)
+//      override def append(liveA: LiveValue[Int], liveB: => LiveValue[Int]): LiveValue[Int] = for (a <- liveA; b <- liveB) yield a + b
 //    }
+//    
 //    val seqs = map(f)
 //    val volumes = seqs.map(_.size)
-//    null
+//
+//    new LiveSeqBinding[B] {
+//      private var tree: Tree[B] = outer.value.map(f)
+//      
+//      val changeSubscriber = { (_: Any, change: Change[A]) =>
+//        def handleChange(change: Change[A]): Unit = {
+//          change match {
+//            case Include(location, elem) => {
+//              val newElem = f(elem)
+//              location match {
+//                case Start => {
+//                  tree = tree.insert(0, newElem)
+//                  spoil(Spoil())
+//                }
+//                case End => {
+//                  tree = tree.insert(outer.value.size, newElem)
+//                  spoil(Spoil())
+//                }
+//                case Index(index) => {
+//                  tree = tree.insert(index, newElem)
+//                  spoil(Spoil())
+//                }
+//                case _ => throw new IndexOutOfBoundsException
+//              }
+//            }
+//            case Update(location, elem, oldElem) => {
+//              val newB = f(elem)
+//              location match {
+//                case Start => {
+//                  tree = tree.update(0, newB)
+//                  spoil(Spoil())
+//                }
+//                case End => {
+//                  tree = tree.update(outer.value.size, newB)
+//                  spoil(Spoil())
+//                }
+//                case Index(index) => {
+//                  tree = tree.update(index, newB)
+//                  spoil(Spoil())
+//                }
+//                case _ => throw new IndexOutOfBoundsException
+//              }
+//            }
+//            case Remove(location, elem) => location match {
+//              case Start => {
+//                tree = tree.delete(0)
+//                spoil(Spoil())
+//              }
+//              case End => {
+//                tree = tree.delete(outer.value.size - 1)
+//                spoil(Spoil())
+//              }
+//              case Index(index) => {
+//                tree = tree.delete(index)
+//                spoil(Spoil())
+//              }
+//              case _ => throw new IndexOutOfBoundsException
+//            }
+//            case Reset => tree = Leaf
+//            case script: Script[A] => script.foreach(handleChange(_))
+//          }
+//        }
+//        handleChange(change)
+//      }
+//
+//      outer.changes.subscribeWeak(changeSubscriber) 
+//      
+//      override def computeValue: Tree[B] = tree
+//    }
 //  }
   
   
