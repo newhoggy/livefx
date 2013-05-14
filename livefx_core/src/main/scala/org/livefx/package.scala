@@ -74,5 +74,5 @@ package object livefx {
     }
   }
 
-  def const(value: Int): Const[Int] = Const(value)
+  def const[A](value: A): Const[A] = Const(value)
 }
