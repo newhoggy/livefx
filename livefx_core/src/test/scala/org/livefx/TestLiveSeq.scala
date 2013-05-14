@@ -50,7 +50,7 @@ class TestLiveSeq {
   def testMap(): Unit = {
     val random = new scala.util.Random(0)
     val tree1: VarTreeSeq[Int] = new VarTreeSeq[Int]()
-    val tree2: LiveSeq[Int] = tree1.map(_ * 10)
+    val tree2 = tree1.asLiveTreeSeq.map(_ * 10)
     val sum1: LiveValue[Int] = tree1.fold(new Monoid[Int] {
       override def zero: Int = 0
       override def append(a: Int, b: => Int): Int = a + b

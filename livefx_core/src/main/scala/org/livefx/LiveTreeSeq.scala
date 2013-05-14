@@ -119,9 +119,17 @@ trait LiveTreeSeq[+A] extends LiveSeq[A] {
 //    }
 //  }
   
+  def asLiveTreeSeq: LiveTreeSeq[A] = this
   
-  final def map[B](f: A => B): LiveSeq[B] = {
+  final def map[B](f: A => B): LiveTreeSeq[B] = {
     val outer = this
+    
+    /*
+     def fold[B >: B](implicit monoid: scalaz.Monoid[B]): org.livefx.LiveValue[B] =
+     def map[B](f: B => B): org.livefx.LiveSeq[B] = ??? def 
+ size: org.livefx.LiveValue[Int] = ???
+     * */
+    
     new LiveTreeSeqBinding[B] {
       private var tree: Tree[B] = outer.value.map(f)
       

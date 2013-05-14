@@ -14,11 +14,23 @@ trait LiveSeq[+A] extends Spoilable {
   
   def size: LiveValue[Int]
   
-  def asLiveValue: LiveValue[Tree[A]]
-  
   def asLiveSeq: LiveSeq[A] = this
-
-  def fold[B >: A](implicit monoid: Monoid[B]): LiveValue[B]
   
   def map[B](f: A => B): LiveSeq[B]
+
+  def +[B >: A](that: LiveSeq[B]): LiveSeq[B] = {
+    val self = this
+    new LiveSeqBinding[B] {
+      // TODO: Hook up events
+      private lazy val _spoils = new EventSource[Pub, Spoil](publisher)
+      
+      protected override def spoilsSource: EventSink[Spoil] = _spoils
+      
+      override def spoils: Events[Pub, Spoil] = _spoils
+
+      def size: LiveValue[Int] = for (selfSize <- self.size; thatSize <- that.size) yield selfSize + thatSize
+      
+      def map[C](f: B => C): LiveSeq[C] = self.map(f) + that.map(f)
+    }
+  }
 }
