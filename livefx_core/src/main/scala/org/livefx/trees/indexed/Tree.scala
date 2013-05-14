@@ -2,6 +2,8 @@ package org.livefx.trees.indexed
 
 import scala.annotation.tailrec
 import scala.Array.canBuildFrom
+import scalaz.Monoid
+import org.livefx.util.Memoize
 
 sealed trait Color {
   def apply[T](l: Tree[T], v: T, r: Tree[T]): Tree[T]
@@ -284,5 +286,20 @@ object Tree {
     case t@Tree(Leaf, v, r) => t.color(Leaf, f(v), map(r, f))
     case t@Tree(l, v, r) => t.color(map(l, f), f(v), map(r, f))
     case Leaf => Leaf
+  }
+
+  final def appendUp[A](tree: Tree[A])(implicit monoid: Monoid[A]): Tree[A] = {
+    lazy val memoize: Tree[A] => Tree[A] = Memoize.apply(Tree.idOf(_: Tree[A])) { tree =>
+      import scalaz.Scalaz._
+      tree match {
+        case t@Tree(Leaf, v, Leaf) => t
+        case t@Tree(l, v, Leaf) => t.color(l, memoize(l).value |+| v |+| monoid.zero, Leaf)
+        case t@Tree(Leaf, v, r) => t.color(Leaf, v |+| memoize(r).value |+| monoid.zero, r)
+        case t@Tree(l, v, r) => t.color(l, memoize(l).value |+| v |+| memoize(r).value |+| monoid.zero, r)
+        case Leaf => Leaf
+      }
+    }
+    
+    memoize(tree)
   }
 }
