@@ -15,7 +15,7 @@ class TestVarSeq {
   def testInsertUpdateRemove(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    val tree: VarSeq[Int] = new VarSeq[Int]()
+    val tree: VarTreeSeq[Int] = new VarTreeSeq[Int]()
     var change: Option[Change[Int]] = None
     tree.changes.subscribe{(p, e) => change = Some(e)}
 
@@ -54,7 +54,7 @@ class TestVarSeq {
   def testSetValueEvents(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    val tree: VarSeq[Int] = new VarSeq[Int]()
+    val tree: VarTreeSeq[Int] = new VarTreeSeq[Int]()
     var updateCount = 0
     val sum: LiveValue[Int] = tree.fold(new Monoid[Int] {
       override def zero: Int = 0

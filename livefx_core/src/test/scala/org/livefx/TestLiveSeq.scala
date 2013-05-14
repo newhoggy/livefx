@@ -9,7 +9,7 @@ class TestLiveSeq {
   def testFold(): Unit = {
     val random = new scala.util.Random(0)
     var list: ArrayBuffer[Int] = new ArrayBuffer[Int]()
-    val tree: VarSeq[Int] = new VarSeq[Int]()
+    val tree: VarTreeSeq[Int] = new VarTreeSeq[Int]()
     var updateCount = 0
     val sum: LiveValue[Int] = tree.fold(new Monoid[Int] {
       override def zero: Int = 0
@@ -49,7 +49,7 @@ class TestLiveSeq {
   @Test
   def testMap(): Unit = {
     val random = new scala.util.Random(0)
-    val tree1: VarSeq[Int] = new VarSeq[Int]()
+    val tree1: VarTreeSeq[Int] = new VarTreeSeq[Int]()
     val tree2: LiveSeq[Int] = tree1.map(_ * 10)
     val sum1: LiveValue[Int] = tree1.fold(new Monoid[Int] {
       override def zero: Int = 0

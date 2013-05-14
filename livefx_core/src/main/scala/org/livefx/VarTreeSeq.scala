@@ -5,8 +5,8 @@ import org.livefx.script._
 import org.livefx.util.Memoize
 import scalaz.Monoid
 
-class VarSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveTreeSeq[A] {
-  type Pub <: VarSeq[A]
+class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveTreeSeq[A] {
+  type Pub <: VarTreeSeq[A]
   
   override def asLiveValue: LiveValue[Tree[A]] = this
   
