@@ -122,7 +122,7 @@ trait LiveTreeSeq[+A] extends LiveSeq[A] {
   
   final def map[B](f: A => B): LiveSeq[B] = {
     val outer = this
-    new LiveSeqBinding[B] {
+    new LiveTreeSeqBinding[B] {
       private var tree: Tree[B] = outer.value.map(f)
       
       val changeSubscriber = { (_: Any, change: Change[A]) =>
