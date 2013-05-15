@@ -21,6 +21,8 @@ trait LiveSeq[+A] extends Spoilable {
   def +[B >: A](that: LiveSeq[B]): LiveSeq[B] = {
     val self = this
     new LiveSeqBinding[B] {
+      val ref = self.changes.subscribeWeak { (p, e) => Unit }
+      
       // TODO: Hook up events
       private lazy val _spoils = new EventSource[Pub, Spoil](publisher)
       
