@@ -133,7 +133,7 @@ trait LiveTreeSeq[+A] extends LiveSeq[A] {
     new LiveTreeSeqBinding[B] {
       private var tree: Tree[B] = outer.value.map(f)
       
-      val changeSubscriber = { (_: Any, change: Change[A]) =>
+      val ref = outer.changes.subscribeWeak { (_, change) =>
         def handleChange(change: Change[A]): Unit = {
           change match {
             case Include(location, elem) => {
@@ -194,8 +194,6 @@ trait LiveTreeSeq[+A] extends LiveSeq[A] {
         handleChange(change)
       }
 
-      outer.changes.subscribeWeak(changeSubscriber) 
-      
       override def computeValue: Tree[B] = tree
     }
   }
