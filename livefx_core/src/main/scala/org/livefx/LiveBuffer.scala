@@ -7,7 +7,7 @@ trait LiveBuffer[A] extends Buffer[A] with OldLiveSeq[A] with Publisher {
   
   abstract override def +=(element: A): this.type = {
     super.+=(element)
-    changesSink.publish(Include(End, element))
+    changesSink.publish(Include(End(0), element))
     this
   }
 
@@ -18,20 +18,20 @@ trait LiveBuffer[A] extends Buffer[A] with OldLiveSeq[A] with Publisher {
 
   abstract override def +=:(element: A): this.type = {
     super.+=:(element)
-    changesSink.publish(Include(Start, element))
+    changesSink.publish(Include(Start(0), element))
     this
   }
 
   abstract override def update(n: Int, newelement: A): Unit = {
     val oldelement = apply(n)
     super.update(n, newelement)
-    changesSink.publish(Update(Index(n), newelement, oldelement))
+    changesSink.publish(Update(Start(n), newelement, oldelement))
   }
 
   abstract override def remove(n: Int): A = {
     val oldelement = apply(n)
     super.remove(n)
-    changesSink.publish(Remove(Index(n), oldelement))
+    changesSink.publish(Remove(Start(n), oldelement))
     oldelement
   }
 
@@ -46,7 +46,7 @@ trait LiveBuffer[A] extends Buffer[A] with OldLiveSeq[A] with Publisher {
     val msg = elems.foldLeft(new Script[A]()) {
       case (msg, elem) =>
         curr += 1
-        msg += Include(Index(curr), elem)
+        msg += Include(Start(curr), elem)
     }
     changesSink.publish(msg)
   }

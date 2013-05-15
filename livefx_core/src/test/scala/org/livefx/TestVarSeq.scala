@@ -5,10 +5,10 @@ import org.junit.Assert
 import org.livefx.trees.indexed.Tree
 import org.livefx.script.Change
 import org.livefx.script.Include
-import org.livefx.script.Index
-import org.livefx.script.Update
 import org.livefx.script.Remove
+import org.livefx.script.Update
 import scalaz.Monoid
+import org.livefx.script.Start
 
 class TestVarSeq {
   @Test
@@ -25,14 +25,14 @@ class TestVarSeq {
           val index = random.nextInt(list.size + 1)
           list.insert(index, i)
           tree.insert(index, i)
-          Assert.assertEquals(Some(Include(Index(index), i)), change)
+          Assert.assertEquals(Some(Include(Start(index), i)), change)
         case 1 =>
           if (list.size > 0) {
             val index = random.nextInt(list.size)
             val oldValue = list(index)
             list(index) = i
             tree(index) = i
-            Assert.assertEquals(Some(Update(Index(index), i, oldValue)), change)
+            Assert.assertEquals(Some(Update(Start(index), i, oldValue)), change)
           }
       }
 
@@ -44,7 +44,7 @@ class TestVarSeq {
       val oldValue = list(index)
       list.remove(index)
       tree.remove(index)
-      Assert.assertEquals(Some(Remove(Index(index), oldValue)), change)
+      Assert.assertEquals(Some(Remove(Start(index), oldValue)), change)
       
       Assert.assertEquals(list.toList, Tree.iterator(tree.value).toList)
     }

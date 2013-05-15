@@ -139,16 +139,12 @@ trait LiveTreeSeq[+A] extends LiveSeq[A] {
             case Include(location, elem) => {
               val newElem = f(elem)
               location match {
-                case Start => {
-                  tree = tree.insert(0, newElem)
-                  spoil(Spoil())
-                }
-                case End => {
-                  tree = tree.insert(outer.value.size, newElem)
-                  spoil(Spoil())
-                }
-                case Index(index) => {
+                case Start(index) => {
                   tree = tree.insert(index, newElem)
+                  spoil(Spoil())
+                }
+                case End(index) => {
+                  tree = tree.insert(outer.value.size - index, newElem)
                   spoil(Spoil())
                 }
                 case _ => throw new IndexOutOfBoundsException
@@ -157,32 +153,24 @@ trait LiveTreeSeq[+A] extends LiveSeq[A] {
             case Update(location, elem, oldElem) => {
               val newB = f(elem)
               location match {
-                case Start => {
-                  tree = tree.update(0, newB)
-                  spoil(Spoil())
-                }
-                case End => {
-                  tree = tree.update(outer.value.size, newB)
-                  spoil(Spoil())
-                }
-                case Index(index) => {
+                case Start(index) => {
                   tree = tree.update(index, newB)
+                  spoil(Spoil())
+                }
+                case End(0) => {
+                  tree = tree.update(outer.value.size, newB)
                   spoil(Spoil())
                 }
                 case _ => throw new IndexOutOfBoundsException
               }
             }
             case Remove(location, elem) => location match {
-              case Start => {
-                tree = tree.delete(0)
-                spoil(Spoil())
-              }
-              case End => {
-                tree = tree.delete(outer.value.size - 1)
-                spoil(Spoil())
-              }
-              case Index(index) => {
+              case Start(index) => {
                 tree = tree.delete(index)
+                spoil(Spoil())
+              }
+              case End(index) => {
+                tree = tree.delete(outer.value.size - index - 1)
                 spoil(Spoil())
               }
               case _ => throw new IndexOutOfBoundsException

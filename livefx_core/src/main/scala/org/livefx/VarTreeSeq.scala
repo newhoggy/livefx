@@ -26,14 +26,14 @@ class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with Li
     val msg = newValue.toList.foldLeft(new Script[A]() += Reset) {
       case (msg, elem) =>
         curr += 1
-        msg += Include(Index(curr), elem)
+        msg += Include(Start(curr), elem)
     }
     _changes.publish(msg)
   }
   
   def +=(element: A): this.type = {
     updateValue(_value, this.value.insert(this.value.size, element))
-    _changes.publish(Include(End, element))
+    _changes.publish(Include(End(0), element))
     this
   }
 
@@ -44,7 +44,7 @@ class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with Li
 
   def +=:(element: A): this.type = {
     updateValue(_value, this.value.insert(0, element))
-    _changes.publish(Include(Start, element))
+    _changes.publish(Include(Start(0), element))
     this
   }
 
@@ -53,13 +53,13 @@ class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with Li
   def update(index: Int, newElement: A): Unit = {
     val oldElement = apply(index)
     updateValue(_value, this.value.update(index, newElement))
-    _changes.publish(Update(Index(index), newElement, oldElement))
+    _changes.publish(Update(Start(index), newElement, oldElement))
   }
 
   def remove(index: Int): A = {
     val oldElement = apply(index)
     updateValue(_value, this.value.delete(index))
-    _changes.publish(Remove(Index(index), oldElement))
+    _changes.publish(Remove(Start(index), oldElement))
     oldElement
   }
 
@@ -70,7 +70,7 @@ class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with Li
 
   def insert(index: Int, elem: A): Unit = {
     updateValue(_value, this.value.insert(index, elem))
-    _changes.publish(Include(Index(index), elem))
+    _changes.publish(Include(Start(index), elem))
   }
 
   def insertAll(index: Int, elems: scala.collection.Traversable[A]): Unit = {
@@ -80,7 +80,7 @@ class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with Li
     val msg = elems.foldLeft(new Script[A]()) {
       case (msg, elem) =>
         curr += 1
-        msg += Include(Index(curr), elem)
+        msg += Include(Start(curr), elem)
     }
     _changes.publish(msg)
   }

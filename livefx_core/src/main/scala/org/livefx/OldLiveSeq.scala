@@ -5,7 +5,6 @@ import org.livefx.script.Change
 import org.livefx.script.Location
 import org.livefx.script.Start
 import org.livefx.script.End
-import org.livefx.script.Index
 import org.livefx.script.NoLo
 import org.livefx.script.Remove
 import org.livefx.script.Include
@@ -75,9 +74,8 @@ trait OldLiveSeq[A] extends Seq[A] with Publisher {
   def changes: Events[Pub, Change[A]] = changesSink
 
   def apply(location: Location): Option[A] = location match {
-    case Start => Some(this(0))
-    case End => Some(this(this.size - 1))
-    case Index(index) => Some(this(index))
+    case Start(index) => Some(this(index))
+    case End(index) => Some(this(this.size - index - 1))
     case NoLo => None
   }
   
@@ -93,21 +91,18 @@ trait OldLiveSeq[A] extends Seq[A] with Publisher {
         def process(pub: OldLiveSeq[A], change: Change[A]): Unit = {
           change match {
             case Remove(location, oldElem) => location match {
-              case Start => target.remove(0)
-              case End => target.remove(target.size - 1)
-              case Index(index) => target.remove(index)
+              case Start(index) => target.remove(index)
+              case End(index) => target.remove(target.size - index - 1)
               case NoLo => assert(false)
             }
             case Include(location, newElem) => location match {
-              case Start => target.prepend(f(newElem))
-              case End => target.append(f(newElem))
-              case Index(index) => target.insert(index, f(newElem))
+              case Start(index) => target.insert(index, f(newElem))
+              case End(0) => target.append(f(newElem))
               case NoLo => assert(false)
             }
             case Update(location, newElem, oldElem) => location match {
-              case Start => target(0) = f(newElem)
-              case End => target(target.size - 1) = f(newElem)
-              case Index(index) => target(index) = f(newElem)
+              case Start(index) => target(index) = f(newElem)
+              case End(0) => target(target.size - 1) = f(newElem)
               case NoLo => assert(false)
             }
             case Reset => target.clear()
