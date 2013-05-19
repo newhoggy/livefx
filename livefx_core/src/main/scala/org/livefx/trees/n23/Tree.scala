@@ -13,6 +13,7 @@ trait Tree[+A] {
 object Tree {
   type Keep[A] = Tree[A] => Tree[A]
   type Push[A] = (Tree[A], A, Tree[A]) => Tree[A]
+  type Pull[A] = Tree[A] => Tree[A]
   
   final def insertAt[A](tree: Tree[A], index: Int, value: A, keep: Keep[A], push: Push[A]): Tree[A] = {
     if (index < 0 || index > tree.size) throw new IndexOutOfBoundsException
@@ -47,7 +48,34 @@ object Tree {
     }
   }
 
-  def updateAt[A, B <: A](tree: Tree[A], index: Int, value: B): Tree[B] = ???
+  def updateAt[A](tree: Tree[A], index: Int, value: A): Tree[A] = {
+    if (index < 0 || index > tree.size) throw new IndexOutOfBoundsException
+    tree match {
+      case Tip => throw new IndexOutOfBoundsException
+      case Tree2(l, v, r) => {
+        if (index < l.size) {
+          updateAt(l, index, value)
+        } else if (index == l.size) {
+          Tree2(l, value, r)
+        } else {
+          updateAt(r, index - l.size - 1, value)
+        }
+      }
+      case Tree3(l, v, c, w, r) => {
+        if (index < l.size) {
+          updateAt(l, index, value)
+        } else if (index == l.size) {
+          Tree3(l, value, c, w, r)
+        } else if (index < l.size + 1 + c.size) {
+          updateAt(c, index, value)
+        } else if (index == c.size) {
+          Tree3(l, v, c, value, r)
+        } else {
+          updateAt(r, index, value)
+        }
+      }
+    }
+  }
 
   def removeAt[A](tree: Tree[A], index: Int): Tree[A] = ???
   
