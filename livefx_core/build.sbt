@@ -4,17 +4,22 @@ javaHome := Some(file(System.getenv("JAVA_HOME")))
 
 resolvers += "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots/"
 
-libraryDependencies += "com.typesafe" %% "scalalogging-slf4j" % "1.0.1"
-
-libraryDependencies += "junit" % "junit" % "4.10" % "test"
-
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.0"
+libraryDependencies ++= Seq(
+  "com.typesafe" %% "scalalogging-slf4j" % "1.0.1",
+  "junit" % "junit" % "4.10" % "test",
+  "org.scalaz" %% "scalaz-core" % "7.0.0",
+  "org.scalacheck" %% "scalacheck" % "1.10.1" % "test"
+)
 
 unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
 
 proguardSettings
 
-ProguardKeys.options in Proguard ++= Seq("-dontnote", "-dontwarn", "-ignorewarnings")
+ProguardKeys.options in Proguard ++= Seq(
+  "-dontnote",
+  "-dontwarn",
+  "-ignorewarnings"
+)
 
 ProguardKeys.options in Proguard += ProguardOptions.keepMain("org.livefx.*")
 
