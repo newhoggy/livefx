@@ -3,7 +3,7 @@ package org.livefx.trees.n23
 case class Tree[+A](root: Node[A], depth: Int = 0) {
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree(Tree.insertAt(root, index, value)(identity, Branch2[B](_, _)))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree(Tree.updateAt(root, index, value))
-  final def removeAt(index: Int): Tree[A] = Tree(Tree.removeAt(root, index))
+  final def removeAt(index: Int): Tree[A] = Tree(Tree.removeAt(root, index)(identity)(identity))
   final def toList[B >: A](): List[B] = Tree.toList(root, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(root, tail)
 }
@@ -72,6 +72,7 @@ final object Tree {
   }
   
   private final def doKeep[A](k: Node[A] => Node[A]): Keep[A] = k
+  private final def doPull[A](k: Node[A] => Node[A]): Keep[A] = k
   private final def doPush[A](p: (Node[A], Node[A]) => Node[A]): Push[A] = p 
   
   final def apply(): Tree[Nothing] = Tree(Empty)
@@ -116,13 +117,86 @@ final object Tree {
   }
 
   def updateAt[A](tree: Node[A], index: Int, value: A): Node[A] = {
-    val x: Int = ???
-    val a: Int = x * 2
-    ???
+    type N = Node[A]
+    tree match {
+      case Empty => throw new IndexOutOfBoundsException
+      case Tip(a) => index match {
+        case 0 => Tip(value)
+        case _ => throw new IndexOutOfBoundsException
+      }
+      case Branch2(a, b) => index match {
+        case index if index < 0 => throw new IndexOutOfBoundsException
+        case index if index < a.size => Tree.updateAt(a, index, value)
+        case index => index - a.size match {
+          case index if index < b.size => Tree.updateAt(b, index, value)
+          case _ => throw new IndexOutOfBoundsException
+        }
+      }
+      case Branch3(a, b, c) => index match {
+        case index if index < 0 => throw new IndexOutOfBoundsException
+        case index if index < a.size => Tree.updateAt(a, index, value)
+        case index => index - a.size match {
+          case index if index < b.size => Tree.updateAt(b, index, value)
+          case index => index - b.size match {
+            case index if index < c.size => Tree.updateAt(c, index, value)
+            case _ => throw new IndexOutOfBoundsException
+          }
+        }
+      }
+    }
   }
 
-  def removeAt[A](tree: Node[A], index: Int): Node[A] = {
-    ???
+  def removeAt[A](tree: Node[A], index: Int)(keep: Keep[A])(pull: Pull[A]): Node[A] = {
+    type N = Node[A]
+    tree match {
+      case Branch2(Tip(a), Tip(b)) => index match {
+        case 0 => pull(Tip(b))
+        case 1 => pull(Tip(a))
+        case _ => throw new IndexOutOfBoundsException
+      }
+      case Branch3(Tip(a), Tip(b), Tip(c)) => index match {
+        case 0 => keep(Branch2(Tip(b), Tip(c)))
+        case 1 => keep(Branch2(Tip(a), Tip(c)))
+        case 2 => keep(Branch2(Tip(a), Tip(b)))
+        case _ => throw new IndexOutOfBoundsException
+      }
+      case Branch2(a: Branch[A], b: Branch[A]) => index match {
+        case index if index < 0 => throw new IndexOutOfBoundsException
+        case index if index < a.size =>
+          Tree.removeAt(a, index)((k: N) => keep(Branch2(k, b))) { (p: N) =>
+            a match {
+              case Branch2(x, y) => pull(Branch3(x, y, b))
+              case Branch3(x, y, z) => keep(Branch2(Branch2(x, y), Branch2(z, b)))
+              case _ => ???
+            }
+          }
+        case index => index - a.size match {
+          case index if index <= b.size =>
+            Tree.removeAt(b, index)((k: N) => keep(Branch2(a, k))) { (p: N) =>
+              b match {
+                case Branch2(x, y) => pull(Branch3(a, x, y))
+                case Branch3(x, y, z) => keep(Branch2(Branch2(a, x), Branch2(y, z)))
+                case _ => ???
+              }
+            }
+          case _ => throw new IndexOutOfBoundsException
+        }
+      }
+      case Branch3(a, b, c) => index match {
+        case index if index < 0 => throw new IndexOutOfBoundsException
+        case index if index < a.size =>
+          Tree.removeAt(a, index)((k: N) => keep(Branch3(k, b, c)))(_ => keep(Branch2(b, c)))
+        case index => index - a.size match {
+          case index if index < b.size =>
+            Tree.removeAt(b, index)((k: N) => keep(Branch3(a, k, c)))(_ => keep(Branch2(a, c)))
+          case index => index - b.size match {
+            case index if index <= c.size =>
+              Tree.removeAt(c, index)((k: N) => keep(Branch3(a, b, k)))(_ => keep(Branch2(a, b)))
+            case _ => throw new IndexOutOfBoundsException
+          }
+        }
+      }
+    }
   }
   
   final def toList[A, B >: A](tree: Node[A], tail: List[B]): List[B] = tree match {
