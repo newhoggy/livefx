@@ -5,6 +5,18 @@ import org.scalacheck.Prop._
 import TreeArbitrary.ArbitraryTree
 
 object TreeSpecification extends Properties("Tree") {
+  import scala.language.implicitConversions
+  
+  implicit def implThrows(x: => Any) = new { 
+    def throws[T <: Throwable](c: Class[T]) = try { 
+      x
+      falsified 
+    } catch { 
+      case e if c.isInstance(e) => proved
+      case _: Throwable => falsified 
+    } 
+  }
+
   property("insert at 0 prepends") = forAll { (tree: Tree[Int], value: Int) =>
     tree.insertAt(0, value).toList == value::tree.toList
   }
@@ -20,7 +32,13 @@ object TreeSpecification extends Properties("Tree") {
     }
   }
 
-//  property("hasRight produces value") = forAll(
+  property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
+    (n < 0 || n > tree.size) ==> {
+      tree.insertAt(n, value).throws(classOf[IndexOutOfBoundsException])
+    }
+  }
+
+  //  property("hasRight produces value") = forAll(
 //    (x: Zipper[Int]) =>
 //      x.right.isEmpty || x.hasRight
 //  )
