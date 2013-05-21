@@ -1,6 +1,7 @@
 package org.livefx.trees.n23
 
-case class Tree[+A](root: Node[A], depth: Int = 0) {
+case class Tree[+A](root: Node[A] = Empty, depth: Int = 0) {
+  final def size: Int = root.size
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree(Tree.insertAt(root, index, value)(identity, Branch2[B](_, _)))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree(Tree.updateAt(root, index, value))
   final def removeAt(index: Int): Tree[A] = Tree(Tree.removeAt(root, index)(identity)(identity))
@@ -64,6 +65,14 @@ final object Tree {
   type Push[A] = (Node[A], Node[A]) => Node[A]
   type Keep[A] = Node[A] => Node[A]
   type Pull[A] = Node[A] => Node[A]
+  
+  def apply[A](values: A*): Tree[A] = {
+    values.foldLeft(Tree[A](Empty))((tree, value) => tree.insertAt(tree.size, value))
+  }
+
+  def apply[A](values: List[A]): Tree[A] = {
+    values.foldLeft(Tree[A](Empty))((tree, value) => tree.insertAt(tree.size, value))
+  }
   
   private final def boundsCheck(test: Boolean): Unit = {
     if (!test) {
