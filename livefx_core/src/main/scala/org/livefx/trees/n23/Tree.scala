@@ -4,7 +4,10 @@ case class Tree[+A](root: Node[A] = Empty, depth: Int = 0) {
   final def size: Int = root.size
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree(Tree.insertAt(root, index, value)(identity, Branch2[B](_, _)))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree(Tree.updateAt(root, index, value))
-  final def removeAt(index: Int): Tree[A] = Tree(Tree.removeAt(root, index)(identity)(identity))
+  final def removeAt(index: Int): Tree[A] = root match {
+    case Tip(a) => Tree(Empty)
+    case tree => Tree(Tree.removeAt(tree, index)(identity)(identity))
+  }
   final def toList[B >: A](): List[B] = Tree.toList(root, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(root, tail)
 }
@@ -173,18 +176,18 @@ final object Tree {
         case index if index < 0 => throw new IndexOutOfBoundsException
         case index if index < a.size =>
           Tree.removeAt(a, index)((k: N) => keep(Branch2(k, b))) { (p: N) =>
-            a match {
-              case Branch2(x, y) => pull(Branch3(x, y, b))
-              case Branch3(x, y, z) => keep(Branch2(Branch2(x, y), Branch2(z, b)))
+            b match {
+              case Branch2(x, y) => pull(Branch3(p, x, y))
+              case Branch3(x, y, z) => keep(Branch2(Branch2(p, x), Branch2(y, z)))
               case _ => ???
             }
           }
         case index => index - a.size match {
           case index if index <= b.size =>
             Tree.removeAt(b, index)((k: N) => keep(Branch2(a, k))) { (p: N) =>
-              b match {
-                case Branch2(x, y) => pull(Branch3(a, x, y))
-                case Branch3(x, y, z) => keep(Branch2(Branch2(a, x), Branch2(y, z)))
+              a match {
+                case Branch2(x, y) => pull(Branch3(x, y, b))
+                case Branch3(x, y, z) => keep(Branch2(Branch2(x, y), Branch2(z, b)))
                 case _ => ???
               }
             }
@@ -194,13 +197,18 @@ final object Tree {
       case Branch3(a, b, c) => index match {
         case index if index < 0 => throw new IndexOutOfBoundsException
         case index if index < a.size =>
-          Tree.removeAt(a, index)((k: N) => keep(Branch3(k, b, c)))(_ => keep(Branch2(b, c)))
+          Tree.removeAt(a, index)((k: N) => keep(Branch3(k, b, c))) { p =>
+            b match {
+              case Branch2(ba, bb) => keep(Branch2(Branch3(p, ba, bb), c))
+              case Branch3(ba, bb, bc) => keep(Branch3(Branch2(p, ba), Branch2(ba, bb), c))
+            }
+          }
         case index => index - a.size match {
           case index if index < b.size =>
-            Tree.removeAt(b, index)((k: N) => keep(Branch3(a, k, c)))(_ => keep(Branch2(a, c)))
+            Tree.removeAt(b, index)((k: N) => keep(Branch3(a, k, c)))(p => keep(Branch2(a, c)))
           case index => index - b.size match {
             case index if index <= c.size =>
-              Tree.removeAt(c, index)((k: N) => keep(Branch3(a, b, k)))(_ => keep(Branch2(a, b)))
+              Tree.removeAt(c, index)((k: N) => keep(Branch3(a, b, k)))(p => keep(Branch2(a, b)))
             case _ => throw new IndexOutOfBoundsException
           }
         }
