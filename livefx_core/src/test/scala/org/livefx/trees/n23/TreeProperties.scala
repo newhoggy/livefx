@@ -6,6 +6,7 @@ import TreeArbitrary.ArbitraryTree
 
 object TreeSpecification extends Properties("Tree") {
   import scala.language.implicitConversions
+  import scala.language.reflectiveCalls
   
   implicit def implThrows(x: => Any) = new { 
     def throws[T <: Throwable](c: Class[T]) = try { 
