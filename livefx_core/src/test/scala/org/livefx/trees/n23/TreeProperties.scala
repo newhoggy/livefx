@@ -3,6 +3,7 @@ package org.livefx.trees.n23
 import org.scalacheck.Properties
 import org.scalacheck.Prop._
 import TreeArbitrary.ArbitraryTree
+import org.scalacheck.Gen
 
 object TreeSpecification extends Properties("Tree") {
   import scala.language.implicitConversions
@@ -33,20 +34,28 @@ object TreeSpecification extends Properties("Tree") {
     }
   }
 
-  property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
-    (n < 0 || n > tree.size) ==> {
-      tree.insertAt(n, value).throws(classOf[IndexOutOfBoundsException])
+  val smallInteger = Gen.choose(0.0, 1.0)
+  import org.scalacheck.Arbitrary.arbitrary
+  property("remove at n ") = forAll(arbitrary[Tree[Int]], smallInteger) { (tree: Tree[Int], d: Double) =>
+    val n: Int = (tree.size * d).toInt
+    println(s"--> $d, $n, $tree")
+    (tree.size > 0 && n >= 0 && n < tree.size) ==> {
+      if (tree.size == 0) {
+        tree.removeAt(n).throws(classOf[IndexOutOfBoundsException])
+      } else {
+        println(s"--> tree: $tree.removeAt($n)")
+        println(s"--> result: ${tree.removeAt(n)}")
+        val l = tree.removeAt(n).toList
+        val r = tree.toList.take(n) ::: tree.toList.drop(n + 1)
+        println(s"--> $l <> $r")
+        tree.removeAt(n).toList == tree.toList.take(n) ::: tree.toList.drop(n + 1)
+      }
     }
   }
 
-  property("remove at n ") = forAll { (tree: Tree[Int], n: Int) =>
-    (tree.size > 0 && (n >= 0 && n < tree.size)) ==> {
-      println(s"--> tree: $tree.removeAt($n)")
-      println(s"--> result: ${tree.removeAt(n)}")
-      val l = tree.removeAt(n).toList
-      val r = tree.toList.take(n) ::: tree.toList.drop(n + 1)
-      println(s"--> $l <> $r")
-      tree.removeAt(n).toList == tree.toList.take(n) ::: tree.toList.drop(n + 1)
+  property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
+    (n < 0 || n > tree.size) ==> {
+      tree.insertAt(n, value).throws(classOf[IndexOutOfBoundsException])
     }
   }
 
