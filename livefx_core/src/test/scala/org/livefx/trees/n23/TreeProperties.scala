@@ -38,7 +38,7 @@ object TreeSpecification extends Properties("Tree") {
   import org.scalacheck.Arbitrary.arbitrary
   property("remove at n ") = forAll(arbitrary[Tree[Int]], smallInteger) { (tree: Tree[Int], d: Double) =>
     val n: Int = (tree.size * d).toInt
-    println(s"--> $d, $n, $tree")
+    println(s"--> removeAt: $d, $n, $tree")
     (tree.size > 0 && n >= 0 && n < tree.size) ==> {
       if (tree.size == 0) {
         tree.removeAt(n).throws(classOf[IndexOutOfBoundsException])
