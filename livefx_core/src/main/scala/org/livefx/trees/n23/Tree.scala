@@ -3,7 +3,7 @@ package org.livefx.trees.n23
 trait Tree[+A] {
   def depth: Int
   def size: Int
-  final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch2(_, _, _))
+  final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch1(_, _, _))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree.updateAt(this, index, value)
   final def removeAt(index: Int): (A, Tree[A]) = Tree.removeAt(this, index)
   final def toList[B >: A](): List[B] = Tree.toList(this, Nil)
@@ -16,13 +16,13 @@ final case object Tip extends Tree[Nothing] {
   def apply[A]: Tree[A] = Tip
 }
 
-final case class Branch2[+A](a: Tree[A], v: A, b: Tree[A]) extends Tree[A] {
+final case class Branch1[+A](a: Tree[A], v: A, b: Tree[A]) extends Tree[A] {
   final override val depth: Int = (a.depth max b.depth) + 1
   final override val size: Int = a.size + b.size + 1
   assert(a.depth + 1 == depth && b.depth + 1 == depth)
 }
 
-final case class Branch3[+A](a: Tree[A], v: A, b: Tree[A], w: A, c: Tree[A]) extends Tree[A] {
+final case class Branch2[+A](a: Tree[A], v: A, b: Tree[A], w: A, c: Tree[A]) extends Tree[A] {
   final override val depth: Int = (a.depth max b.depth max c.depth) + 1
   final override val size: Int = a.size + b.size + c.size + 2
   assert(a.depth + 1 == depth && b.depth + 1 == depth && c.depth + 1 == depth)
@@ -63,26 +63,26 @@ final object Tree {
         case _ => throw new IndexOutOfBoundsException
       }
 
-      case Branch2(a, v, b) => index match {
+      case Branch1(a, v, b) => index match {
         case index if index < 0 => throw new IndexOutOfBoundsException
         case index if index <= a.size =>
-          Tree.insertAt(a, index, value)(k => keep(Branch2(k, v, b)), (pa, pv, pb) => keep(Branch3(pa, pv, pb, v, b)))
+          Tree.insertAt(a, index, value)(k => keep(Branch1(k, v, b)), (pa, pv, pb) => keep(Branch2(pa, pv, pb, v, b)))
         case index => index - a.size - 1 match {
           case index if index <= b.size =>
-            Tree.insertAt(b, index, value)(k => keep(Branch2(a, v, k)), (pa, pv, pb) => keep(Branch3(a, v, pa, pv, pb)))
+            Tree.insertAt(b, index, value)(k => keep(Branch1(a, v, k)), (pa, pv, pb) => keep(Branch2(a, v, pa, pv, pb)))
           case _ => throw new IndexOutOfBoundsException
         }
       }
-      case Branch3(a, v, b, w, c) => index match {
+      case Branch2(a, v, b, w, c) => index match {
         case index if index < 0 => throw new IndexOutOfBoundsException
         case index if index <= a.size =>
-          Tree.insertAt(a, index, value)(k => keep(Branch3(k, v, b, w, c)), (pa, pv, pb) => push(Branch2(pa, pv, pb), v, Branch2(b, w, c)))
+          Tree.insertAt(a, index, value)(k => keep(Branch2(k, v, b, w, c)), (pa, pv, pb) => push(Branch1(pa, pv, pb), v, Branch1(b, w, c)))
         case index => index - a.size - 1 match {
           case index if index <= b.size =>
-            Tree.insertAt(b, index, value)(k => keep(Branch3(a, v, k, w, c)), (pa, pv, pb) => push(Branch2(a, v, pa), pv, Branch2(pb, w, c)))
+            Tree.insertAt(b, index, value)(k => keep(Branch2(a, v, k, w, c)), (pa, pv, pb) => push(Branch1(a, v, pa), pv, Branch1(pb, w, c)))
           case index => index - b.size - 1 match {
             case index if index <= c.size =>
-              Tree.insertAt(c, index, value)((k: N) => keep(Branch3(a, v, b, w, k)), (pa, pv, pb) => push(Branch2(a, v, b), w, Branch2(pa, pv, pb)))
+              Tree.insertAt(c, index, value)((k: N) => keep(Branch2(a, v, b, w, k)), (pa, pv, pb) => push(Branch1(a, v, b), w, Branch1(pa, pv, pb)))
             case _ => throw new IndexOutOfBoundsException
           }
         }
@@ -94,24 +94,24 @@ final object Tree {
     type N = Tree[A]
     tree match {
       case Tip => throw new IndexOutOfBoundsException
-      case Branch2(a, v, b) => index match {
+      case Branch1(a, v, b) => index match {
         case index if index < 0 => throw new IndexOutOfBoundsException
-        case index if index < a.size => Branch2(Tree.updateAt(a, index, value), v, b)
-        case index if index == a.size => Branch2(a, value, b)
+        case index if index < a.size => Branch1(Tree.updateAt(a, index, value), v, b)
+        case index if index == a.size => Branch1(a, value, b)
         case index => index - a.size - 1 match {
-          case index if index < b.size => Branch2(a, v, Tree.updateAt(b, index, value))
+          case index if index < b.size => Branch1(a, v, Tree.updateAt(b, index, value))
           case _ => throw new IndexOutOfBoundsException
         }
       }
-      case Branch3(a, v, b, w, c) => index match {
+      case Branch2(a, v, b, w, c) => index match {
         case index if index < 0 => throw new IndexOutOfBoundsException
-        case index if index < a.size => Branch3(Tree.updateAt(a, index, value), v, b, w, c)
-        case index if index == a.size => Branch3(a, value, b, w, c)
+        case index if index < a.size => Branch2(Tree.updateAt(a, index, value), v, b, w, c)
+        case index if index == a.size => Branch2(a, value, b, w, c)
         case index => index - a.size - 1 match {
-          case index if index < b.size => Branch3(a, v, Tree.updateAt(b, index, value), w, c)
-          case index if index == b.size => Branch3(a, v, b, value, c)
+          case index if index < b.size => Branch2(a, v, Tree.updateAt(b, index, value), w, c)
+          case index if index == b.size => Branch2(a, v, b, value, c)
           case index => index - b.size - 1 match {
-            case index if index < c.size => Branch3(a, v, b, w, Tree.updateAt(c, index, value))
+            case index if index < c.size => Branch2(a, v, b, w, Tree.updateAt(c, index, value))
             case index => index - b.size - 1 match {
               case index if index < c.size => Tree.updateAt(c, index, value)
               case _ => throw new IndexOutOfBoundsException
@@ -128,63 +128,63 @@ final object Tree {
     def repl[T](tree: Tree[A], keep: Tree[A] => (A => T), pull: Shrunk[A] => (A => T), leaf: T): T = {
       tree match {
         case Tip => leaf
-        case Branch2(a, v, b) => repl(b, k => keep(Branch2(a, v, k)), p => mrg2r(keep, pull, a, v, p), pull(Shrunk(a))(v))
-        case Branch3(a, v, b, w, c) => repl(c, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p), keep(Branch2(a, v, b))(w))
+        case Branch1(a, v, b) => repl(b, k => keep(Branch1(a, v, k)), p => mrg2r(keep, pull, a, v, p), pull(Shrunk(a))(v))
+        case Branch2(a, v, b, w, c) => repl(c, k => keep(Branch2(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p), keep(Branch1(a, v, b))(w))
       }
     }
     
     def mrg2r[T](keep: Tree[A] => T, pull: Shrunk[A] => T, t: Tree[A], w: A, s: Shrunk[A]): T = t match {
-      case Branch2(ta, tv, tb) => pull(Shrunk(Branch3(ta, tv, tb, w, s.value)))
-      case Branch3(ta, tv, tb, tw, tc) => keep(Branch2(Branch2(ta, tv, tb), tw, Branch2(tc, w, s.value)))
+      case Branch1(ta, tv, tb) => pull(Shrunk(Branch2(ta, tv, tb, w, s.value)))
+      case Branch2(ta, tv, tb, tw, tc) => keep(Branch1(Branch1(ta, tv, tb), tw, Branch1(tc, w, s.value)))
     }
 
     def mrg3r[T](keep: Tree[A] => T, a: Tree[A], v: A, b: Tree[A], w: A, s: Shrunk[A]): T = b match {
-      case Branch2(ba, bv, bb) => keep(Branch2(a, v, Branch3(ba, bv, bb, w, s.value)))
-      case Branch3(ba, bv, bb, bw, bc) => keep(Branch3(a, v, Branch2(ba, bv, bb), bw, Branch2(bc, w, s.value)))
+      case Branch1(ba, bv, bb) => keep(Branch1(a, v, Branch2(ba, bv, bb, w, s.value)))
+      case Branch2(ba, bv, bb, bw, bc) => keep(Branch2(a, v, Branch1(ba, bv, bb), bw, Branch1(bc, w, s.value)))
     }
     
     def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): (A, T) = {
       tree match {
         case Tip => throw new IndexOutOfBoundsException
-        case Branch2(a, v, b) => {
+        case Branch1(a, v, b) => {
           def mrgl(s: Shrunk[A], v: A, b: Tree[A]): T = b match {
-            case Branch2(ba, bv, bb) => pull(Shrunk(Branch3(s.value, v, ba, bv, bb)))
-            case Branch3(ba, bv, bb, bw, bc) => keep(Branch2(Branch2(s.value, v, ba), bv, Branch2(bb, bw, bc)))
+            case Branch1(ba, bv, bb) => pull(Shrunk(Branch2(s.value, v, ba, bv, bb)))
+            case Branch2(ba, bv, bb, bw, bc) => keep(Branch1(Branch1(s.value, v, ba), bv, Branch1(bb, bw, bc)))
           }
           
           index match {
             case index if index < a.size =>
-              search(a, index, k => keep(Branch2(k, v, b)), p => mrgl(p, v, b))
+              search(a, index, k => keep(Branch1(k, v, b)), p => mrgl(p, v, b))
             case index if index == a.size =>
-              (v, repl(a, k => r => keep(Branch2(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a))))
+              (v, repl(a, k => r => keep(Branch1(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a))))
             case index if index > a.size =>
-              search(b, index - a.size - 1, k => keep(Branch2(a, v, k)), p => mrg2r(keep, pull, a, v, p))
+              search(b, index - a.size - 1, k => keep(Branch1(a, v, k)), p => mrg2r(keep, pull, a, v, p))
           }
         }
-        case Branch3(a, v, b, w, c) => {
+        case Branch2(a, v, b, w, c) => {
           def mrgl(s: Shrunk[A], v: A, b: Tree[A], w: A, c: Tree[A]): T = b match {
-            case Branch3(ba, bv, bb, bw, bc) => keep(Branch3(Branch2(s.value, v, ba), bv, Branch2(bb, bw, bc), w, c))
-            case Branch2(ba, bv, bb) => keep(Branch2(Branch3(s.value, v, ba, bv, bb), w, c))
+            case Branch2(ba, bv, bb, bw, bc) => keep(Branch2(Branch1(s.value, v, ba), bv, Branch1(bb, bw, bc), w, c))
+            case Branch1(ba, bv, bb) => keep(Branch1(Branch2(s.value, v, ba, bv, bb), w, c))
           }
           
           def mrgm(a: Tree[A], v: A, s: Shrunk[A], w: A, c: Tree[A]): T = c match {
-            case Branch3(ca, cv, cb, cw, cc) => keep(Branch3(a, v, Branch2(s.value, w, ca), cv, Branch2(cb, cw, cc)))
-            case Branch2(ca, cv, cb) => keep(Branch2(a, v, Branch3(s.value, w, ca, cv, cb)))
+            case Branch2(ca, cv, cb, cw, cc) => keep(Branch2(a, v, Branch1(s.value, w, ca), cv, Branch1(cb, cw, cc)))
+            case Branch1(ca, cv, cb) => keep(Branch1(a, v, Branch2(s.value, w, ca, cv, cb)))
           }
   
           index match {
             case index if index < a.size =>
-              search(a, index, k => keep(Branch3(k, v, b, w, c)), p => mrgl(p, v, b, w, c))
+              search(a, index, k => keep(Branch2(k, v, b, w, c)), p => mrgl(p, v, b, w, c))
             case index if index == a.size =>
-              (v, repl(a, k => r => keep(Branch3(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch2(b, w, c))))
+              (v, repl(a, k => r => keep(Branch2(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch1(b, w, c))))
             case index if index > a.size => index - a.size - 1 match {
               case index if index < b.size =>
-                search(b, index, k => keep(Branch3(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
+                search(b, index, k => keep(Branch2(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
               case index if index == b.size =>
-                (w, repl(b, k => r => keep(Branch3(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch2(a, v, b))))
+                (w, repl(b, k => r => keep(Branch2(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch1(a, v, b))))
               case index if index > b.size => index - b.size - 1 match {
                 case index => {
-                  search(c, index, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
+                  search(c, index, k => keep(Branch2(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
                 }
               }
             }
@@ -202,8 +202,8 @@ final object Tree {
   
   final def toList[A, B >: A](tree: Tree[A], tail: List[B]): List[B] = tree match {
     case Tip => tail
-    case Branch2(a, v, b) => toList(a, v::toList(b, tail))
-    case Branch3(a, v, b, w, c) => toList(a, v::toList(b, w::toList(c, tail)))
+    case Branch1(a, v, b) => toList(a, v::toList(b, tail))
+    case Branch2(a, v, b, w, c) => toList(a, v::toList(b, w::toList(c, tail)))
   }
   
   var debugging = false
