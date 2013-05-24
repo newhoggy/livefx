@@ -187,6 +187,16 @@ final object Tree {
     case Branch2(a, v, b) => toList(a, v::toList(b, tail))
     case Branch3(a, v, b, w, c) => toList(a, v::toList(b, w::toList(c, tail)))
   }
+  
+  var debugging = false
+  def debug[T](f: => T): T = {
+    debugging = true
+    try {
+      f
+    } finally {
+      debugging = false
+    }
+  }
 }
 
 object Moo {

@@ -8,6 +8,7 @@ import org.scalacheck.Gen
 object TreeSpecification extends Properties("Tree") {
   import scala.language.implicitConversions
   import scala.language.reflectiveCalls
+  import org.scalacheck.Arbitrary.arbitrary
   
   implicit def implThrows(x: => Any) = new { 
     def throws[T <: Throwable](c: Class[T]) = try { 
@@ -35,14 +36,13 @@ object TreeSpecification extends Properties("Tree") {
   }
 
   property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
-    (n < 0 || n > tree.size) ==> {
-      tree.insertAt(n, value).throws(classOf[IndexOutOfBoundsException])
+    val m = if (n >= 0) n + tree.size + 1 else n
+    Tree.debug {
+      tree.insertAt(m, value).throws(classOf[IndexOutOfBoundsException])
     }
   }
 
-  val smallInteger = Gen.choose(0.0, 1.0)
-  import org.scalacheck.Arbitrary.arbitrary
-  property("remove at n ") = forAll(arbitrary[Tree[Int]], smallInteger) { (tree: Tree[Int], d: Double) =>
+  property("remove at n ") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0)) { (tree: Tree[Int], d: Double) =>
     val n: Int = (tree.size * d).toInt
     println(s"--> removeAt: $d, $n, $tree")
     (tree.size > 0 && n >= 0 && n < tree.size) ==> {
