@@ -28,7 +28,8 @@ object TreeSpecification extends Properties("Tree") {
     tree.insertAt(tree.size, value).toList == tree.toList ::: List(value)
   }
   
-  property("insert at 0 <= n <= size inserts") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
+  property("insert at 0 <= n <= size inserts") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0), arbitrary[Int]) { (tree: Tree[Int], d: Double, value: Int) =>
+    val n: Int = (tree.size * d).toInt
     (n >= 0 && n <= tree.size) ==> {
       val list = tree.toList
       tree.insertAt(n, value).toList == list.take(n) ::: value :: list.drop(n)
