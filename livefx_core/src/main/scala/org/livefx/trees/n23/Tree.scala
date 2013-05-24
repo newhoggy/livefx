@@ -5,7 +5,7 @@ trait Tree[+A] {
   def size: Int
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch2(_, _, _))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree.updateAt(this, index, value)
-  final def removeAt(index: Int): Tree[A] = Tree.removeAt(this, index)
+  final def removeAt(index: Int): (A, Tree[A]) = Tree.removeAt(this, index)
   final def toList[B >: A](): List[B] = Tree.toList(this, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
 }
@@ -122,7 +122,7 @@ final object Tree {
     }
   }
 
-  def removeAt[A](tree: Tree[A], index: Int): Tree[A] = {
+  def removeAt[A](tree: Tree[A], index: Int): (A, Tree[A]) = {
     type N = Tree[A]
     
     def repl[T](tree: Tree[A], keep: Tree[A] => (A => T), pull: Shrunk[A] => (A => T), leaf: T): T = {
@@ -143,10 +143,9 @@ final object Tree {
       case Branch3(ba, bv, bb, bw, bc) => keep(Branch3(a, v, Branch2(ba, bv, bb), bw, Branch2(bc, w, s.value)))
     }
     
-    def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): T = {
+    def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): (A, T) = {
       tree match {
-        case Tip =>
-          keep(Tip)
+        case Tip => throw new IndexOutOfBoundsException
         case Branch2(a, v, b) => {
           def mrgl(s: Shrunk[A], v: A, b: Tree[A]): T = b match {
             case Branch2(ba, bv, bb) => pull(Shrunk(Branch3(s.value, v, ba, bv, bb)))
@@ -157,7 +156,7 @@ final object Tree {
             case index if index < a.size =>
               search(a, index, k => keep(Branch2(k, v, b)), p => mrgl(p, v, b))
             case index if index == a.size =>
-              repl(a, k => r => keep(Branch2(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a)))
+              (v, repl(a, k => r => keep(Branch2(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a))))
             case index if index > a.size =>
               search(b, index - a.size - 1, k => keep(Branch2(a, v, k)), p => mrg2r(keep, pull, a, v, p))
           }
@@ -177,12 +176,12 @@ final object Tree {
             case index if index < a.size =>
               search(a, index, k => keep(Branch3(k, v, b, w, c)), p => mrgl(p, v, b, w, c))
             case index if index == a.size =>
-              repl(a, k => r => keep(Branch3(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch2(b, w, c)))
+              (v, repl(a, k => r => keep(Branch3(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch2(b, w, c))))
             case index if index > a.size => index - a.size - 1 match {
               case index if index < b.size =>
                 search(b, index, k => keep(Branch3(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
               case index if index == b.size =>
-                repl(b, k => r => keep(Branch3(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch2(a, v, b)))
+                (w, repl(b, k => r => keep(Branch3(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch2(a, v, b))))
               case index if index > b.size => index - b.size - 1 match {
                 case index => {
                   search(c, index, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
@@ -195,6 +194,10 @@ final object Tree {
     }
     
     return search(tree, index, identity, s => s.value)
+  }
+  
+  final def append[A](l: Tree[A], r: Tree[A]): Tree[A] = {
+    ???
   }
   
   final def toList[A, B >: A](tree: Tree[A], tail: List[B]): List[B] = tree match {

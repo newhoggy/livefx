@@ -49,9 +49,10 @@ object TreeSpecification extends Properties("Tree") {
       if (tree.size == 0) {
         tree.removeAt(n).throws(classOf[IndexOutOfBoundsException])
       } else {
-        val l = tree.removeAt(n).toList
+        val (a, t) = tree.removeAt(n)
+        val l = t.toList
         val r = tree.toList.take(n) ::: tree.toList.drop(n + 1)
-        tree.removeAt(n).toList == tree.toList.take(n) ::: tree.toList.drop(n + 1)
+        tree.removeAt(n)._2.toList == tree.toList.take(n) ::: tree.toList.drop(n + 1) && a == tree.toList.drop(n).head
       }
     }
   }
