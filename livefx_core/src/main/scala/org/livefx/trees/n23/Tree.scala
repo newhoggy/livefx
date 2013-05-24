@@ -123,7 +123,6 @@ final object Tree {
   }
 
   def removeAt[A](tree: Tree[A], index: Int): Tree[A] = {
-    println(s"--> removeAt($tree, $index)")
     type N = Tree[A]
     
     def repl[T](tree: Tree[A], keep: Tree[A] => (A => T), pull: Shrunk[A] => (A => T), leaf: T): T = {
@@ -145,10 +144,8 @@ final object Tree {
     }
     
     def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): T = {
-      println(s"--> search($tree, .., ..)")
-      val result = tree match {
+      tree match {
         case Tip =>
-          new Exception("--> TIP").printStackTrace(System.out)
           keep(Tip)
         case Branch2(a, v, b) => {
           def mrgl(s: Shrunk[A], v: A, b: Tree[A]): T = b match {
@@ -158,13 +155,10 @@ final object Tree {
           
           index match {
             case index if index < a.size =>
-              println(s"--> B2 1: index: $index, a.size: ${a.size}")
               search(a, index, k => keep(Branch2(k, v, b)), p => mrgl(p, v, b))
             case index if index == a.size =>
-              println(s"--> B2 2: index: $index, a.size: ${a.size}")
               repl(a, k => r => keep(Branch2(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a)))
             case index if index > a.size =>
-              println(s"--> B2 3: index: $index, a.size: ${a.size}")
               search(b, index - a.size - 1, k => keep(Branch2(a, v, k)), p => mrg2r(keep, pull, a, v, p))
           }
         }
@@ -181,27 +175,23 @@ final object Tree {
   
           index match {
             case index if index < a.size =>
-              println(s"--> B3 1: $index, a.size: ${a.size}")
               search(a, index, k => keep(Branch3(k, v, b, w, c)), p => mrgl(p, v, b, w, c))
             case index if index == a.size =>
-              println(s"--> B3 2: $index, a.size: ${a.size}")
               repl(a, k => r => keep(Branch3(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch2(b, w, c)))
             case index if index > a.size => index - a.size - 1 match {
               case index if index < b.size =>
-                println(s"--> B3 3: $index, a.size: ${a.size}")
-                search(c, index, k => keep(Branch3(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
+                search(b, index, k => keep(Branch3(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
               case index if index == b.size =>
-                println(s"--> B3 4: $index, a.size: ${a.size}")
                 repl(b, k => r => keep(Branch3(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch2(a, v, b)))
-              case index if index > b.size =>
-                println(s"--> B3 5: $index, a.size: ${a.size}")
-                search(c, index - b.size, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
+              case index if index > b.size => index - b.size - 1 match {
+                case index => {
+                  search(c, index, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
+                }
+              }
             }
           }
         }
       }
-      println("--> moo")
-      result
     }
     
     return search(tree, index, identity, s => s.value)
