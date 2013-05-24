@@ -44,13 +44,11 @@ object TreeSpecification extends Properties("Tree") {
 
   property("remove at n ") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0)) { (tree: Tree[Int], d: Double) =>
     val n: Int = (tree.size * d).toInt
-    println(s"--> removeAt: $d, $n, $tree")
     (tree.size > 0 && n >= 0 && n < tree.size) ==> {
       if (tree.size == 0) {
         tree.removeAt(n).throws(classOf[IndexOutOfBoundsException])
       } else {
-        println(s"--> tree: $tree.removeAt($n)")
-        println(s"--> result: ${tree.removeAt(n)}")
+        println(s"==> removeAt: $n, $tree")
         val l = tree.removeAt(n).toList
         val r = tree.toList.take(n) ::: tree.toList.drop(n + 1)
         println(s"--> $l <> $r")

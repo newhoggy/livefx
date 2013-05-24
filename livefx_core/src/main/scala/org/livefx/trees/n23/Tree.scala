@@ -123,6 +123,7 @@ final object Tree {
   }
 
   def removeAt[A](tree: Tree[A], index: Int): Tree[A] = {
+    println(s"--> removeAt($tree, $index)")
     type N = Tree[A]
     
     def repl[T](tree: Tree[A], keep: Tree[A] => (A => T), pull: Shrunk[A] => (A => T), leaf: T): T = {
@@ -143,43 +144,67 @@ final object Tree {
       case Branch3(ba, bv, bb, bw, bc) => keep(Branch3(a, v, Branch2(ba, bv, bb), bw, Branch2(bc, w, s.value)))
     }
     
-    def search[T](tree: Tree[A], keep: Tree[A] => T, pull: Shrunk[A] => T): T = tree match {
-      case Tip => keep(Tip)
-      case Branch2(a, v, b) => {
-        def mrgl(s: Shrunk[A], v: A, b: Tree[A]): T = b match {
-          case Branch2(ba, bv, bb) => pull(Shrunk(Branch3(s.value, v, ba, bv, bb)))
-          case Branch3(ba, bv, bb, bw, bc) => keep(Branch2(Branch2(s.value, v, ba), bv, Branch2(bb, bw, bc)))
+    def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): T = {
+      println(s"--> search($tree, .., ..)")
+      val result = tree match {
+        case Tip =>
+          new Exception("--> TIP").printStackTrace(System.out)
+          keep(Tip)
+        case Branch2(a, v, b) => {
+          def mrgl(s: Shrunk[A], v: A, b: Tree[A]): T = b match {
+            case Branch2(ba, bv, bb) => pull(Shrunk(Branch3(s.value, v, ba, bv, bb)))
+            case Branch3(ba, bv, bb, bw, bc) => keep(Branch2(Branch2(s.value, v, ba), bv, Branch2(bb, bw, bc)))
+          }
+          
+          index match {
+            case index if index < a.size =>
+              println(s"--> B2 1: index: $index, a.size: ${a.size}")
+              search(a, index, k => keep(Branch2(k, v, b)), p => mrgl(p, v, b))
+            case index if index == a.size =>
+              println(s"--> B2 2: index: $index, a.size: ${a.size}")
+              repl(a, k => r => keep(Branch2(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a)))
+            case index if index > a.size =>
+              println(s"--> B2 3: index: $index, a.size: ${a.size}")
+              search(b, index - a.size - 1, k => keep(Branch2(a, v, k)), p => mrg2r(keep, pull, a, v, p))
+          }
         }
-        
-        index match {
-          case index if index < a.size => search(a, k => keep(Branch2(k, v, b)), p => mrgl(p, v, b))
-          case index if index == a.size => repl(a, k => r => keep(Branch2(k, r, b)), p => r => mrgl(p, r, b), pull(Shrunk(a)))
-          case index if index > a.size => search(b, k => keep(Branch2(a, v, k)), p => mrg2r(keep, pull, a, v, p))
-        }
-      }
-      case Branch3(a, v, b, w, c) => {
-        def mrgl(s: Shrunk[A], v: A, b: Tree[A], w: A, c: Tree[A]): T = b match {
-          case Branch3(ba, bv, bb, bw, bc) => keep(Branch3(Branch2(s.value, v, ba), bv, Branch2(bb, bw, bc), w, c))
-          case Branch2(ba, bv, bb) => keep(Branch2(Branch3(s.value, v, ba, bv, bb), w, c))
-        }
-        
-        def mrgm(a: Tree[A], v: A, s: Shrunk[A], w: A, c: Tree[A]): T = c match {
-          case Branch3(ca, cv, cb, cw, cc) => keep(Branch3(a, v, Branch2(s.value, w, ca), cv, Branch2(cb, cw, cc)))
-        }
-
-        index match {
-          case index if index < a.size => search(a, k => keep(Branch3(k, v, b, w, c)), p => mrgl(p, v, b, w, c))
-          case index if index == a.size => repl(a, k => r => keep(Branch3(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch2(b, w, c)))
-          case index if index > a.size => index - a.size - 1 match {
-            case index if index < b.size => search(c, k => keep(Branch3(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
-            case index if index == b.size => repl(b, k => r => keep(Branch3(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch2(a, v, b)))
-            case index if index > b.size => search(c, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
+        case Branch3(a, v, b, w, c) => {
+          def mrgl(s: Shrunk[A], v: A, b: Tree[A], w: A, c: Tree[A]): T = b match {
+            case Branch3(ba, bv, bb, bw, bc) => keep(Branch3(Branch2(s.value, v, ba), bv, Branch2(bb, bw, bc), w, c))
+            case Branch2(ba, bv, bb) => keep(Branch2(Branch3(s.value, v, ba, bv, bb), w, c))
+          }
+          
+          def mrgm(a: Tree[A], v: A, s: Shrunk[A], w: A, c: Tree[A]): T = c match {
+            case Branch3(ca, cv, cb, cw, cc) => keep(Branch3(a, v, Branch2(s.value, w, ca), cv, Branch2(cb, cw, cc)))
+            case Branch2(ca, cv, cb) => keep(Branch2(a, v, Branch3(s.value, w, ca, cv, cb)))
+          }
+  
+          index match {
+            case index if index < a.size =>
+              println(s"--> B3 1: $index, a.size: ${a.size}")
+              search(a, index, k => keep(Branch3(k, v, b, w, c)), p => mrgl(p, v, b, w, c))
+            case index if index == a.size =>
+              println(s"--> B3 2: $index, a.size: ${a.size}")
+              repl(a, k => r => keep(Branch3(k, r, b, w, c)), p => r => mrgl(p, r, b, w, c), keep(Branch2(b, w, c)))
+            case index if index > a.size => index - a.size - 1 match {
+              case index if index < b.size =>
+                println(s"--> B3 3: $index, a.size: ${a.size}")
+                search(c, index, k => keep(Branch3(a, v, k, w, c)), p => mrgm(a, v, p, w, c))
+              case index if index == b.size =>
+                println(s"--> B3 4: $index, a.size: ${a.size}")
+                repl(b, k => r => keep(Branch3(a, v, k, r, c)), p => r => mrgm(a, v, p, r, c), keep(Branch2(a, v, b)))
+              case index if index > b.size =>
+                println(s"--> B3 5: $index, a.size: ${a.size}")
+                search(c, index - b.size, k => keep(Branch3(a, v, b, w, k)), p => mrg3r(keep, a, v, b, w, p))
+            }
           }
         }
       }
+      println("--> moo")
+      result
     }
     
-    return search(tree, identity, s => s.value)
+    return search(tree, index, identity, s => s.value)
   }
   
   final def toList[A, B >: A](tree: Tree[A], tail: List[B]): List[B] = tree match {
@@ -196,14 +221,5 @@ final object Tree {
     } finally {
       debugging = false
     }
-  }
-}
-
-object Moo {
-  def main(args: Array[String]): Unit = {
-    var t: Tree[String] = Tree()
-    println(s"--> t = $t")
-    t = t.insertAt(0, "a")
-    println(s"--> insertAt(0, 'a') => $t:${t.toList}")
   }
 }
