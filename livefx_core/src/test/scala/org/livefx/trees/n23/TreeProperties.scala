@@ -34,6 +34,12 @@ object TreeSpecification extends Properties("Tree") {
     }
   }
 
+  property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
+    (n < 0 || n > tree.size) ==> {
+      tree.insertAt(n, value).throws(classOf[IndexOutOfBoundsException])
+    }
+  }
+
   val smallInteger = Gen.choose(0.0, 1.0)
   import org.scalacheck.Arbitrary.arbitrary
   property("remove at n ") = forAll(arbitrary[Tree[Int]], smallInteger) { (tree: Tree[Int], d: Double) =>
@@ -50,12 +56,6 @@ object TreeSpecification extends Properties("Tree") {
         println(s"--> $l <> $r")
         tree.removeAt(n).toList == tree.toList.take(n) ::: tree.toList.drop(n + 1)
       }
-    }
-  }
-
-  property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
-    (n < 0 || n > tree.size) ==> {
-      tree.insertAt(n, value).throws(classOf[IndexOutOfBoundsException])
     }
   }
 

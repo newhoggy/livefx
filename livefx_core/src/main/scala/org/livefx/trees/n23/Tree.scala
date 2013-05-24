@@ -1,6 +1,7 @@
 package org.livefx.trees.n23
 
 trait Tree[+A] {
+  def depth: Int
   def size: Int
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch2(_, _, _))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree.updateAt(this, index, value)
@@ -10,16 +11,21 @@ trait Tree[+A] {
 }
 
 final case object Tip extends Tree[Nothing] {
+  final override def depth: Int = 0
   final override def size: Int = 0
   def apply[A]: Tree[A] = Tip
 }
 
 final case class Branch2[+A](a: Tree[A], v: A, b: Tree[A]) extends Tree[A] {
+  final override val depth: Int = (a.depth max b.depth) + 1
   final override val size: Int = a.size + b.size + 1
+  assert(a.depth + 1 == depth && b.depth + 1 == depth)
 }
 
 final case class Branch3[+A](a: Tree[A], v: A, b: Tree[A], w: A, c: Tree[A]) extends Tree[A] {
+  final override val depth: Int = (a.depth max b.depth max c.depth) + 1
   final override val size: Int = a.size + b.size + c.size + 2
+  assert(a.depth + 1 == depth && b.depth + 1 == depth && c.depth + 1 == depth)
 }
 
 case class Shrunk[A](value: Tree[A])
@@ -53,7 +59,7 @@ final object Tree {
     type N = Tree[A]
     tree match {
       case Tip => index match {
-        case 0 => keep(Branch2(Tip, value, Tip))
+        case 0 => push(Tip, value, Tip)
         case _ => throw new IndexOutOfBoundsException
       }
 
@@ -69,10 +75,10 @@ final object Tree {
       }
       case Branch3(a, v, b, w, c) => index match {
         case index if index < 0 => throw new IndexOutOfBoundsException
-        case index if index < a.size =>
+        case index if index <= a.size =>
           Tree.insertAt(a, index, value)(k => keep(Branch3(k, v, b, w, c)), (pa, pv, pb) => push(Branch2(pa, pv, pb), v, Branch2(b, w, c)))
         case index => index - a.size - 1 match {
-          case index if index < b.size =>
+          case index if index <= b.size =>
             Tree.insertAt(b, index, value)(k => keep(Branch3(a, v, k, w, c)), (pa, pv, pb) => push(Branch2(a, v, pa), pv, Branch2(pb, w, c)))
           case index => index - b.size - 1 match {
             case index if index <= c.size =>
