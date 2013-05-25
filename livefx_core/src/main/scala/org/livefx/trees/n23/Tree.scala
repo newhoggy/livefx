@@ -144,7 +144,7 @@ final object Tree {
       case Branch2(ba, bv, bb, bw, bc) => keep(Branch2(a, v, Branch1(ba, bv, bb), bw, Branch1(bc, w, s.value)))
     }
     
-    def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): (A, T) = {
+    def search[T](tree: Tree[A], index: Int, keep: Tree[A] => T, pull: Shrunk[A] => T): (A, T) = moo {
       tree match {
         case Tip => throw new IndexOutOfBoundsException
         case Branch1(a, v, b) => {
@@ -197,23 +197,65 @@ final object Tree {
     return search(tree, index, identity, s => s.value)
   }
   
-  final def append[A](l: Tree[A], r: Tree[A]): Tree[A] = {
-    if (l.depth < r.depth) {
-      val (v, rt) = l.removeAt(l.size - 1)
+  final def moo[T](f: => T): T = f
+  
+  final def append[A](l: Tree[A], r: Tree[A]): Tree[A] = moo {
+    if (l.size == 0) {
+      r
+    } else if (r.size == 0) {
+      l
+    } else if (l.depth < r.depth) {
+      val (v, lz) = l.removeAt(l.size - 1)
       
-      def merge(l: Tree[A], v: A, rt: Tree[A]): Tree[A] = {
-        ???
+      def merge(rt: Tree[A])(keep: Tree[A] => Tree[A], push: Push[A]): Tree[A] = {
+        rt match {
+          case Tip => ???
+          case Branch1(rta, rtv, rtb) =>
+            if (rta.depth > lz.depth) {
+              merge(rta)(k => keep(Branch1(k, rtv, rtb)), (pl, pv, pr) => keep(Branch2(pl, pv, pr, rtv, rtb)))
+            } else if (rta.depth == lz.depth) {
+              keep(Branch2(lz, v, rta, rtv, rtb))
+            } else {
+              keep(Branch1(lz, v, Branch1(rta, rtv, rtb)))
+            }
+          case Branch2(rta, rtv, rtb, rtw, rtc) =>
+            if (rta.depth > lz.depth) {
+              merge(rta)(k => keep(Branch2(k, rtv, rtb, rtw, rtc)), (pl, pv, pr) => push(Branch1(pl, pv, pr), rtv, Branch1(rtb, rtw, rtc)))
+            } else if (rta.depth == lz.depth) {
+              push(Branch1(lz, v, rta), rtv, Branch1(rtb, rtw, rtc))
+            } else {
+              push(lz, v, Branch2(rta, rtv, rtb, rtw, rtc))
+            }
+        }
       }
       
-      merge(l, v, rt)
+      merge(r)(identity, Branch1(_, _, _))
     } else {
-      val (v, lt) = l.removeAt(0)
-
-      def merge(l: Tree[A], v: A, rt: Tree[A]): Tree[A] = {
-        ???
+      val (v, rz) = r.removeAt(0)
+      
+      def merge(lt: Tree[A])(keep: Tree[A] => Tree[A], push: Push[A]): Tree[A] = {
+        lt match {
+          case Tip => ???
+          case Branch1(lta, ltv, ltb) =>
+            if (lta.depth > rz.depth) {
+              merge(ltb)(k => keep(Branch1(lta, ltv, k)), (pl, pv, pr) => keep(Branch2(lta, ltv, pl, pv, pr)))
+            } else if (lta.depth == rz.depth) {
+              keep(Branch2(lta, ltv, ltb, v, rz))
+            } else {
+              keep(Branch1(Branch1(lta, ltv, ltb), v, rz))
+            }
+          case Branch2(lta, ltv, ltb, ltw, ltc) =>
+            if (lta.depth > rz.depth) {
+              merge(ltc)(k => keep(Branch2(lta, ltv, ltb, ltw, k)), (pl, pv, pr) => push(Branch1(lta, ltv, ltb), ltw, Branch1(pl, pv, pr)))
+            } else if (lta.depth == rz.depth) {
+              push(Branch1(lta, ltv, ltb), ltw, Branch1(ltc, v, rz))
+            } else {
+              push(Branch2(lta, ltv, ltb, ltw, ltc), v, rz)
+            }
+        }
       }
       
-      merge(lt, v, r)
+      merge(l)(identity, Branch1(_, _, _))
     }
   }
   
