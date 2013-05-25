@@ -6,7 +6,7 @@ trait Tree[+A] {
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch1(_, _, _))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree.updateAt(this, index, value)
   final def removeAt(index: Int): (A, Tree[A]) = Tree.removeAt(this, index)
-  final def append[B >: A](tree: Tree[B]): Tree[B] = ???
+  final def append[B >: A](that: Tree[B]): Tree[B] = Tree.append(this, that)
   final def toList[B >: A](): List[B] = Tree.toList(this, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
 }
