@@ -9,6 +9,7 @@ trait Tree[+A] {
   final def append[B >: A](that: Tree[B]): Tree[B] = Tree.append(this, that)
   final def toList[B >: A](): List[B] = Tree.toList(this, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
+  final def indexedDiff[B >: A](that: Tree[B]): List[(Int, Tree[B])] = Tree.indexedDiff(this, that)
 }
 
 final case object Tip extends Tree[Nothing] {
@@ -273,5 +274,9 @@ final object Tree {
     } finally {
       debugging = false
     }
+  }
+
+  final def indexedDiff[A](self: Tree[A], that: Tree[A]): List[(Int, Tree[A])] = {
+    ???
   }
 }
