@@ -28,44 +28,36 @@ object TreeSpecification extends Properties("Tree") {
     tree.insertAt(tree.size, value).toList == tree.toList ::: List(value)
   }
   
-  property("insert at 0 <= n <= size inserts") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0), arbitrary[Int]) { (tree: Tree[Int], d: Double, value: Int) =>
-    val n: Int = (tree.size * d).toInt
-    (n >= 0 && n <= tree.size) ==> {
-      val list = tree.toList
-      tree.insertAt(n, value).toList == list.take(n) ::: value :: list.drop(n)
-    }
+  property("insert at 0 <= n <= size inserts") = forAll { (tree: Tree[Int], d: Int, value: Int) =>
+    val n = (d & 0x7ffffff) % (tree.size + 1)
+    val list = tree.toList
+    tree.insertAt(n, value).toList == list.take(n) ::: value :: list.drop(n)
   }
 
   property("insert at n < 0 || n > size throws") = forAll { (tree: Tree[Int], n: Int, value: Int) =>
     val m = if (n >= 0) n + tree.size + 1 else n
-    Tree.debug {
-      tree.insertAt(m, value).throws(classOf[IndexOutOfBoundsException])
-    }
+    tree.insertAt(m, value).throws(classOf[IndexOutOfBoundsException])
   }
 
-  property("update at 0 <= n < size updates") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0), arbitrary[Int]) { (tree: Tree[Int], d: Double, value: Int) =>
-    val n: Int = (tree.size * d).toInt
-    (n >= 0 && n < tree.size) ==> {
+  property("update at 0 <= n < size updates") = forAll { (tree: Tree[Int], d: Int, value: Int) =>
+    (0 < tree.size) ==> {
+      val n = (d & 0x7ffffff) % tree.size
       val list = tree.toList
       tree.updateAt(n, value).toList == list.take(n) ::: value :: list.drop(n + 1)
     }
   }
 
-  property("remove at n ") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0)) { (tree: Tree[Int], d: Double) =>
-    val n: Int = (tree.size * d).toInt
-    (tree.size > 0 && n >= 0 && n < tree.size) ==> {
-      if (tree.size == 0) {
-        tree.removeAt(n).throws(classOf[IndexOutOfBoundsException])
-      } else {
-        val (a, t) = tree.removeAt(n)
-        val l = t.toList
-        val r = tree.toList.take(n) ::: tree.toList.drop(n + 1)
-        tree.removeAt(n)._2.toList == tree.toList.take(n) ::: tree.toList.drop(n + 1) && a == tree.toList.drop(n).head
-      }
+  property("remove at n ") = forAll { (tree: Tree[Int], d: Int) =>
+    (tree.size > 0) ==> {
+      val n = (d & 0x7ffffff) % tree.size
+      val (a, t) = tree.removeAt(n)
+      val l = t.toList
+      val r = tree.toList.take(n) ::: tree.toList.drop(n + 1)
+      tree.removeAt(n)._2.toList == tree.toList.take(n) ::: tree.toList.drop(n + 1) && a == tree.toList.drop(n).head
     }
   }
 
-  property("l append r") = forAll(arbitrary[Tree[Int]], arbitrary[Tree[Int]]) { (l: Tree[Int], r: Tree[Int]) =>
+  property("l append r") = forAll { (l: Tree[Int], r: Tree[Int]) =>
     (l append r).toList == l.toList ::: r.toList
   }
 
