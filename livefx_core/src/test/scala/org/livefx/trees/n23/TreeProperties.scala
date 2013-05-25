@@ -43,6 +43,14 @@ object TreeSpecification extends Properties("Tree") {
     }
   }
 
+  property("update at 0 <= n < size updates") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0), arbitrary[Int]) { (tree: Tree[Int], d: Double, value: Int) =>
+    val n: Int = (tree.size * d).toInt
+    (n >= 0 && n < tree.size) ==> {
+      val list = tree.toList
+      tree.updateAt(n, value).toList == list.take(n) ::: value :: list.drop(n + 1)
+    }
+  }
+
   property("remove at n ") = forAll(arbitrary[Tree[Int]], Gen.choose(0.0, 1.0)) { (tree: Tree[Int], d: Double) =>
     val n: Int = (tree.size * d).toInt
     (tree.size > 0 && n >= 0 && n < tree.size) ==> {
