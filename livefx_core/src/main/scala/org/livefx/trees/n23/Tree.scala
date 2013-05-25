@@ -198,7 +198,23 @@ final object Tree {
   }
   
   final def append[A](l: Tree[A], r: Tree[A]): Tree[A] = {
-    ???
+    if (l.depth < r.depth) {
+      val (v, rt) = l.removeAt(l.size - 1)
+      
+      def merge(l: Tree[A], v: A, rt: Tree[A]): Tree[A] = {
+        ???
+      }
+      
+      merge(l, v, rt)
+    } else {
+      val (v, lt) = l.removeAt(0)
+
+      def merge(l: Tree[A], v: A, rt: Tree[A]): Tree[A] = {
+        ???
+      }
+      
+      merge(lt, v, r)
+    }
   }
   
   final def toList[A, B >: A](tree: Tree[A], tail: List[B]): List[B] = tree match {
