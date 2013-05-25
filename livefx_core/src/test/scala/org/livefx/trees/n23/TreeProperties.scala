@@ -65,6 +65,11 @@ object TreeSpecification extends Properties("Tree") {
     }
   }
 
+  property("remove at n ") = forAll(arbitrary[Tree[Int]], arbitrary[Tree[Int]]) { (l: Tree[Int], r: Tree[Int]) =>
+    val t = l append r
+    t.toList == l.toList ::: r.toList
+  }
+
   //  property("hasRight produces value") = forAll(
 //    (x: Zipper[Int]) =>
 //      x.right.isEmpty || x.hasRight
