@@ -278,6 +278,8 @@ final object Tree {
   }
 
   final def removeRange[A](self: Tree[A], index: Int, length: Int): Tree[A] = {
+    // TODO: Optimise for case where remove range results in very small trees.  One possible
+    // strategy is to take the sum of remaining subtrees.
     (0 until length).foldLeft(self)((t, _) => t.removeAt(index)._2)
   }
   
