@@ -6,6 +6,7 @@ trait Tree[+A] {
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch1(_, _, _))
   final def updateAt[B >: A](index: Int, value: B): Tree[B] = Tree.updateAt(this, index, value)
   final def removeAt(index: Int): (A, Tree[A]) = Tree.removeAt(this, index)
+  final def removeRange(index: Int, length: Int): Tree[A] = Tree.removeRange(this, index, length)
   final def append[B >: A](that: Tree[B]): Tree[B] = Tree.append(this, that)
   final def toList[B >: A](): List[B] = Tree.toList(this, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
@@ -276,6 +277,10 @@ final object Tree {
     }
   }
 
+  final def removeRange[A](self: Tree[A], index: Int, length: Int): Tree[A] = {
+    (0 until length).foldLeft(self)((t, _) => t.removeAt(index)._2)
+  }
+  
   final def indexedDiff[A](self: Tree[A], that: Tree[A]): List[(Int, Tree[A])] = {
     ???
   }

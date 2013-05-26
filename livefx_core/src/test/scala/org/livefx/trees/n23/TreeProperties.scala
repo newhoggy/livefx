@@ -14,7 +14,7 @@ object TreeSpecification extends Properties("Tree") {
     def throws[T <: Throwable](c: Class[T]) = try { 
       x
       falsified 
-    } catch { 
+    } catch {
       case e if c.isInstance(e) => proved
       case _: Throwable => falsified 
     } 
@@ -61,7 +61,17 @@ object TreeSpecification extends Properties("Tree") {
     (l append r).toList == l.toList ::: r.toList
   }
 
-  //  property("hasRight produces value") = forAll(
+  property("removeRange") = forAll { (t: Tree[Int], n0: Int, n1: Int) =>
+    val size = (n0 & 0x7fffffff) % (t.size max 1)
+    val index = (n1 & 0x7fffffff) % ((t.size - size) max 1)
+    
+    assert(index + size <= t.size)
+    val actual = t.removeRange(index, size).toList
+    val expected = t.toList.take(index) ++ t.toList.drop(index + size)
+    actual == expected
+  }
+
+//  property("hasRight produces value") = forAll(
 //    (x: Zipper[Int]) =>
 //      x.right.isEmpty || x.hasRight
 //  )
