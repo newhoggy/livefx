@@ -284,6 +284,7 @@ final object Tree {
   }
   
   final def indexedDiff[A](self: Tree[A], that: Tree[A]): List[(Int, Tree[A])] = {
+    // TODO: Implement indexedDiff with test property
     ???
   }
 }
