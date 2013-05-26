@@ -3,6 +3,7 @@ package org
 import scala.collection.{ mutable => mutable }
 import org.livefx.script._
 import scala.util.DynamicVariable
+import org.livefx.trees.n23.Tree
 
 package object livefx {
   type ArrayBuffer[A] = mutable.ArrayBuffer[A]
@@ -11,6 +12,11 @@ package object livefx {
   type HashSet[A] = mutable.HashSet[A]
   type Map[A, B] = mutable.Map[A, B]
   type Set[A] = mutable.Set[A]
+
+  implicit class RichLiveTreeSeq[A](self: LiveValue[Tree[A]]) {
+    // TODO: Implement flatMap for RichLiveTreeSeq.
+    def flatMap[B](f: A => Tree[B]): Tree[B] = ???
+  }
   
   implicit class RichLiveBuffer[A](val self: Buffer[A] with LiveBuffer[A]) {
     def asSeq: Seq[A] with OldLiveSeq[A] = self
