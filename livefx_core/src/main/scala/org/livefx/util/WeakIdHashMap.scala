@@ -9,9 +9,9 @@ import java.util.HashSet
 import java.util.Collections
 import scala.collection.JavaConversions._
 
-class WeakIdentityHashMap[K, V] extends Map[K, V] {
+class WeakIdHashMap[K, V] extends Map[K, V] {
   private implicit val queue = new ReferenceQueue[K]
-  private val backingStore = new HashMap[WeakIdentityReference[K], V]
+  private val backingStore = new HashMap[WeakIdRef[K], V]
 
   override def clear(): Unit = {
     backingStore.clear()
@@ -19,7 +19,7 @@ class WeakIdentityHashMap[K, V] extends Map[K, V] {
   }
 
   override def containsKey(key: Any): Boolean = reapThen {
-    backingStore.containsKey(WeakIdentityReference(key.asInstanceOf[K]))
+    backingStore.containsKey(WeakIdRef(key.asInstanceOf[K]))
   }
 
   override def containsValue(value: Any): Boolean = reapThen(backingStore.containsValue(value))
@@ -53,15 +53,15 @@ class WeakIdentityHashMap[K, V] extends Map[K, V] {
   }
 
   override def equals(any: Any): Boolean = {
-    backingStore.equals(any.asInstanceOf[WeakIdentityHashMap[K, V]].backingStore)
+    backingStore.equals(any.asInstanceOf[WeakIdHashMap[K, V]].backingStore)
   }
 
   override def get(key: Any): V = reapThen {
-    backingStore.get(WeakIdentityReference(key.asInstanceOf[K]))
+    backingStore.get(WeakIdRef(key.asInstanceOf[K]))
   }
 
   override def put(key: K, value: V): V = reapThen {
-    backingStore.put(WeakIdentityReference(key), value)
+    backingStore.put(WeakIdRef(key), value)
   }
 
   override def hashCode(): Int = reapThen(backingStore.hashCode)
@@ -71,7 +71,7 @@ class WeakIdentityHashMap[K, V] extends Map[K, V] {
   override def putAll(map: Map[_ <: K, _ <: V]): Unit = throw new UnsupportedOperationException
   
   override def remove(key: Any): V  = reapThen {
-    backingStore.remove(WeakIdentityReference(key.asInstanceOf[K]))
+    backingStore.remove(WeakIdRef(key.asInstanceOf[K]))
   }
   
   override def size(): Int = reapThen(backingStore.size)
@@ -82,7 +82,7 @@ class WeakIdentityHashMap[K, V] extends Map[K, V] {
     var zombie = queue.poll()
 
     while (zombie != null) {
-      val victim = zombie.asInstanceOf[WeakIdentityReference[K]]
+      val victim = zombie.asInstanceOf[WeakIdRef[K]]
       backingStore.remove(victim)
       zombie = queue.poll()
     }
