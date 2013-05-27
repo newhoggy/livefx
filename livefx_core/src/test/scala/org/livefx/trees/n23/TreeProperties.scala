@@ -75,9 +75,10 @@ object TreeSpecification extends Properties("Tree") {
     t.map(_ + 100).toList == t.toList.map(_ + 100)
   }
 
-  property("l append r") = forAll { (l: Tree[Int], r: Tree[Int]) =>
+  property("memoizedMap gives same result as map") = forAll { (l: Tree[Int], r: Tree[Int]) =>
     val lr = l append r
-    proved
+    val map = Tree.memoizedMap((_: Int) + 1)
+    lr.map(_ + 1).toList == map(lr).toList
   }
 
 //  property("hasRight produces value") = forAll(
