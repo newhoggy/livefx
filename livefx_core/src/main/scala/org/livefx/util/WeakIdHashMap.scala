@@ -24,8 +24,6 @@ class WeakIdHashMap[K, V]() extends MutMap[K, V] {
 
   override def size: Int = backingStore.size
 
-//  def this() = this(null)
-//
   override def contains(key: K): Boolean = reapThen(backingStore.contains(WeakIdRef(key)))
 
   override def apply(key: K): V = backingStore(WeakIdRef(key))
