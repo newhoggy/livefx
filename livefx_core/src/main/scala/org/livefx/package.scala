@@ -14,6 +14,10 @@ package object livefx {
   type Set[A] = mutable.Set[A]
 
   implicit class RichLiveTreeSeq[A](self: LiveValue[Tree[A]]) {
+//    def map[B](f: A => B): Tree[B] = for {
+//      tree <- self
+//    } yield tree.map(f)
+    
     // TODO: Implement flatMap for RichLiveTreeSeq.
     def flatMap[B](f: A => Tree[B]): Tree[B] = ???
   }

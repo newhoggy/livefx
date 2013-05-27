@@ -1,5 +1,7 @@
 package org.livefx.trees.n23
 
+import org.livefx.util.MemoizeById
+
 trait Tree[+A] {
   def depth: Int
   def size: Int
@@ -11,6 +13,8 @@ trait Tree[+A] {
   final def toList[B >: A](): List[B] = Tree.toList(this, Nil)
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
   final def indexedDiff[B >: A](that: Tree[B]): List[(Int, Tree[B])] = Tree.indexedDiff(this, that)
+  final def map[B](f: A => B): Tree[B] = Tree.map(this, f)
+//  final def mapMemoized[B](f: A => B)(implicit memoizer: Tree[A] => Tree[B]): Tree[B] = Tree.mapMemoized(this, f)
 }
 
 final case object Tip extends Tree[Nothing] {
@@ -277,6 +281,36 @@ final object Tree {
     }
   }
 
+  final def map[A, B](self: Tree[A], f: A => B): Tree[B] = {
+    self match {
+      case Tip => Tip
+      case Branch1(a, v, b) => Branch1(a map f, f(v), b map f)
+      case Branch2(a, v, b, w, c) => Branch2(a map f, f(v), b map f, f(w), c map f)
+    }
+  }
+  
+  final def memoizeById[A, B](f: A => B): Tree[A] => Tree[B] = {
+    lazy val memoizedMap: Tree[A] => Tree[B] = MemoizeById { tree: Tree[A] =>
+      tree match {
+        case Tip => Tip
+        case Branch1(a, v, b) => Branch1(memoizedMap(a), f(v), memoizedMap(b))
+        case Branch2(a, v, b, w, c) => Branch2(memoizedMap(a), f(v), memoizedMap(b), f(w), memoizedMap(c))
+      }
+    }
+    
+    memoizedMap
+  }
+  
+  
+//  final def mapMemoized[A, B](self: Tree[A], f: A => B)(implicit memoizer: Tree[A] => Tree[B]): Tree[B] = {
+//    self match {
+//      case Tip => Tip
+//      case Branch1(a, v, b) => Branch1(a map f, f(v), b map f)
+//      case Branch2(a, v, b, w, c) => Branch2(a map f, f(v), b map f, f(w), c map f)
+//    }
+////    memoizer(result)
+//  }
+  
   final def removeRange[A](self: Tree[A], index: Int, length: Int): Tree[A] = {
     // TODO: Optimise for case where remove range results in very small trees.  One possible
     // strategy is to take the sum of remaining subtrees.
