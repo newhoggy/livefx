@@ -75,6 +75,11 @@ object TreeSpecification extends Properties("Tree") {
     t.map(_ + 100).toList == t.toList.map(_ + 100)
   }
 
+  property("l append r") = forAll { (l: Tree[Int], r: Tree[Int]) =>
+    val lr = l append r
+    proved
+  }
+
 //  property("hasRight produces value") = forAll(
 //    (x: Zipper[Int]) =>
 //      x.right.isEmpty || x.hasRight

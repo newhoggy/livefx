@@ -14,7 +14,6 @@ trait Tree[+A] {
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
   final def indexedDiff[B >: A](that: Tree[B]): List[(Int, Tree[B])] = Tree.indexedDiff(this, that)
   final def map[B](f: A => B): Tree[B] = Tree.map(this, f)
-//  final def mapMemoized[B](f: A => B)(implicit memoizer: Tree[A] => Tree[B]): Tree[B] = Tree.mapMemoized(this, f)
 }
 
 final case object Tip extends Tree[Nothing] {
@@ -289,7 +288,7 @@ final object Tree {
     }
   }
   
-  final def mapMemoizeById[A, B](f: A => B): Tree[A] => Tree[B] = {
+  final def memoizedMap[A, B](f: A => B): Tree[A] => Tree[B] = {
     lazy val memoizedMap: Tree[A] => Tree[B] = MemoizeById { tree: Tree[A] =>
       tree match {
         case Tip => Tip
