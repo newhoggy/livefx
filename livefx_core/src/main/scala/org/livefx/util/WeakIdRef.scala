@@ -7,7 +7,7 @@ class WeakIdRef[K](k: K, queue: ReferenceQueue[K]) extends WeakReference[K](k, q
   override val hashCode: Int = System.identityHashCode(k)
 
   override def equals(any: Any): Boolean = {
-    this == any || (any match {
+    (this eq any.asInstanceOf[AnyRef]) || (any match {
       case that: WeakIdRef[K] => this.get == that.get
       case _ => false
     })
