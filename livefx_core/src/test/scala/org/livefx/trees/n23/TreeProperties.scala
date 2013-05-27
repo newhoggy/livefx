@@ -71,6 +71,10 @@ object TreeSpecification extends Properties("Tree") {
     actual == expected
   }
 
+  property("tree map same as list map") = forAll { (t: Tree[Int]) =>
+    t.map(_ + 100).toList == t.toList.map(_ + 100)
+  }
+
 //  property("hasRight produces value") = forAll(
 //    (x: Zipper[Int]) =>
 //      x.right.isEmpty || x.hasRight
