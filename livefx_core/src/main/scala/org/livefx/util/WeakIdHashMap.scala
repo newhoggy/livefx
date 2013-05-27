@@ -13,11 +13,6 @@ import scala.collection.mutable.{Map => MutMap}
 import scala.collection.{mutable => mutable}
 import scala.annotation.migration
 
-object Moo {
-  val x = new HashMap[Int, Int]()
-  x.+(0 -> 0)
-}
-
 class WeakIdHashMap[K, V]() extends MutMap[K, V] {
   private implicit val queue = new ReferenceQueue[K]
   private val backingStore = new HashMap[WeakIdRef[K], V]
