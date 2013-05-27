@@ -289,7 +289,7 @@ final object Tree {
     }
   }
   
-  final def memoizeById[A, B](f: A => B): Tree[A] => Tree[B] = {
+  final def mapMemoizeById[A, B](f: A => B): Tree[A] => Tree[B] = {
     lazy val memoizedMap: Tree[A] => Tree[B] = MemoizeById { tree: Tree[A] =>
       tree match {
         case Tip => Tip
@@ -300,16 +300,6 @@ final object Tree {
     
     memoizedMap
   }
-  
-  
-//  final def mapMemoized[A, B](self: Tree[A], f: A => B)(implicit memoizer: Tree[A] => Tree[B]): Tree[B] = {
-//    self match {
-//      case Tip => Tip
-//      case Branch1(a, v, b) => Branch1(a map f, f(v), b map f)
-//      case Branch2(a, v, b, w, c) => Branch2(a map f, f(v), b map f, f(w), c map f)
-//    }
-////    memoizer(result)
-//  }
   
   final def removeRange[A](self: Tree[A], index: Int, length: Int): Tree[A] = {
     // TODO: Optimise for case where remove range results in very small trees.  One possible
