@@ -14,6 +14,8 @@ trait Tree[+A] {
   final def toList[B >: A](tail: List[B]): List[B] = Tree.toList(this, tail)
   final def indexedDiff[B >: A](that: Tree[B]): List[(Int, Tree[B])] = Tree.indexedDiff(this, that)
   final def map[B](f: A => B): Tree[B] = Tree.map(this, f)
+  final def branchIdHashCodes(tail: List[Int]): List[Int] = Tree.branchIdHashCodes(this, tail)
+  final def branchIdHashCodes(): List[Int] = Tree.branchIdHashCodes(this, Nil)
 }
 
 final case object Tip extends Tree[Nothing] {
@@ -309,5 +311,14 @@ final object Tree {
   final def indexedDiff[A](self: Tree[A], that: Tree[A]): List[(Int, Tree[A])] = {
     // TODO: Implement indexedDiff with test property
     ???
+  }
+  
+  final def branchIdHashCodes[A](self: Tree[A], tail: List[Int]): List[Int] = {
+    def hash(a: AnyRef): Int = System.identityHashCode(a)
+    self match {
+      case Tip => tail
+      case Branch1(a, v, b) => hash(self)::branchIdHashCodes(a, branchIdHashCodes(b, tail))
+      case Branch2(a, v, b, w, c) => hash(self)::branchIdHashCodes(a, branchIdHashCodes(b, branchIdHashCodes(c, tail)))
+    }
   }
 }
