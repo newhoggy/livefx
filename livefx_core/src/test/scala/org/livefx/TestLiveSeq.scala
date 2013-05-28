@@ -3,6 +3,7 @@ package org.livefx
 import org.junit.Test
 import scalaz.Monoid
 import org.junit.Assert
+import org.livefx.old.VarTreeSeq
 
 class TestLiveSeq {
   @Test

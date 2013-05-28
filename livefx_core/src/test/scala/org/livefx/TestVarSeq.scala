@@ -9,6 +9,7 @@ import org.livefx.script.Remove
 import org.livefx.script.Update
 import scalaz.Monoid
 import org.livefx.script.Start
+import org.livefx.old.VarTreeSeq
 
 class TestVarSeq {
   @Test

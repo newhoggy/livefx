@@ -1,9 +1,13 @@
-package org.livefx
+package org.livefx.old
 
 import org.livefx.trees.indexed._
 import org.livefx.script._
-import org.livefx.util.Memoize
-import scalaz.Monoid
+import org.livefx.EventSink
+import org.livefx.EventSource
+import org.livefx.Events
+import org.livefx.LiveTreeSeq
+import org.livefx.LiveValue
+import org.livefx.Var
 
 class VarTreeSeq[A](_value: Tree[A] = Leaf) extends Var[Tree[A]](_value) with LiveTreeSeq[A] {
   type Pub <: VarTreeSeq[A]
