@@ -22,10 +22,6 @@ package object livefx {
     def flatMap[B](f: A => Tree[B]): Tree[B] = ???
   }
   
-  implicit class RichLiveBuffer[A](val self: Buffer[A] with LiveBuffer[A]) {
-    def asSeq: Seq[A] with OldLiveSeq[A] = self
-  }
-  
   implicit class RichLiveValueBoolean(val self: LiveValue[Boolean]) {
     def &&(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l && r
     def ||(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l || r
