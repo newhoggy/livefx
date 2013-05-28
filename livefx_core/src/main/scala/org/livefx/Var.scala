@@ -1,7 +1,6 @@
 package org.livefx
 
-import org.livefx.script.Update
-import org.livefx.script.NoLo
+import org.livefx.script.Change
 import org.livefx.script.Spoil
 
 class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) extends LiveValue[A] {
@@ -13,9 +12,9 @@ class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) ext
   
   override def spoils: Events[Pub, Spoil] = _spoils
 
-  lazy val _updates = new EventSource[Pub, Update[A]](publisher)
+  lazy val _changes = new EventSource[Pub, Change[A]](publisher)
 
-  override def updates: Events[Pub, Update[A]] = _updates
+  override def changes: Events[Pub, Change[A]] = _changes
 
   def value: A = _value
 
@@ -24,6 +23,6 @@ class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) ext
   protected def updateValue(oldValue: A, newValue: A): Unit = {
     _value = newValue
     spoil(Spoil())
-    _updates.publish(Update(NoLo, oldValue, newValue))
+    _changes.publish(Change(oldValue, newValue))
   }
 }

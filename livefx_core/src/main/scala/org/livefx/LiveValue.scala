@@ -1,7 +1,7 @@
 package org.livefx
 
+import org.livefx.script.Change
 import org.livefx.script.Message
-import org.livefx.script.Update
 import org.livefx.script.Spoil
 
 trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
@@ -9,9 +9,7 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   
   def value: A
   
-  //lazy val _updates = new EventSource[Pub, Update[A]](publisher)
-  
-  def updates: Events[Pub, Update[A]]
+  def changes: Events[Pub, Change[A]]
   
   def asliveValue: LiveValue[A] = this
 

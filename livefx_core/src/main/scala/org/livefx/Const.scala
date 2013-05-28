@@ -1,14 +1,14 @@
 package org.livefx
 
+import org.livefx.script.Change
 import org.livefx.script.Spoil
-import org.livefx.script.Update
 
 case class Const[A](value: A) extends LiveValue[A] {
   type Pub <: Const[A]
 
   def spoils: Events[Pub, Spoil] = NoEvents
 
-  def updates: Events[Pub, Update[A]] = NoEvents
+  def changes: Events[Pub, Change[A]] = NoEvents
 
   def spoilsSource: org.livefx.EventSink[org.livefx.script.Spoil] = ???
 }

@@ -3,8 +3,6 @@ package org.livefx
 import org.junit.Test
 import org.junit.Assert
 import org.livefx.script.Change
-import org.livefx.script.Update
-import org.livefx.script.NoLo
 import scala.reflect.macros.Context
 
 class TestSimpleProperty {
@@ -38,22 +36,22 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new Var[Int](0)
     
-    val subscription = liveValue.updates.subscribe((_, change) => changes = change::changes)
+    val subscription = liveValue.changes.subscribe((_, change) => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
     liveValue.value = 11
     Assert.assertEquals(11, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(0, 11)), changes)
 
     liveValue.value = 12
     Assert.assertEquals(12, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
     
     subscription.dispose
     liveValue.value = 13
     Assert.assertEquals(13, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
   }
 
   @Test
@@ -61,23 +59,23 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new Var[Int](0)
     
-    var subscription = liveValue.updates.subscribeWeak((_, change) => changes = change::changes)
+    var subscription = liveValue.changes.subscribeWeak((_, change) => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
     liveValue.value = 11
     Assert.assertEquals(11, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(0, 11)), changes)
 
     liveValue.value = 12
     Assert.assertEquals(12, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
     
     subscription = null
     System.gc()
     liveValue.value = 13
     Assert.assertEquals(13, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
   }
 
   @Test
@@ -85,23 +83,23 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new Var[Int](0)
     
-    var subscription = liveValue.updates.subscribe((_, change) => changes = change::changes)
+    var subscription = liveValue.changes.subscribe((_, change) => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
     liveValue.value = 11
     Assert.assertEquals(11, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(0, 11)), changes)
 
     liveValue.value = 12
     Assert.assertEquals(12, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
     
     subscription = null
     System.gc()
     liveValue.value = 13
     Assert.assertEquals(13, liveValue.value)
-    Assert.assertEquals(List(Update(NoLo, 12, 13), Update(NoLo, 11, 12), Update(NoLo, 0, 11)), changes)
+    Assert.assertEquals(List(Change(12, 13), Change(11, 12), Change(0, 11)), changes)
   }
   
   @Test

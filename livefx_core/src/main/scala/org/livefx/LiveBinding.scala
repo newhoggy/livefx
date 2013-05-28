@@ -1,7 +1,6 @@
 package org.livefx
 
-import org.livefx.script.Update
-import org.livefx.script.NoLo
+import org.livefx.script.Change
 import org.livefx.script.Spoil
 
 abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
@@ -13,28 +12,28 @@ abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
   
   override def spoils: Events[Pub, Spoil] = _spoils
 
-  lazy val _updates = new EventSource[Pub, Update[A]](publisher) {
+  lazy val _changes = new EventSource[Pub, Change[A]](publisher) {
     lazy val spoilHandler: (Any, Any) => Unit = { (_, _) => LiveBinding.this.value }
-    
-    override def subscribe(subscriber: (Pub, Update[A]) => Unit): Disposable = {
+
+    override def subscribe(subscriber: (Pub, Change[A]) => Unit): Disposable = {
       LiveBinding.this.spoils.subscribe(spoilHandler)
       LiveBinding.this.value
       super.subscribe(subscriber)
     }
-  
-    override def subscribeWeak(subscriber: (Pub, Update[A]) => Unit): Disposable ={
+
+    override def subscribeWeak(subscriber: (Pub, Change[A]) => Unit): Disposable ={
       LiveBinding.this.spoils.subscribeWeak(spoilHandler)
       LiveBinding.this.value
       super.subscribeWeak(subscriber)
     }
   
-    override def unsubscribe(subscriber: (Pub, Update[A]) => Unit): Unit = {
+    override def unsubscribe(subscriber: (Pub, Change[A]) => Unit): Unit = {
       super.unsubscribe(subscriber)
       if (isEmpty) LiveBinding.this.spoils.unsubscribe(spoilHandler)
     }
   }
 
-  override def updates: Events[Pub, Update[A]] = _updates
+  override def changes: Events[Pub, Change[A]] = _changes
 
   private var _value: A = null.asInstanceOf[A]
   
@@ -44,11 +43,11 @@ abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
       val newValue = computeValue
       _value = newValue
       unspoil()
-      _updates.publish(Update(NoLo, oldValue, newValue))
+      _changes.publish(Change(oldValue, newValue))
     }
     
     _value
   }
-  
+
   protected def computeValue: A
 }
