@@ -15,7 +15,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
 
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = {
     val source = this
-    new LiveBinding[B] {
+    new Binding[B] {
       val ref = source.spoils.subscribeWeak((_, spoilEvent) => spoil(spoilEvent))
 
       protected override def computeValue: B = f(source.value)
@@ -24,7 +24,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   
   def flatMap[B](f: A => Live[B]): Live[B] = {
     val source = this
-    val binding = new LiveBinding[B] {
+    val binding = new Binding[B] {
       var nested: Live[B] = f(source.value)
       val nestedSpoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
       var ref: Any = nested.spoils.subscribeWeak(nestedSpoilHandler)
@@ -42,7 +42,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   
   def spoilCount: Live[Long] = {
     val outer = this
-    new LiveBinding[Long] {
+    new Binding[Long] {
       private var counter = 0L
       private val ref = outer.spoils.subscribeWeak { (_, spoilEvent) =>
         counter += 1

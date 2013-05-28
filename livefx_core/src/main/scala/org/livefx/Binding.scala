@@ -3,8 +3,8 @@ package org.livefx
 import org.livefx.script.Change
 import org.livefx.script.Spoil
 
-abstract class LiveBinding[A] extends Live[A] with Unspoilable {
-  type Pub <: LiveBinding[A]
+abstract class Binding[A] extends Live[A] with Unspoilable {
+  type Pub <: Binding[A]
 
   private lazy val _spoils = new EventSource[Pub, Spoil](publisher)
   
@@ -13,23 +13,23 @@ abstract class LiveBinding[A] extends Live[A] with Unspoilable {
   override def spoils: Events[Pub, Spoil] = _spoils
 
   lazy val _changes = new EventSource[Pub, Change[A]](publisher) {
-    lazy val spoilHandler: (Any, Any) => Unit = { (_, _) => LiveBinding.this.value }
+    lazy val spoilHandler: (Any, Any) => Unit = { (_, _) => Binding.this.value }
 
     override def subscribe(subscriber: (Pub, Change[A]) => Unit): Disposable = {
-      LiveBinding.this.spoils.subscribe(spoilHandler)
-      LiveBinding.this.value
+      Binding.this.spoils.subscribe(spoilHandler)
+      Binding.this.value
       super.subscribe(subscriber)
     }
 
     override def subscribeWeak(subscriber: (Pub, Change[A]) => Unit): Disposable ={
-      LiveBinding.this.spoils.subscribeWeak(spoilHandler)
-      LiveBinding.this.value
+      Binding.this.spoils.subscribeWeak(spoilHandler)
+      Binding.this.value
       super.subscribeWeak(subscriber)
     }
   
     override def unsubscribe(subscriber: (Pub, Change[A]) => Unit): Unit = {
       super.unsubscribe(subscriber)
-      if (isEmpty) LiveBinding.this.spoils.unsubscribe(spoilHandler)
+      if (isEmpty) Binding.this.spoils.unsubscribe(spoilHandler)
     }
   }
 
