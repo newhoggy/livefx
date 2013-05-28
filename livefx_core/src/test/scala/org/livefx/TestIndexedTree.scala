@@ -5,6 +5,7 @@ import org.junit.Test
 import org.junit.Assert
 import org.junit.Ignore
 import org.livefx.trees.indexed._
+import scala.collection.mutable.ArrayBuffer
 
 class TestIndexedTree {
   @Test

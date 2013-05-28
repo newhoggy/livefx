@@ -1,27 +1,10 @@
 package org
 
-import scala.collection.{ mutable => mutable }
 import org.livefx.script._
 import scala.util.DynamicVariable
 import org.livefx.trees.n23.Tree
 
 package object livefx {
-  type ArrayBuffer[A] = mutable.ArrayBuffer[A]
-  type Buffer[A] = mutable.Buffer[A]
-  type HashMap[A, B] = mutable.HashMap[A, B]
-  type HashSet[A] = mutable.HashSet[A]
-  type Map[A, B] = mutable.Map[A, B]
-  type Set[A] = mutable.Set[A]
-
-  implicit class RichLiveTreeSeq[A](self: Live[Tree[A]]) {
-//    def map[B](f: A => B): Tree[B] = for {
-//      tree <- self
-//    } yield tree.map(f)
-    
-    // TODO: Implement flatMap for RichLiveTreeSeq.
-    def flatMap[B](f: A => Tree[B]): Tree[B] = ???
-  }
-  
   implicit class RichLiveValueBoolean(val self: Live[Boolean]) {
     def &&(that: Live[Boolean]): Live[Boolean] =  for (l <- self; r <- that) yield l && r
     def ||(that: Live[Boolean]): Live[Boolean] =  for (l <- self; r <- that) yield l || r
