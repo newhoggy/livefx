@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Change
 import org.livefx.script.Spoil
 
-case class Const[A](value: A) extends LiveValue[A] {
+case class Const[A](value: A) extends Live[A] {
   type Pub <: Const[A]
 
   def spoils: Events[Pub, Spoil] = NoEvents

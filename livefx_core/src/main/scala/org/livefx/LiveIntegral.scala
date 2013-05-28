@@ -1,18 +1,18 @@
 package org.livefx
 
 trait LiveIntegral[T] extends LiveNumeric[T] {
-  def quot(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield integral.quot(xv, yv)
-  def rem(x: LiveValue[T], y: LiveValue[T]): LiveValue[T] = for (xv <- x; yv <- y) yield integral.rem(xv, yv)
+  def quot(x: Live[T], y: Live[T]): Live[T] = for (xv <- x; yv <- y) yield integral.quot(xv, yv)
+  def rem(x: Live[T], y: Live[T]): Live[T] = for (xv <- x; yv <- y) yield integral.rem(xv, yv)
   
   def integral: Integral[T]
   override def numeric: Numeric[T] = integral
 
-  class IntegralOps(lhs: LiveValue[T]) extends Ops(lhs) {
-    def /(rhs: LiveValue[T]) = quot(lhs, rhs)
-    def %(rhs: LiveValue[T]) = rem(lhs, rhs)
-    def /%(rhs: LiveValue[T]) = (quot(lhs, rhs), rem(lhs, rhs))
+  class IntegralOps(lhs: Live[T]) extends Ops(lhs) {
+    def /(rhs: Live[T]) = quot(lhs, rhs)
+    def %(rhs: Live[T]) = rem(lhs, rhs)
+    def /%(rhs: Live[T]) = (quot(lhs, rhs), rem(lhs, rhs))
   }
-  override implicit def mkNumericOps(lhs: LiveValue[T]): IntegralOps = new IntegralOps(lhs)
+  override implicit def mkNumericOps(lhs: Live[T]): IntegralOps = new IntegralOps(lhs)
 }
 
 object Integral {

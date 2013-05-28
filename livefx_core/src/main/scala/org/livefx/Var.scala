@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Change
 import org.livefx.script.Spoil
 
-class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) extends LiveValue[A] {
+class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) extends Live[A] {
   type Pub <: Var[A]
 
   private lazy val _spoils = new EventSource[Pub, Spoil](publisher)

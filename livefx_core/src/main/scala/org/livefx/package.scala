@@ -13,7 +13,7 @@ package object livefx {
   type Map[A, B] = mutable.Map[A, B]
   type Set[A] = mutable.Set[A]
 
-  implicit class RichLiveTreeSeq[A](self: LiveValue[Tree[A]]) {
+  implicit class RichLiveTreeSeq[A](self: Live[Tree[A]]) {
 //    def map[B](f: A => B): Tree[B] = for {
 //      tree <- self
 //    } yield tree.map(f)
@@ -22,16 +22,16 @@ package object livefx {
     def flatMap[B](f: A => Tree[B]): Tree[B] = ???
   }
   
-  implicit class RichLiveValueBoolean(val self: LiveValue[Boolean]) {
-    def &&(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l && r
-    def ||(that: LiveValue[Boolean]): LiveValue[Boolean] =  for (l <- self; r <- that) yield l || r
-    def unary_!(): LiveValue[Boolean] =  self.map(!_)
+  implicit class RichLiveValueBoolean(val self: Live[Boolean]) {
+    def &&(that: Live[Boolean]): Live[Boolean] =  for (l <- self; r <- that) yield l && r
+    def ||(that: Live[Boolean]): Live[Boolean] =  for (l <- self; r <- that) yield l || r
+    def unary_!(): Live[Boolean] =  self.map(!_)
     
-    def select[T](liveA: LiveValue[T], liveB: LiveValue[T]): LiveValue[T] = for (v <- self; ab <- if (v) liveA else liveB) yield ab
+    def select[T](liveA: Live[T], liveB: Live[T]): Live[T] = for (v <- self; ab <- if (v) liveA else liveB) yield ab
   }
 
-  implicit class RichLiveOptionLiveValue[T](val self: LiveValue[Option[LiveValue[T]]]) {
-    def orElse(that: LiveValue[T]): LiveValue[T] = for {
+  implicit class RichLiveOptionLiveValue[T](val self: Live[Option[Live[T]]]) {
+    def orElse(that: Live[T]): Live[T] = for {
       maybeSelfValue <- self
       value <- maybeSelfValue.getOrElse(that)
     } yield value
@@ -49,9 +49,9 @@ package object livefx {
 
   def bindTrace[T](value: T, source: String, line: Int, column: Int, snippet: String): T = {println("A2"); value}
 
-  def bindTrace(liveValue: LiveValue[Int]) = {println("B"); liveValue}
+  def bindTrace(liveValue: Live[Int]) = {println("B"); liveValue}
 
-  def bindTrace(liveValue: LiveValue[Int], source: String, line: Int, column: Int, snippet: String) = {
+  def bindTrace(liveValue: Live[Int], source: String, line: Int, column: Int, snippet: String) = {
     val newBindTraceEntry = BindTraceEntry(source, line, column, snippet)
 
     println(s"(${source}:${line}:${column}) => ${snippet}")
@@ -68,7 +68,7 @@ package object livefx {
   
   def spoilStack = bindTraceEntries.value
 
-  def traceSpoils[V](liveValue: LiveValue[V]): LiveValue[V] = {
+  def traceSpoils[V](liveValue: Live[V]): Live[V] = {
     val caller = CallContext.caller
 
     new LiveBinding[V] {

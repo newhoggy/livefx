@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Change
 import org.livefx.script.Spoil
 
-abstract class LiveBinding[A] extends LiveValue[A] with Unspoilable {
+abstract class LiveBinding[A] extends Live[A] with Unspoilable {
   type Pub <: LiveBinding[A]
 
   private lazy val _spoils = new EventSource[Pub, Spoil](publisher)

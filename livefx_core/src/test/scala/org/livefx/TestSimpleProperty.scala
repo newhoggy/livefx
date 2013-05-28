@@ -215,7 +215,7 @@ class TestSimpleProperty {
     val liveA = new Var[Int](0)
     val liveB = new Var[Int](0)
     val liveC = new Var[Int](0)
-    val liveD = new Var[Option[LiveValue[Int]]](None)
+    val liveD = new Var[Option[Live[Int]]](None)
     val liveE = liveD.orElse(liveA)
     
     Assert.assertEquals(0, liveE.value)

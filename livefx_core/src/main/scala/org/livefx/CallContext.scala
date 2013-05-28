@@ -14,7 +14,7 @@ class CallContext {
 
   private val spoilTrace = new DynamicVariable[List[StackTraceElement]](Nil)
   
-  def traceSpoils[V](liveValue: LiveValue[V]): LiveValue[V] = new LiveBinding[V] {
+  def traceSpoils[V](liveValue: Live[V]): Live[V] = new LiveBinding[V] {
     spoils.subscribe { (_, spoilEvent) =>
       spoil(Spoil(spoilEvent.trace))
     }

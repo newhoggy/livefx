@@ -4,16 +4,16 @@ import org.livefx.script.Change
 import org.livefx.script.Message
 import org.livefx.script.Spoil
 
-trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
-  type Pub <: LiveValue[A]
+trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
+  type Pub <: Live[A]
   
   def value: A
   
   def changes: Events[Pub, Change[A]]
   
-  def asliveValue: LiveValue[A] = this
+  def asliveValue: Live[A] = this
 
-  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): LiveValue[B] = {
+  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = {
     val source = this
     new LiveBinding[B] {
       val ref = source.spoils.subscribeWeak((_, spoilEvent) => spoil(spoilEvent))
@@ -22,10 +22,10 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
     }
   }
   
-  def flatMap[B](f: A => LiveValue[B]): LiveValue[B] = {
+  def flatMap[B](f: A => Live[B]): Live[B] = {
     val source = this
     val binding = new LiveBinding[B] {
-      var nested: LiveValue[B] = f(source.value)
+      var nested: Live[B] = f(source.value)
       val nestedSpoilHandler = { (_: Any, spoilEvent: Spoil) => spoil(spoilEvent) }
       var ref: Any = nested.spoils.subscribeWeak(nestedSpoilHandler)
       val ref1 = source.spoils.subscribeWeak { (_, spoilEvent) =>
@@ -40,7 +40,7 @@ trait LiveValue[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
     binding
   }
   
-  def spoilCount: LiveValue[Long] = {
+  def spoilCount: Live[Long] = {
     val outer = this
     new LiveBinding[Long] {
       private var counter = 0L
