@@ -55,10 +55,20 @@ object Observables {
 
     implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
       def value: Int = self.get()
+      def live: Live[Integer] = new Binding[Integer] with JfxBindable {
+        bind(self)
+
+        override def computeValue: Integer = self.value
+      }
     }
 
     implicit class RichObservableDoubleValue[A](self: ObservableDoubleValue) {
       def value: Double = self.get()
+      def live: Live[Double] = new Binding[Double] with JfxBindable {
+        bind(self)
+
+        override def computeValue: Double = self.value
+      }
     }
 
     implicit class RichObservableBooleanValue[A](self: ObservableBooleanValue) {
