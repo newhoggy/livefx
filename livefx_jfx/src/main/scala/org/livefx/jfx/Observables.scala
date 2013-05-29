@@ -1,23 +1,31 @@
 package org.livefx.jfx
 
-import javafx.beans.value.ObservableValue
 import javafx.beans.InvalidationListener
 import javafx.beans.WeakInvalidationListener
+import javafx.beans.binding.{Binding => JBinding}
+import javafx.beans.binding.BooleanBinding
+import javafx.beans.binding.DoubleBinding
+import javafx.beans.binding.IntegerBinding
+import javafx.beans.property.Property
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.BooleanProperty
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.WeakChangeListener
+import javafx.beans.value.ObservableValue
+import javafx.beans.value.ObservableIntegerValue
+import javafx.beans.value.ObservableBooleanValue
+import javafx.beans.value.ObservableDoubleValue
 import javafx.collections.ListChangeListener
 import javafx.collections.WeakListChangeListener
 import javafx.collections.MapChangeListener
 import javafx.collections.WeakMapChangeListener
 import javafx.collections.SetChangeListener
 import javafx.collections.WeakSetChangeListener
-import javafx.beans.property.Property
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.DoubleProperty
-import javafx.beans.property.BooleanProperty
-import javafx.beans.value.ObservableIntegerValue
-import javafx.beans.value.ObservableBooleanValue
-import javafx.beans.value.ObservableDoubleValue
+import org.livefx.Live
+import org.livefx.Binding
+import javafx.beans.binding.BooleanBinding
+import javafx.beans.Observable
 
 object Observables {
   object Implicits {
@@ -55,6 +63,11 @@ object Observables {
 
     implicit class RichObservableBooleanValue[A](self: ObservableBooleanValue) {
       def value: Boolean = self.get()
+      def live: Live[Boolean] = new Binding[Boolean] with JfxBindable {
+        bind(self)
+
+        override def computeValue: Boolean = self.value
+      }
     }
 
     implicit class RichInvalidationListener(self: InvalidationListener) {
