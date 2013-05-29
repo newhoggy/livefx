@@ -81,23 +81,23 @@ object Observables {
     }
 
     implicit class RichInvalidationListener(self: InvalidationListener) {
-      def weak: InvalidationListener = new WeakInvalidationListener(self)
+      def weak: WeakInvalidationListener = new WeakInvalidationListener(self)
     }
 
     implicit class RichChangeListener[A](self: ChangeListener[A]) {
-      def weak: ChangeListener[A] = new WeakChangeListener[A](self)
+      def weak: WeakChangeListener[A] = new WeakChangeListener[A](self)
     }
 
     implicit class RichListChangeListener[A](self: ListChangeListener[A]) {
-      def weak: ListChangeListener[A] = new WeakListChangeListener[A](self)
+      def weak: WeakListChangeListener[A] = new WeakListChangeListener[A](self)
     }
 
     implicit class RichMapChangeListener[A, B](self: MapChangeListener[A, B]) {
-      def weak: MapChangeListener[A, B] = new WeakMapChangeListener[A, B](self)
+      def weak: WeakMapChangeListener[A, B] = new WeakMapChangeListener[A, B](self)
     }
 
     implicit class RichSetChangeListener[A](self: SetChangeListener[A]) {
-      def weak: SetChangeListener[A] = new WeakSetChangeListener[A](self)
+      def weak: WeakSetChangeListener[A] = new WeakSetChangeListener[A](self)
     }
   }
 }
