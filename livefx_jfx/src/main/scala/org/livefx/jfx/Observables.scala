@@ -12,6 +12,12 @@ import javafx.collections.WeakMapChangeListener
 import javafx.collections.SetChangeListener
 import javafx.collections.WeakSetChangeListener
 import javafx.beans.property.Property
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.BooleanProperty
+import javafx.beans.value.ObservableIntegerValue
+import javafx.beans.value.ObservableBooleanValue
+import javafx.beans.value.ObservableDoubleValue
 
 object Observables {
   object Implicits {
@@ -20,8 +26,35 @@ object Observables {
       def value: A = self.getValue()
     }
 
+    implicit class RichIntegerProperty(self: IntegerProperty) {
+      def <==(value: Int): Unit = self.setValue(value)
+      def value: Int = self.getValue()
+    }
+
+    implicit class RichDoubleProperty(self: DoubleProperty) {
+      def <==(value: Double): Unit = self.setValue(value)
+      def value: Double = self.getValue()
+    }
+
+    implicit class RichBooleanProperty(self: BooleanProperty) {
+      def <==(value: Boolean): Unit = self.setValue(value)
+      def value: Boolean = self.getValue()
+    }
+
     implicit class RichObservableValue[A](self: ObservableValue[A]) {
-      
+      def value: A = self.getValue()
+    }
+
+    implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
+      def value: Int = self.get()
+    }
+
+    implicit class RichObservableDoubleValue[A](self: ObservableDoubleValue) {
+      def value: Double = self.get()
+    }
+
+    implicit class RichObservableBooleanValue[A](self: ObservableBooleanValue) {
+      def value: Boolean = self.get()
     }
 
     implicit class RichInvalidationListener(self: InvalidationListener) {
