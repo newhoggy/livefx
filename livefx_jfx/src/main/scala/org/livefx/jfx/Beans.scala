@@ -57,6 +57,7 @@ object Beans {
       final def properties: HashMap[Any, Any] = store.properties
       final def properties_=(value: HashMap[Any, Any]): Unit = store.properties = value
       final def cache[T <: AnyRef](key: HotKey[T])(f: => T): T = {
+        StoreRefQueue.tidyUp()
         val store = self.storeFor[WeakReference[T]]
         store.properties.get(key) match {
           case Some(WeakReference(value)) => value
