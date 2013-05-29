@@ -11,6 +11,7 @@ import scala.ref.WeakReference
 import scala.ref.ReferenceQueue
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.BooleanBinding
+import scala.collection.immutable.HashMap
 
 class TestJfxLeaks {
   @Test
@@ -65,5 +66,39 @@ class TestJfxLeaks {
     // but the weak invalidation listener reference is still strongly held
     // representing a small leak.
     Assert.assertTrue(refQueue.poll.nonEmpty)
+  }
+
+  @Test
+  def testHotListenerDemo(): Unit = {
+    var message: String = ""
+
+    class HotInvalidationListener(val name: String) extends InvalidationListener {
+      var properties = HashMap.empty[Any, Any]
+ 
+      override def equals(o: Any): Boolean = o match {
+        case that: HotInvalidationListener => {
+          message = s"$name is stealing properties from ${that.name}"
+          properties = that.properties
+          true
+        }
+        case _ => false
+      }
+
+      override def hashCode(): Int = HotInvalidationListener.hashCode()
+
+      override def invalidated(observable: Observable): Unit = Unit
+    }
+
+    object HotInvalidationListener
+
+    val property = new SimpleIntegerProperty(0)
+    val listener1 = new HotInvalidationListener("a")
+    val listener2 = new HotInvalidationListener("b")
+    property.addListener(listener1)
+    listener1.properties += ("Hello" -> "World")
+    property.removeListener(listener2)
+    property.addListener(listener2)
+    Assert.assertEquals("b is stealing properties from a", message)
+    Assert.assertEquals(listener2.properties.get("Hello"), Some("World"))
   }
 }
