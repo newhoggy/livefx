@@ -27,7 +27,7 @@ import org.livefx.Binding
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.Observable
 
-object Observables {
+object Beans {
   object Implicits {
     implicit class RichProperty[A](self: Property[A]) {
       def <==(value: A): Unit = self.setValue(value)

@@ -3,7 +3,7 @@ package test.livefx
 import org.junit.Test
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.Property
-import org.livefx.jfx.Observables.Implicits._
+import org.livefx.jfx.Beans.Implicits._
 import org.junit.Assert
 import javafx.beans.property.SimpleIntegerProperty
 

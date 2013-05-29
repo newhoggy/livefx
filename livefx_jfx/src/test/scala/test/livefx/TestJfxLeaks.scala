@@ -3,7 +3,7 @@ package test.livefx
 import org.junit.Test
 import javafx.beans.InvalidationListener
 import javafx.beans.Observable
-import org.livefx.jfx.Observables.Implicits._
+import org.livefx.jfx.Beans.Implicits._
 import org.junit.Assert
 import javafx.beans.WeakInvalidationListener
 import javafx.beans.property.SimpleIntegerProperty
