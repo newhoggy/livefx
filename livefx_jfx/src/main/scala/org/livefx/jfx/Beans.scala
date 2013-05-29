@@ -75,30 +75,39 @@ object Beans {
       }
     }
 
+    private object RichObservableIntegerValueKey
     implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
       final def value: Int = self.get()
-      final def live: Live[Integer] = new Binding[Integer] with JfxBindable {
-        bind(self)
-
-        override def computeValue: Integer = self.value
+      final def live: Live[Integer] = self.cache(RichObservableIntegerValueKey) {
+        new Binding[Integer] with JfxBindable {
+          bind(self)
+  
+          override def computeValue: Integer = self.value
+        }
       }
     }
 
+    private object RichObservableDoubleValueKey
     implicit class RichObservableDoubleValue[A](self: ObservableDoubleValue) {
       def value: Double = self.get()
-      def live: Live[Double] = new Binding[Double] with JfxBindable {
-        bind(self)
-
-        override def computeValue: Double = self.value
+      def live: Live[Double] = self.cache(RichObservableIntegerValueKey) {
+        new Binding[Double] with JfxBindable {
+          bind(self)
+  
+          override def computeValue: Double = self.value
+        }
       }
     }
 
+    private object RichObservableBooleanValueKey
     implicit class RichObservableBooleanValue[A](self: ObservableBooleanValue) {
       def value: Boolean = self.get()
-      def live: Live[Boolean] = new Binding[Boolean] with JfxBindable {
-        bind(self)
-
-        override def computeValue: Boolean = self.value
+      def live: Live[Boolean] = self.cache(RichObservableBooleanValueKey) {
+       new Binding[Boolean] with JfxBindable {
+          bind(self)
+  
+          override def computeValue: Boolean = self.value
+        }
       }
     }
 
