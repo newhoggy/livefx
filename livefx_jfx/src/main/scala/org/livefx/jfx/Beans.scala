@@ -64,6 +64,11 @@ object Beans {
 
     implicit class RichObservableValue[A](self: ObservableValue[A]) {
       final def value: A = self.getValue()
+      final def live: Live[A] = new Binding[A] with JfxBindable {
+        bind(self)
+
+        override def computeValue: A = self.value
+      }
     }
 
     implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
