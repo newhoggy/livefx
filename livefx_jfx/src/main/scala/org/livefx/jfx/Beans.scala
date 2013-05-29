@@ -40,6 +40,7 @@ object Beans {
 
       final def properties: HashMap[Any, Any] = hotListener.properties
       final def properties_=(value: HashMap[Any, Any]): Unit = hotListener.properties = value
+      final def cache[T](key: Any)(f: => T): T = properties.get(key).asInstanceOf[Option[T]].getOrElse(f)
     }
 
     implicit class RichProperty[A](self: Property[A]) {
@@ -62,12 +63,15 @@ object Beans {
       final def value: Boolean = self.getValue()
     }
 
+    private object RichObservableValueKey
     implicit class RichObservableValue[A](self: ObservableValue[A]) {
       final def value: A = self.getValue()
-      final def live: Live[A] = new Binding[A] with JfxBindable {
-        bind(self)
-
-        override def computeValue: A = self.value
+      final def live: Live[A] = self.cache(RichObservableValueKey) {
+        new Binding[A] with JfxBindable {
+          bind(self)
+  
+          override def computeValue: A = self.value
+        }
       }
     }
 
