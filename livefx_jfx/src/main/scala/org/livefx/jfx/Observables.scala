@@ -11,9 +11,15 @@ import javafx.collections.MapChangeListener
 import javafx.collections.WeakMapChangeListener
 import javafx.collections.SetChangeListener
 import javafx.collections.WeakSetChangeListener
+import javafx.beans.property.Property
 
 object Observables {
   object Implicits {
+    implicit class RichProperty[A](self: Property[A]) {
+      def <==(value: A): Unit = self.setValue(value)
+      def value: A = self.getValue()
+    }
+
     implicit class RichObservableValue[A](self: ObservableValue[A]) {
       
     }
