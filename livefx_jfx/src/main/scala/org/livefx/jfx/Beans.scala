@@ -26,36 +26,49 @@ import org.livefx.Live
 import org.livefx.Binding
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.Observable
+import scala.collection.immutable.HashMap
 
 object Beans {
   object Implicits {
+    implicit class RichObservable[A](self: Observable) {
+      private final def hotListener: HotInvalidationListener = {
+        val listener = new HotInvalidationListener
+        self.addListener(listener)
+        self.removeListener(listener)
+        listener
+      }
+
+      final def properties: HashMap[Any, Any] = hotListener.properties
+      final def properties_=(value: HashMap[Any, Any]): Unit = hotListener.properties = value
+    }
+
     implicit class RichProperty[A](self: Property[A]) {
-      def <==(value: A): Unit = self.setValue(value)
-      def value: A = self.getValue()
+      final def <==(value: A): Unit = self.setValue(value)
+      final def value: A = self.getValue()
     }
 
     implicit class RichIntegerProperty(self: IntegerProperty) {
-      def <==(value: Int): Unit = self.setValue(value)
-      def value: Int = self.getValue()
+      final def <==(value: Int): Unit = self.setValue(value)
+      final def value: Int = self.getValue()
     }
 
     implicit class RichDoubleProperty(self: DoubleProperty) {
-      def <==(value: Double): Unit = self.setValue(value)
-      def value: Double = self.getValue()
+      final def <==(value: Double): Unit = self.setValue(value)
+      final def value: Double = self.getValue()
     }
 
     implicit class RichBooleanProperty(self: BooleanProperty) {
-      def <==(value: Boolean): Unit = self.setValue(value)
-      def value: Boolean = self.getValue()
+      final def <==(value: Boolean): Unit = self.setValue(value)
+      final def value: Boolean = self.getValue()
     }
 
     implicit class RichObservableValue[A](self: ObservableValue[A]) {
-      def value: A = self.getValue()
+      final def value: A = self.getValue()
     }
 
     implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
-      def value: Int = self.get()
-      def live: Live[Integer] = new Binding[Integer] with JfxBindable {
+      final def value: Int = self.get()
+      final def live: Live[Integer] = new Binding[Integer] with JfxBindable {
         bind(self)
 
         override def computeValue: Integer = self.value
