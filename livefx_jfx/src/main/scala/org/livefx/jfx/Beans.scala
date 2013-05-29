@@ -27,9 +27,23 @@ import org.livefx.Binding
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.Observable
 import scala.collection.immutable.HashMap
+import scala.ref.ReferenceQueue
+import scala.ref.WeakReference
+import scala.annotation.tailrec
 
 object Beans {
   object Implicits {
+    private object StoreRefQueue extends ReferenceQueue[Nothing] {
+      @tailrec
+      def tidyUp(): Unit = poll match {
+        case Some(weakRef) => weakRef match {
+          case runnable: Runnable => runnable.run(); tidyUp()
+          case _ =>
+        }
+        case None =>
+      }
+    }
+
     implicit class RichObservable[A](self: Observable) {
       private final def hotListener: HotInvalidationListener = {
         val listener = new HotInvalidationListener
@@ -38,9 +52,24 @@ object Beans {
         listener
       }
 
-      final def properties: HashMap[Any, Any] = hotListener.store.properties
-      final def properties_=(value: HashMap[Any, Any]): Unit = hotListener.store.properties = value
-      final def cache[T](key: Any)(f: => T): T = properties.get(key).asInstanceOf[Option[T]].getOrElse(f)
+      final def store: PropertyStore[Any] = hotListener.store
+      final def storeFor[T]: PropertyStore[T] = store.asInstanceOf[PropertyStore[T]]
+      final def properties: HashMap[Any, Any] = store.properties
+      final def properties_=(value: HashMap[Any, Any]): Unit = store.properties = value
+      final def cache[T <: AnyRef](key: HotKey[T])(f: => T): T = {
+        val store = self.storeFor[WeakReference[T]]
+        store.properties.get(key) match {
+          case Some(WeakReference(value)) => value
+          case None => {
+            val value = f
+            val weakRef = new WeakReference[T](value, StoreRefQueue) with Runnable {
+              override def run(): Unit = store.properties -= key
+            }
+            store.properties += (key -> weakRef)
+            value
+          }
+        }
+      }
     }
 
     implicit class RichProperty[A](self: Property[A]) {
@@ -63,34 +92,34 @@ object Beans {
       final def value: Boolean = self.getValue()
     }
 
-    private object RichObservableValueKey
+    private object RichObservableValueKey extends HotKey[Nothing]
     implicit class RichObservableValue[A](self: ObservableValue[A]) {
       final def value: A = self.getValue()
-      final def live: Live[A] = self.cache(RichObservableValueKey) {
+      final def live: Live[A] = self.cache(RichObservableValueKey: HotKey[Binding[A]]) {
         new Binding[A] with JfxBindable {
           bind(self)
-  
+
           override def computeValue: A = self.value
         }
       }
     }
 
-    private object RichObservableIntegerValueKey
+    private object RichObservableIntegerValueKey extends HotKey[Binding[Int]]
     implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
       final def value: Int = self.get()
-      final def live: Live[Integer] = self.cache(RichObservableIntegerValueKey) {
-        new Binding[Integer] with JfxBindable {
+      final def live: Live[Int] = self.cache(RichObservableIntegerValueKey) {
+        new Binding[Int] with JfxBindable {
           bind(self)
   
-          override def computeValue: Integer = self.value
+          override def computeValue: Int = self.value
         }
       }
     }
 
-    private object RichObservableDoubleValueKey
+    private object RichObservableDoubleValueKey extends HotKey[Binding[Double]]
     implicit class RichObservableDoubleValue[A](self: ObservableDoubleValue) {
       def value: Double = self.get()
-      def live: Live[Double] = self.cache(RichObservableIntegerValueKey) {
+      def live: Live[Double] = self.cache(RichObservableDoubleValueKey) {
         new Binding[Double] with JfxBindable {
           bind(self)
   
@@ -99,7 +128,7 @@ object Beans {
       }
     }
 
-    private object RichObservableBooleanValueKey
+    private object RichObservableBooleanValueKey extends HotKey[Binding[Boolean]]
     implicit class RichObservableBooleanValue[A](self: ObservableBooleanValue) {
       def value: Boolean = self.get()
       def live: Live[Boolean] = self.cache(RichObservableBooleanValueKey) {
