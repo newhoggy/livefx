@@ -12,6 +12,9 @@ class TestProperty {
     val property: Property[Int] = new SimpleObjectProperty[Int](0)
     property <== 1
     Assert.assertEquals(property.value, 1)
-    
+    property <== 1 + 1
+    Assert.assertEquals(property.value, 2)
+    property <== 3 min 4
+    Assert.assertEquals(property.value, 3)
   }
 }
