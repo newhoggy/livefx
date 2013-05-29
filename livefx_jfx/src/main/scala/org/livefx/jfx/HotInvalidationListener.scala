@@ -6,11 +6,11 @@ import javafx.beans.property.SimpleIntegerProperty
 import scala.collection.immutable.HashMap
 
 class HotInvalidationListener extends InvalidationListener {
-  var properties = HashMap.empty[Any, Any]
+  var store = new PropertyStore
 
   override def equals(o: Any): Boolean = o match {
     case that: HotInvalidationListener => {
-      properties = that.properties
+      store = that.store
       true
     }
     case _ => false

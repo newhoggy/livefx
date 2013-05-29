@@ -38,8 +38,8 @@ object Beans {
         listener
       }
 
-      final def properties: HashMap[Any, Any] = hotListener.properties
-      final def properties_=(value: HashMap[Any, Any]): Unit = hotListener.properties = value
+      final def properties: HashMap[Any, Any] = hotListener.store.properties
+      final def properties_=(value: HashMap[Any, Any]): Unit = hotListener.store.properties = value
       final def cache[T](key: Any)(f: => T): T = properties.get(key).asInstanceOf[Option[T]].getOrElse(f)
     }
 
