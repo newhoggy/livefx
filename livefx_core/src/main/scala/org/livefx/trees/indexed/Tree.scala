@@ -268,13 +268,13 @@ object Tree {
   private[this] class ValuesIterator[A](tree: Tree[A]) extends TreeIterator[A, A](tree) {
     override def nextResult(tree: Tree[A]) = tree.value
   }
-  
+
   def unapply[A](t: Tree[A]): Option[(Tree[A], A, Tree[A])] = t match {
     case Black(l, v, r) => Some((l, v, r))
     case Red(l, v, r) => Some((l, v, r))
     case _ => None
   }
-  
+
   def toList[A](t: Tree[A], acc: List[A] = Nil): List[A] = t match {
     case Tree(l, v, r) => toList(l, v::toList(r, acc))
     case Leaf => acc
