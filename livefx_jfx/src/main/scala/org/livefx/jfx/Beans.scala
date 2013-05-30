@@ -40,6 +40,7 @@ import scala.ref.WeakReference
 import scala.annotation.tailrec
 import org.livefx.Live
 import org.livefx.Binding
+import scala.collection.immutable.HashSet
 
 object Beans {
   object Implicits {
@@ -172,14 +173,51 @@ object Beans {
     }
 
     implicit class RichLiveIterable[T](self: Live[Iterable[T]]) {
-      def asObservableArrayList: ObservableList[T] = {
-        lazy val targetList: ObservableList[T] = FXCollections.observableArrayList(new JArrayList[T] {
-          val binding = for {
-            iterable <- self
-          } yield targetList.setAll(iterable.seq)
-        })
-  
-        return FXCollections.unmodifiableObservableList(targetList)
+      def asObservableArrayList: ObservableList[T] = new ObservableList[T] {
+        private val refQueue = new ReferenceQueue[Nothing]
+        private var invalidationListeners = HashSet.empty[WeakReference[InvalidationListener]]
+        private var listChangeListeners = HashSet.empty[WeakReference[ListChangeListener[_ >: T]]]
+        val binding = new Binding[ObservableList[T]] {
+          val underlying = FXCollections.observableArrayList[T]
+          underlying.setAll(self.value)
+          override def computeValue: ObservableList[T] = {
+            underlying.setAll(self.value)
+            underlying
+          }
+        }
+        override def add(index: Int, value: T): Unit = throw new UnsupportedOperationException
+        override def add(index: T): Boolean = throw new UnsupportedOperationException
+        override def addAll(index: Int,x$2: JCollection[_ <: T]): Boolean = throw new UnsupportedOperationException
+        override def addAll(values: JCollection[_ <: T]): Boolean = throw new UnsupportedOperationException
+        override def clear(): Unit = throw new UnsupportedOperationException
+        override def contains(value: Any): Boolean = binding.value.contains(value)
+        override def containsAll(values: JCollection[_]): Boolean = binding.value.containsAll(values)
+        override def get(index: Int): T = binding.value.get(index)
+        override def indexOf(value: Any): Int = binding.value.indexOf(value)
+        override def isEmpty(): Boolean = binding.value.isEmpty
+        override def iterator(): java.util.Iterator[T] = binding.value.iterator
+        override def lastIndexOf(value: Any): Int = binding.value.lastIndexOf(value)
+        override def listIterator(index: Int): java.util.ListIterator[T] = binding.value.listIterator
+        override def listIterator(): java.util.ListIterator[T] = binding.value.listIterator
+        override def remove(index: Int): T = throw new UnsupportedOperationException
+        override def remove(value: Any): Boolean = throw new UnsupportedOperationException
+        override def removeAll(values: JCollection[_]): Boolean = throw new UnsupportedOperationException
+        override def retainAll(values: JCollection[_]): Boolean = throw new UnsupportedOperationException
+        override def set(index: Int, value: T): T = throw new UnsupportedOperationException
+        override def size(): Int = binding.value.size
+        override def subList(from: Int, to: Int): java.util.List[T] = binding.value.subList(from, to)
+        override def toArray[T](array: Array[T with Object]): Array[T with Object] = binding.value.toArray[T](array)
+        override def toArray(): Array[Object] = binding.value.toArray()
+        override def addAll(index: T*): Boolean = throw new UnsupportedOperationException
+        override def remove(from: Int, to: Int): Unit = throw new UnsupportedOperationException
+        override def removeAll(values: T*): Boolean = throw new UnsupportedOperationException
+        override def retainAll(values: T*): Boolean = throw new UnsupportedOperationException
+        override def setAll(values: JCollection[_ <: T]): Boolean = throw new UnsupportedOperationException
+        override def setAll(values: T*): Boolean = throw new UnsupportedOperationException
+        override def addListener(listener: InvalidationListener): Unit = invalidationListeners += new WeakReference(listener, refQueue)
+        override def removeListener(listener: InvalidationListener): Unit = invalidationListeners -= new WeakReference(listener, refQueue)
+        override def addListener(listener: ListChangeListener[_ >: T]): Unit = listChangeListeners += new WeakReference(listener, refQueue)
+        override def removeListener(listener: ListChangeListener[_ >: T]): Unit = listChangeListeners -= new WeakReference(listener, refQueue)
       }
     }
 
