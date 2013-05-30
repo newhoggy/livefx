@@ -205,7 +205,7 @@ object Beans {
                   override def getPermutation(): Array[Int] = Array.empty
                   override def getRemoved(): JList[T] = oldValue
                   override def getTo(): Int = value.size
-                  override def next(): Boolean = try { more } finally { more = false }
+                  override def next(): Boolean = try { value; more } finally { more = false }
                   override def reset(): Unit = more = true
                   override def wasPermutated(): Boolean = false
                   override def wasAdded(): Boolean = value.size != 0
