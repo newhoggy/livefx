@@ -174,8 +174,8 @@ object Beans {
       def weak: WeakSetChangeListener[A] = new WeakSetChangeListener[A](self)
     }
 
-    implicit class RichLiveIterable[T](self: Live[Iterable[T]]) {
-      def asObservableArrayList: ObservableList[T] = new ObservableList[T] {
+    implicit class RichLiveSeq[T](self: Live[Seq[T]]) {
+      def asObservableArrayList: ObservableList[T] = new ObservableList[T] { target =>
         private object refQueue extends ReferenceQueue[Nothing] {
           @tailrec
           def tidyUp(): Unit = poll match {
@@ -189,17 +189,37 @@ object Beans {
         private var invalidationListeners = HashSet.empty[WeakReference[InvalidationListener]]
         private var listChangeListeners = HashSet.empty[WeakReference[ListChangeListener[_ >: T]]]
         private val binding = new Binding[ObservableList[T]] {
+          var oldValue: Seq[T] = Nil
           val underlying = FXCollections.observableArrayList[T]
           private val ref = self.spoils.subscribe { (p, e) =>
-            for (listener <- invalidationListeners) {
-              
+            for (weakListener <- invalidationListeners) {
+              weakListener match {
+                case WeakReference(listener) => listener.invalidated(target)
+              }
             }
-            for (listener <- listChangeListeners) {
-              
+            for (weakListener <- listChangeListeners) {
+              weakListener match {
+                case WeakReference(listener) => listener.onChanged(new ListChangeListener.Change(target) {
+                  var more = true
+                  override def getFrom(): Int = 0
+                  override def getPermutation(): Array[Int] = Array.empty
+                  override def getRemoved(): JList[T] = oldValue
+                  override def getTo(): Int = value.size
+                  override def next(): Boolean = try { more } finally { more = false }
+                  override def reset(): Unit = more = true
+                  override def wasPermutated(): Boolean = false
+                  override def wasAdded(): Boolean = value.size != 0
+                  override def wasRemoved(): Boolean = oldValue.size != 0
+                  override def getAddedSubList(): JList[T] = value
+                  override def getRemovedSize(): Int = oldValue.size
+                  override def getAddedSize(): Int = value.size
+                })
+              }
             }
           }
           underlying.setAll(self.value)
           override def computeValue: ObservableList[T] = {
+            oldValue = self.value
             underlying.setAll(self.value)
             underlying
           }
