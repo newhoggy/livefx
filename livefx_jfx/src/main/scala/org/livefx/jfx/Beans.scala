@@ -133,7 +133,7 @@ object Beans {
       def live: Live[Double] = self.cache(RichObservableDoubleValueKey) {
         new Binding[Double] with JfxBindable {
           bind(self)
-  
+
           override def computeValue: Double = self.value
         }
       }
@@ -170,6 +170,7 @@ object Beans {
     implicit class RichSetChangeListener[A](self: SetChangeListener[A]) {
       def weak: WeakSetChangeListener[A] = new WeakSetChangeListener[A](self)
     }
+
     implicit class RichLiveIterable[T](self: Live[Iterable[T]]) {
       def asObservableArrayList: ObservableList[T] = {
         lazy val targetList: ObservableList[T] = FXCollections.observableArrayList(new JArrayList[T] {
@@ -181,7 +182,7 @@ object Beans {
         return FXCollections.unmodifiableObservableList(targetList)
       }
     }
-  
+
     implicit class RichLiveMap[A, B](self: Live[Map[A, B]]) {
       def asObservableHashMap: ObservableMap[A, B] = {
         lazy val targetMap: ObservableMap[A, B] = FXCollections.observableMap(new JHashMap[A, B] {
@@ -203,7 +204,7 @@ object Beans {
             }
           }
         })
-        
+
         return FXCollections.unmodifiableObservableMap(targetMap)
       }
     }
