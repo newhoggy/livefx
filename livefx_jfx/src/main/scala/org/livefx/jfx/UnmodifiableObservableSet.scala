@@ -21,7 +21,7 @@ class UnmodifiableObservableSet[A](observableSet: ObservableSet[A]) extends Obse
   override def contains(value: Any): Boolean = observableSet.contains(value)
   override def containsAll(collection: java.util.Collection[_]): Boolean = observableSet.containsAll(collection)
   override def isEmpty(): Boolean = observableSet.isEmpty()
-  override def iterator(): JIterator[A] = unmodifiableIterator(observableSet.iterator())
+  override def iterator(): JIterator[A] = Beans.unmodifiableIterator(observableSet.iterator())
   override def remove(x$1: Any): Boolean = throw new UnsupportedOperationException
   override def removeAll(values: JCollection[_]): Boolean = throw new UnsupportedOperationException
   override def retainAll(values: JCollection[_]): Boolean = throw new UnsupportedOperationException
