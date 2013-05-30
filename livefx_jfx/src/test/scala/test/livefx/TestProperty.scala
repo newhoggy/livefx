@@ -29,4 +29,12 @@ class TestProperty {
     property <== 3 min 4
     Assert.assertEquals(property.value, 3)
   }
+  
+  @Test
+  def testLive(): Unit = {
+    val propertyA = new SimpleIntegerProperty(0)
+    val liveA1 = propertyA.live
+    val liveA2 = propertyA.live
+    Assert.assertTrue(liveA1 eq liveA2)
+  }
 }
