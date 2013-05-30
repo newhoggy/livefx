@@ -322,22 +322,59 @@ final object Tree {
     }
   }
 
-  trait Delta[A]
-  case class Space(size: Int) extends Delta[Nothing]
-  case class DeltaTree[A](tree: Tree[A]) extends Delta[A]
+  trait Delta[+A]
+  case class Space[A](size: Int) extends Delta[Nothing]
   case class Removed[A](value: A) extends Delta[A]
   case class Added[A](value: A) extends Delta[A]
 
-  final def difference[A](lt: Tree[A], rt: Tree[A]): (List[Delta[A]], List[Delta[A]]) = difference(List(DeltaTree(lt)), List(DeltaTree(rt)))
+  trait Fragment[+A]
+  case class Portion[A](tree: Tree[A]) extends Fragment[A]
+  case class Piece[A](value: A) extends Fragment[A]
 
-  final def difference[A](ld: List[Delta[A]], rd: List[Delta[A]]): (List[Delta[A]], List[Delta[A]]) = {
-    (ld, rd) match {
-      case (DeltaTree(lt)::lds, DeltaTree(rt)::rds) => lt.depth compare rt.depth match {
-        case cmp if cmp < 0 => ???
-        case cmp if cmp > 0 => ???
-        case _ => ???
-      }
-      case _ => ???
+  final def difference[A](lt: Tree[A], rt: Tree[A]): List[Delta[A]] = difference(List(Portion(lt)), List(Portion(rt)), Nil)
+
+  final def difference[A](l: List[Fragment[A]], r: List[Fragment[A]], z: List[Delta[A]]): List[Delta[A]] = (l, r) match {
+    case (lh::ls, rh::rs) => (lh, rh) match {
+      case (Piece(lp), Piece(rp)) =>
+        if (lp == rp) z match {
+          case Space(n)::zs => difference(ls, rs, Space(n + 1)::zs)
+          case zs => difference(ls, rs, Space(1)::zs)
+        }
+        else difference(ls, rs, Removed(lp)::Added(rp)::z)
+      case (Piece(lp), Portion(rp)) => difference(ls, r, Removed(lp)::z)
+      case (Portion(lp), Piece(rp)) => difference(l, rs, Added(rp)::z)
     }
+    case (_, rh::rs) => rh match {
+      case Piece(value) => difference(rs, Nil, Removed(value)::z)
+      case Portion(tree) => tree match {
+        case Tip => difference(rs, Nil, z)
+        case Branch1(a, v, b)       => difference(Portion(a)::Piece(v)::Portion(b)                      ::rs, Nil, z)
+        case Branch2(a, v, b, w, c) => difference(Portion(a)::Piece(v)::Portion(b)::Piece(w)::Portion(c)::rs, Nil, z)
+      }
+    }
+    case (lh::ls, _) => lh match {
+      case Piece(value) => difference(ls, Nil, Removed(value)::z)
+      case Portion(tree) => tree match {
+        case Tip => difference(ls, Nil, z)
+        case Branch1(a, v, b)       => difference(Portion(a)::Piece(v)::Portion(b)                      ::ls, Nil, z)
+        case Branch2(a, v, b, w, c) => difference(Portion(a)::Piece(v)::Portion(b)::Piece(w)::Portion(c)::ls, Nil, z)
+      }
+    }
+    case _ =>  z
+//    (ld, rd) match {
+//      case (Added(al)::xs, Added(ar)::xs) => ???
+//      case (DeltaTree(lt)::lds, DeltaTree(rt)::rds) => lt.depth compare rt.depth match {
+//        case cmp if cmp < 0 => rt match {
+//          case Branch1(a, v, b)       => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)                        ::rds)
+//          case Branch2(a, v, b, w, c) => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)::Added(w)::DeltaTree(c)::rds)
+//        }
+//        case cmp if cmp > 0 => rt match {
+//          case Branch1(a, v, b)       => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)                        ::rds)
+//          case Branch2(a, v, b, w, c) => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)::Added(w)::DeltaTree(c)::rds)
+//        }
+//        case _ => ???
+//      }
+//      case _ => ???
+//    }
   }
 }
