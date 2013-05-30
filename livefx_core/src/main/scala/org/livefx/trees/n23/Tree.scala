@@ -1,8 +1,12 @@
 package org.livefx.trees.n23
 
 import org.livefx.util.MemoizeById
+import scala.collection.immutable.HashMap
+import scalaz.Monoid
 
-trait Tree[+A] {
+trait Handle[+A]
+
+trait Tree[+A] extends Handle[A] {
   def depth: Int
   def size: Int
   final def insertAt[B >: A](index: Int, value: B): Tree[B] = Tree.insertAt(this, index, value)(identity, Branch1(_, _, _))
@@ -322,71 +326,28 @@ final object Tree {
     }
   }
 
-  trait Delta[+A]
-  case class Space[A](size: Int) extends Delta[Nothing]
-  case class Removed[A](value: A) extends Delta[A]
-  case class Added[A](value: A) extends Delta[A]
+  case class Space(size: Int, depth: Int) extends Tree[Nothing]
 
-  trait Fragment[+A]
-  case class Portion[A](tree: Tree[A]) extends Fragment[A]
-  case class Piece[A](value: A) extends Fragment[A]
-
-  final def difference[A](lt: Tree[A], rt: Tree[A]): List[Delta[A]] = difference(List(Portion(lt)), List(Portion(rt)), Nil)
-
-  final def fragment[A](tree: Tree[A], fs: List[Fragment[A]]): List[Fragment[A]] = {
+  def foldTree[A <% B, B: Monoid](tree: Tree[A]): B = {
+    import scalaz._
+    import Scalaz._
     tree match {
-      case Branch1(a, v, b)       => Portion(a)::Piece(v)::Portion(b)                      ::fs
-      case Branch2(a, v, b, w, c) => Portion(a)::Piece(v)::Portion(b)::Piece(w)::Portion(c)::fs
-      case Tip                    =>                                                         fs
+      case Tip => Monoid[B].zero
+      case Branch1(a, v, b) => foldTree[A, B](a) |+| (v: B) |+| foldTree[A, B](b)
+      case Branch2(a, v, b, w, c) => foldTree[A, B](a) |+| (v: B) |+| foldTree[A, B](b) |+| (w: B) |+| foldTree[A, B](c)
     }
   }
 
-  final def difference[A](l: List[Fragment[A]], r: List[Fragment[A]], z: List[Delta[A]]): List[Delta[A]] = (l, r) match {
-    case (lh::ls, rh::rs) => (lh, rh) match {
-      case (Piece(lp), Piece(rp)) =>
-        if (lp == rp) z match {
-          case Space(n)::zs => difference(ls, rs, Space(n + 1)::zs)
-          case zs => difference(ls, rs, Space(1)::zs)
-        }
-        else difference(ls, rs, Removed(lp)::Added(rp)::z)
-      case (Piece(lp), Portion(rp)) => difference(ls, r, Removed(lp)::z)
-      case (Portion(lp), Piece(rp)) => difference(l, rs, Added(rp)::z)
-      case (Portion(lp), Portion(rp)) => (lp, rp) match {
-        case (Tip, Tip) => difference(ls, rs, z)
-        case (Tip, _) => difference(ls, r, z)
-        case (_, Tip) => difference(l, rs, z)
-        case (lp, rp) if lp eq rp => z match {
-          case Space(m)::zs => difference(ls, rs, Space(m + lp.size)::zs)
-          case _ => difference(ls, rs, Space(lp.size)::z)
-        }
-        case (lp, rp) if lp.size < rp.size => difference(l,                fragment(rp, rs), z)
-        case (lp, rp) if lp.size > rp.size => difference(fragment(lp, ls), r,                z)
-        case (lp, rp) =>                      difference(fragment(lp, ls), fragment(rp, rs), z)
+  def foldTreeM[A <% B, B: Monoid](tree: Tree[A]): B = {
+    lazy val m: Tree[A] => B = MemoizeById { tree: Tree[A] =>
+      import scalaz._
+      import Scalaz._
+      tree match {
+        case Tip => Monoid[B].zero
+        case Branch1(a, v, b) => m(a) |+| (v: B) |+| m(b)
+        case Branch2(a, v, b, w, c) => m(a) |+| (v: B) |+| m(b) |+| (w: B) |+| m(c)
       }
     }
-    case (_, rh::rs) => rh match {
-      case Piece(value) => difference(rs,               Nil,              Removed(value)::z)
-      case Portion(rp)  => difference(Nil,              fragment(rp, rs),                 z)
-    }
-    case (lh::ls, _) => lh match {
-      case Piece(value) => difference(ls,               Nil,              Removed(value)::z)
-      case Portion(lp)  => difference(fragment(lp, ls), Nil,                              z)
-    }
-    case _ =>  z
-//    (ld, rd) match {
-//      case (Added(al)::xs, Added(ar)::xs) => ???
-//      case (DeltaTree(lt)::lds, DeltaTree(rt)::rds) => lt.depth compare rt.depth match {
-//        case cmp if cmp < 0 => rt match {
-//          case Branch1(a, v, b)       => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)                        ::rds)
-//          case Branch2(a, v, b, w, c) => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)::Added(w)::DeltaTree(c)::rds)
-//        }
-//        case cmp if cmp > 0 => rt match {
-//          case Branch1(a, v, b)       => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)                        ::rds)
-//          case Branch2(a, v, b, w, c) => difference(ld, DeltaTree(a)::Added(v)::DeltaTree(b)::Added(w)::DeltaTree(c)::rds)
-//        }
-//        case _ => ???
-//      }
-//      case _ => ???
-//    }
+    m(tree)
   }
 }
