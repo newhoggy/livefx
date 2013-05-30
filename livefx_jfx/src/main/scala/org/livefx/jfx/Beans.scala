@@ -59,7 +59,6 @@ object Beans {
       final def cache[T <: AnyRef](key: HotKey[T])(f: => T): T = {
         StoreRefQueue.tidyUp()
         val store = self.storeFor[WeakReference[T]]
-        println("--> store: " + System.identityHashCode(store))
         store.properties.get(key) match {
           case Some(WeakReference(value)) => value
           case None => {
@@ -110,7 +109,6 @@ object Beans {
     implicit class RichObservableIntegerValue[A](self: ObservableIntegerValue) {
       final def value: Int = self.get()
       final def live: Live[Int] = self.cache(RichObservableIntegerValueKey) {
-        println("create binding")
         new Binding[Int] with JfxBindable {
           bind(self)
   

@@ -33,8 +33,18 @@ class TestProperty {
   @Test
   def testLive(): Unit = {
     val propertyA = new SimpleIntegerProperty(0)
-    val liveA1 = propertyA.live
-    val liveA2 = propertyA.live
+    var liveA1 = propertyA.live
+    var liveA2 = propertyA.live
     Assert.assertTrue(liveA1 eq liveA2)
+    propertyA.set(1)
+    Assert.assertTrue(liveA1.value == 1)
+    val identity1 = System.identityHashCode(liveA1)
+    liveA1 = null
+    liveA2 = null
+    System.gc()
+    Thread.sleep(2)
+    val liveA3 = propertyA.live
+    val identity3 = System.identityHashCode(liveA3)
+    Assert.assertTrue(identity1 != identity3)
   }
 }
