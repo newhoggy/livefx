@@ -176,11 +176,28 @@ object Beans {
 
     implicit class RichLiveIterable[T](self: Live[Iterable[T]]) {
       def asObservableArrayList: ObservableList[T] = new ObservableList[T] {
-        private val refQueue = new ReferenceQueue[Nothing]
+        private object refQueue extends ReferenceQueue[Nothing] {
+          @tailrec
+          def tidyUp(): Unit = poll match {
+            case Some(weakRef) => weakRef match {
+              case runnable: Runnable => runnable.run(); tidyUp()
+              case _ =>
+            }
+            case None =>
+          }
+        }
         private var invalidationListeners = HashSet.empty[WeakReference[InvalidationListener]]
         private var listChangeListeners = HashSet.empty[WeakReference[ListChangeListener[_ >: T]]]
-        val binding = new Binding[ObservableList[T]] {
+        private val binding = new Binding[ObservableList[T]] {
           val underlying = FXCollections.observableArrayList[T]
+          private val ref = self.spoils.subscribe { (p, e) =>
+            for (listener <- invalidationListeners) {
+              
+            }
+            for (listener <- listChangeListeners) {
+              
+            }
+          }
           underlying.setAll(self.value)
           override def computeValue: ObservableList[T] = {
             underlying.setAll(self.value)
@@ -216,10 +233,30 @@ object Beans {
         override def retainAll(values: T*): Boolean = throw new UnsupportedOperationException
         override def setAll(values: JCollection[_ <: T]): Boolean = throw new UnsupportedOperationException
         override def setAll(values: T*): Boolean = throw new UnsupportedOperationException
-        override def addListener(listener: InvalidationListener): Unit = invalidationListeners += new WeakReference(listener, refQueue)
-        override def removeListener(listener: InvalidationListener): Unit = invalidationListeners -= new WeakReference(listener, refQueue)
-        override def addListener(listener: ListChangeListener[_ >: T]): Unit = listChangeListeners += new WeakReference(listener, refQueue)
-        override def removeListener(listener: ListChangeListener[_ >: T]): Unit = listChangeListeners -= new WeakReference(listener, refQueue)
+        override def addListener(listener: InvalidationListener): Unit = {
+          refQueue.tidyUp()
+          invalidationListeners += new WeakReference(listener, refQueue) with Runnable {
+            override def run(): Unit = invalidationListeners -= this
+          }
+        }
+        override def removeListener(listener: InvalidationListener): Unit = {
+          refQueue.tidyUp()
+          invalidationListeners -= new WeakReference(listener, refQueue) with Runnable {
+            override def run(): Unit = invalidationListeners -= this
+          }
+        }
+        override def addListener(listener: ListChangeListener[_ >: T]): Unit = {
+          refQueue.tidyUp()
+          listChangeListeners += new WeakReference[ListChangeListener[_ >: T]](listener, refQueue) with Runnable {
+            override def run(): Unit = listChangeListeners -= this
+          }
+        }
+        override def removeListener(listener: ListChangeListener[_ >: T]): Unit = {
+          refQueue.tidyUp()
+          listChangeListeners -= new WeakReference[ListChangeListener[_ >: T]](listener, refQueue) with Runnable {
+            override def run(): Unit = listChangeListeners -= this
+          }
+        }
       }
     }
 
