@@ -333,6 +333,14 @@ final object Tree {
 
   final def difference[A](lt: Tree[A], rt: Tree[A]): List[Delta[A]] = difference(List(Portion(lt)), List(Portion(rt)), Nil)
 
+  final def fragment[A](tree: Tree[A], fs: List[Fragment[A]]): List[Fragment[A]] = {
+    tree match {
+      case Branch1(a, v, b)       => Portion(a)::Piece(v)::Portion(b)                      ::fs
+      case Branch2(a, v, b, w, c) => Portion(a)::Piece(v)::Portion(b)::Piece(w)::Portion(c)::fs
+      case Tip                    =>                                                         fs
+    }
+  }
+
   final def difference[A](l: List[Fragment[A]], r: List[Fragment[A]], z: List[Delta[A]]): List[Delta[A]] = (l, r) match {
     case (lh::ls, rh::rs) => (lh, rh) match {
       case (Piece(lp), Piece(rp)) =>
@@ -343,22 +351,26 @@ final object Tree {
         else difference(ls, rs, Removed(lp)::Added(rp)::z)
       case (Piece(lp), Portion(rp)) => difference(ls, r, Removed(lp)::z)
       case (Portion(lp), Piece(rp)) => difference(l, rs, Added(rp)::z)
+      case (Portion(lp), Portion(rp)) => (lp, rp) match {
+        case (Tip, Tip) => difference(ls, rs, z)
+        case (Tip, _) => difference(ls, r, z)
+        case (_, Tip) => difference(l, rs, z)
+        case (lp, rp) if lp eq rp => z match {
+          case Space(m)::zs => difference(ls, rs, Space(m + lp.size)::zs)
+          case _ => difference(ls, rs, Space(lp.size)::z)
+        }
+        case (lp, rp) if lp.size < rp.size => difference(l,                fragment(rp, rs), z)
+        case (lp, rp) if lp.size > rp.size => difference(fragment(lp, ls), r,                z)
+        case (lp, rp) =>                      difference(fragment(lp, ls), fragment(rp, rs), z)
+      }
     }
     case (_, rh::rs) => rh match {
-      case Piece(value) => difference(rs, Nil, Removed(value)::z)
-      case Portion(tree) => tree match {
-        case Tip => difference(rs, Nil, z)
-        case Branch1(a, v, b)       => difference(Portion(a)::Piece(v)::Portion(b)                      ::rs, Nil, z)
-        case Branch2(a, v, b, w, c) => difference(Portion(a)::Piece(v)::Portion(b)::Piece(w)::Portion(c)::rs, Nil, z)
-      }
+      case Piece(value) => difference(rs,               Nil,              Removed(value)::z)
+      case Portion(rp)  => difference(Nil,              fragment(rp, rs),                 z)
     }
     case (lh::ls, _) => lh match {
-      case Piece(value) => difference(ls, Nil, Removed(value)::z)
-      case Portion(tree) => tree match {
-        case Tip => difference(ls, Nil, z)
-        case Branch1(a, v, b)       => difference(Portion(a)::Piece(v)::Portion(b)                      ::ls, Nil, z)
-        case Branch2(a, v, b, w, c) => difference(Portion(a)::Piece(v)::Portion(b)::Piece(w)::Portion(c)::ls, Nil, z)
-      }
+      case Piece(value) => difference(ls,               Nil,              Removed(value)::z)
+      case Portion(lp)  => difference(fragment(lp, ls), Nil,                              z)
     }
     case _ =>  z
 //    (ld, rd) match {
