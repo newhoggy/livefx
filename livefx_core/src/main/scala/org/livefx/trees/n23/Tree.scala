@@ -321,4 +321,23 @@ final object Tree {
       case Branch2(a, v, b, w, c) => hash(self)::branchIdHashCodes(a, branchIdHashCodes(b, branchIdHashCodes(c, tail)))
     }
   }
+
+  trait Delta[A]
+  case class Space(size: Int) extends Delta[Nothing]
+  case class DeltaTree[A](tree: Tree[A]) extends Delta[A]
+  case class Removed[A](value: A) extends Delta[A]
+  case class Added[A](value: A) extends Delta[A]
+
+  final def difference[A](lt: Tree[A], rt: Tree[A]): (List[Delta[A]], List[Delta[A]]) = difference(List(DeltaTree(lt)), List(DeltaTree(rt)))
+
+  final def difference[A](ld: List[Delta[A]], rd: List[Delta[A]]): (List[Delta[A]], List[Delta[A]]) = {
+    (ld, rd) match {
+      case (DeltaTree(lt)::lds, DeltaTree(rt)::rds) => lt.depth compare rt.depth match {
+        case cmp if cmp < 0 => ???
+        case cmp if cmp > 0 => ???
+        case _ => ???
+      }
+      case _ => ???
+    }
+  }
 }

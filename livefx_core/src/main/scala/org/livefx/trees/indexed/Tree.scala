@@ -299,7 +299,7 @@ object Tree {
         case Leaf => Leaf
       }
     }
-    
+
     memoize(tree)
   }
 }
