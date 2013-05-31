@@ -235,26 +235,26 @@ object Beans {
         override def setAll(values: T*): Boolean = throw new UnsupportedOperationException
         override def addListener(listener: InvalidationListener): Unit = {
           TidyReferenceQueue.tidy()
-          invalidationListeners += new WeakReference(listener, TidyReferenceQueue) with Runnable {
-            override def run(): Unit = invalidationListeners -= this
+          invalidationListeners += new TidyWeakReference(listener, TidyReferenceQueue) {
+            override def dispose(): Unit = invalidationListeners -= this
           }
         }
         override def removeListener(listener: InvalidationListener): Unit = {
           TidyReferenceQueue.tidy()
-          invalidationListeners -= new WeakReference(listener, TidyReferenceQueue) with Runnable {
-            override def run(): Unit = invalidationListeners -= this
+          invalidationListeners -= new TidyWeakReference(listener, TidyReferenceQueue) {
+            override def dispose(): Unit = invalidationListeners -= this
           }
         }
         override def addListener(listener: ListChangeListener[_ >: T]): Unit = {
           TidyReferenceQueue.tidy()
-          listChangeListeners += new WeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) with Runnable {
-            override def run(): Unit = listChangeListeners -= this
+          listChangeListeners += new TidyWeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) {
+            override def dispose(): Unit = listChangeListeners -= this
           }
         }
         override def removeListener(listener: ListChangeListener[_ >: T]): Unit = {
           TidyReferenceQueue.tidy()
-          listChangeListeners -= new WeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) with Runnable {
-            override def run(): Unit = listChangeListeners -= this
+          listChangeListeners -= new TidyWeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) {
+            override def dispose(): Unit = listChangeListeners -= this
           }
         }
       }
