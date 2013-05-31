@@ -35,28 +35,18 @@ import javafx.collections.SetChangeListener
 import javafx.collections.WeakListChangeListener
 import javafx.collections.WeakMapChangeListener
 import javafx.collections.WeakSetChangeListener
-import scala.collection.immutable.HashMap
-import scala.collection.JavaConversions._
-import scala.ref.ReferenceQueue
-import scala.ref.WeakReference
 import scala.annotation.tailrec
+import scala.collection.immutable.HashMap
+import scala.collection.immutable.HashSet
+import scala.collection.JavaConversions._
+import scala.ref.WeakReference
 import org.livefx.Live
 import org.livefx.Binding
-import scala.collection.immutable.HashSet
+import org.livefx.util.TidyReferenceQueue
+import org.livefx.util.TidyWeakReference
 
 object Beans {
   object Implicits {
-    private object StoreRefQueue extends ReferenceQueue[Nothing] {
-      @tailrec
-      def tidyUp(): Unit = poll match {
-        case Some(weakRef) => weakRef match {
-          case runnable: Runnable => runnable.run(); tidyUp()
-          case _ =>
-        }
-        case None =>
-      }
-    }
-
     implicit class RichObservable[A](self: Observable) {
       private final def hotListener: HotInvalidationListener = {
         val listener = new HotInvalidationListener
@@ -70,14 +60,14 @@ object Beans {
       final def properties: HashMap[Any, Any] = store.properties
       final def properties_=(value: HashMap[Any, Any]): Unit = store.properties = value
       final def cache[T <: AnyRef](key: HotKey[T])(f: => T): T = {
-        StoreRefQueue.tidyUp()
+        TidyReferenceQueue.tidy()
         val store = self.storeFor[WeakReference[T]]
         store.properties.get(key) match {
           case Some(WeakReference(value)) => value
           case None => {
             val value = f
-            val weakRef = new WeakReference[T](value, StoreRefQueue) with Runnable {
-              override def run(): Unit = store.properties -= key
+            val weakRef = new TidyWeakReference[T](value, TidyReferenceQueue) {
+              override def dispose(): Unit = store.properties -= key
             }
             store.properties += (key -> weakRef)
             value
@@ -176,16 +166,6 @@ object Beans {
 
     implicit class RichLiveSeq[T](self: Live[Seq[T]]) {
       def asObservableArrayList: ObservableList[T] = new ObservableList[T] { target =>
-        private object refQueue extends ReferenceQueue[Nothing] {
-          @tailrec
-          def tidyUp(): Unit = poll match {
-            case Some(weakRef) => weakRef match {
-              case runnable: Runnable => runnable.run(); tidyUp()
-              case _ =>
-            }
-            case None =>
-          }
-        }
         private var invalidationListeners = HashSet.empty[WeakReference[InvalidationListener]]
         private var listChangeListeners = HashSet.empty[WeakReference[ListChangeListener[_ >: T]]]
         private val binding = new Binding[ObservableList[T]] {
@@ -254,26 +234,26 @@ object Beans {
         override def setAll(values: JCollection[_ <: T]): Boolean = throw new UnsupportedOperationException
         override def setAll(values: T*): Boolean = throw new UnsupportedOperationException
         override def addListener(listener: InvalidationListener): Unit = {
-          refQueue.tidyUp()
-          invalidationListeners += new WeakReference(listener, refQueue) with Runnable {
+          TidyReferenceQueue.tidy()
+          invalidationListeners += new WeakReference(listener, TidyReferenceQueue) with Runnable {
             override def run(): Unit = invalidationListeners -= this
           }
         }
         override def removeListener(listener: InvalidationListener): Unit = {
-          refQueue.tidyUp()
-          invalidationListeners -= new WeakReference(listener, refQueue) with Runnable {
+          TidyReferenceQueue.tidy()
+          invalidationListeners -= new WeakReference(listener, TidyReferenceQueue) with Runnable {
             override def run(): Unit = invalidationListeners -= this
           }
         }
         override def addListener(listener: ListChangeListener[_ >: T]): Unit = {
-          refQueue.tidyUp()
-          listChangeListeners += new WeakReference[ListChangeListener[_ >: T]](listener, refQueue) with Runnable {
+          TidyReferenceQueue.tidy()
+          listChangeListeners += new WeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) with Runnable {
             override def run(): Unit = listChangeListeners -= this
           }
         }
         override def removeListener(listener: ListChangeListener[_ >: T]): Unit = {
-          refQueue.tidyUp()
-          listChangeListeners -= new WeakReference[ListChangeListener[_ >: T]](listener, refQueue) with Runnable {
+          TidyReferenceQueue.tidy()
+          listChangeListeners -= new WeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) with Runnable {
             override def run(): Unit = listChangeListeners -= this
           }
         }
