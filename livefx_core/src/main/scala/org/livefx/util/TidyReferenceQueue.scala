@@ -13,6 +13,4 @@ object TidyReferenceQueue extends ReferenceQueue[Nothing] {
       if (count >= 0) tidy(count - 1)
     case _ =>
   }
-
-  final def weak[A <: AnyRef](a: A): WeakReference[A] = new WeakReference(a, this)
 }
