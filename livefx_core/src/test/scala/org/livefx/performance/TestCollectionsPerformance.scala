@@ -4,7 +4,7 @@ import org.junit.Test
 
 class TestCollectionsPerformance {
   @Test
-  def testList(args: Array[String]): Unit = {
+  def testList(): Unit = {
     var x: List[Int] = Nil
     val a = System.nanoTime()
     for (i <- 1 to 1000000) {
@@ -20,7 +20,7 @@ class TestCollectionsPerformance {
   }
 
   @Test
-  def testArray(args: Array[String]): Unit = {
+  def testArray(): Unit = {
     var x: Array[Int] = new Array[Int](1000000)
     val a = System.nanoTime()
     for (i <- 0 until 1000000) {
