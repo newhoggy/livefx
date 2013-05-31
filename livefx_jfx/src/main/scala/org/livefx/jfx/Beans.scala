@@ -272,7 +272,7 @@ object Beans {
                 targetMap.remove(k)
               }
             }
-    
+
             for ((k, v) <- newMap) {
               newMap.get(k) match {
                 case Some(value) if value == v => // Do nothing
