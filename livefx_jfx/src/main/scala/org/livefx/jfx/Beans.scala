@@ -303,17 +303,15 @@ object Beans {
             for (e <- newSet -- oldSet) {
               targetSet.remove(e)
             }
-            
+
             for (e <- oldSet -- newSet) {
               targetSet.add(e)
             }
           }
         })
-        
-        return unmodifiableObservableSet(targetSet)
+
+        return Unmodifiable(targetSet)
       }
     }
   }
-
-  def unmodifiableObservableSet[A](observableSet: ObservableSet[A]): ObservableSet[A] = new UnmodifiableObservableSet(observableSet)
 }

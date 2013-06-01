@@ -1,12 +1,13 @@
 package org.livefx.jfx
 
-import scala.collection.immutable.HashSet
 import java.util.{Collection => JCollection}
 import java.util.{Iterator => JIterator}
+
+import scala.collection.immutable.HashSet
+
+import javafx.beans.InvalidationListener
 import javafx.collections.ObservableSet
 import javafx.collections.SetChangeListener
-import javafx.beans.InvalidationListener
-import org.livefx.jfx.Unmodifiable
 
 class UnmodifiableObservableSet[A](observableSet: ObservableSet[A]) extends ObservableSet[A] {
   var listeners = HashSet[InvalidationListener]()
