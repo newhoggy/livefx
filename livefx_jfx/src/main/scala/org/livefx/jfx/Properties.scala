@@ -6,9 +6,13 @@ import javafx.scene.Node
 import javafx.collections.ObservableMap
 import javafx.scene.control.TableView
 import javafx.scene.control.TableColumn
+import javafx.scene.control.Button
 
 object Properties {
   object Implicits {
+    implicit class RichButton(self: Button) {
+    }
+
     implicit class RichTableView[R](node: TableView[R]) {
       def items: ObjectProperty[ObservableList[R]] = node.itemsProperty()
     }
