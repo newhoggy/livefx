@@ -177,7 +177,7 @@ object Beans {
         private val binding = new Binding[ObservableList[T]] {
           var oldValue: Seq[T] = Nil
           val underlying = FXCollections.observableArrayList[T]
-          private val ref = self.spoils.subscribe { (p, e) =>
+          private val ref = self.spoils.subscribe { e =>
             for (weakListener <- invalidationListeners) {
               weakListener match {
                 case WeakReference(listener) => listener.invalidated(target)
@@ -313,7 +313,7 @@ object Beans {
       }
     }
 
-    def eventProperty[P, E <: Event](eventProperty: ObjectProperty[EventHandler[E]]): EventSource[P, E] = ???
+    def eventProperty[E <: Event](eventProperty: ObjectProperty[EventHandler[E]]): EventSource[E] = ???
   }
 
   def unmodifiableIterator[A](iterator: JIterator[A]): JIterator[A] = new JIterator[A] {

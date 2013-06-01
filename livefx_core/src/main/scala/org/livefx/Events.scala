@@ -1,12 +1,12 @@
 package org.livefx
 
-trait Events[+P, +E] { self =>
-  def subscribe(subscriber: (P, E) => Unit): Disposable
-  def subscribeWeak(subscriber: (P, E) => Unit): Disposable
-  def unsubscribe(subscriber: (P, E) => Unit): Unit
+trait Events[+E] { self =>
+  def subscribe(subscriber: E => Unit): Disposable
+  def subscribeWeak(subscriber: E => Unit): Disposable
+  def unsubscribe(subscriber: E => Unit): Unit
 
-  def +[Q >: P, F >: E](that: Events[Q, F]): Events[Q, F] = new Events[Q, F] {
-    def subscribe(subscriber: (Q, F) => Unit): Disposable = new Disposable {
+  def +[F >: E](that: Events[F]): Events[F] = new Events[F] {
+    def subscribe(subscriber: F => Unit): Disposable = new Disposable {
       val disposable1 = self.subscribe(subscriber)
       val disposable2 = that.subscribe(subscriber)
       def dispose(): Unit = {
@@ -15,7 +15,7 @@ trait Events[+P, +E] { self =>
       }
     }
 
-    def subscribeWeak(subscriber: (Q, F) => Unit): Disposable = new Disposable {
+    def subscribeWeak(subscriber: F => Unit): Disposable = new Disposable {
       val disposable1 = self.subscribe(subscriber)
       val disposable2 = that.subscribe(subscriber)
       def dispose(): Unit = {
@@ -24,7 +24,7 @@ trait Events[+P, +E] { self =>
       }
     }
 
-    def unsubscribe(subscriber: (Q, F) => Unit): Unit = {
+    def unsubscribe(subscriber: F => Unit): Unit = {
       self.unsubscribe(subscriber)
       that.unsubscribe(subscriber)
     }

@@ -4,17 +4,15 @@ import org.livefx.script.Change
 import org.livefx.script.Spoil
 
 class Var[A](@specialized(Boolean, Int, Long, Double) private var _value: A) extends Live[A] {
-  type Pub <: Var[A]
-
-  private lazy val _spoils = new EventSource[Pub, Spoil](publisher)
+  private lazy val _spoils = new EventSource[Spoil]
   
   protected override def spoilsSource: EventSink[Spoil] = _spoils
   
-  override def spoils: Events[Pub, Spoil] = _spoils
+  override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new EventSource[Pub, Change[A]](publisher)
+  lazy val _changes = new EventSource[Change[A]]
 
-  override def changes: Events[Pub, Change[A]] = _changes
+  override def changes: Events[Change[A]] = _changes
 
   def value: A = _value
 

@@ -4,6 +4,7 @@ import org.junit.Test
 import org.junit.Assert
 import org.livefx.script.Change
 import scala.reflect.macros.Context
+import scala.collection.script.Update
 
 class TestSimpleProperty {
   @Test
@@ -17,7 +18,7 @@ class TestSimpleProperty {
     Assert.assertEquals(1, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
     
-    val subscription = liveValue.spoils.subscribe((_, _) => spoilCount += 1)
+    val subscription = liveValue.spoils.subscribe(_ => spoilCount += 1)
     Assert.assertEquals(0, spoilCount)
     liveValue.value = 2
     Assert.assertEquals(1, spoilCount)
@@ -36,7 +37,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new Var[Int](0)
     
-    val subscription = liveValue.changes.subscribe((_, change) => changes = change::changes)
+    val subscription = liveValue.changes.subscribe(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
@@ -59,7 +60,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new Var[Int](0)
     
-    var subscription = liveValue.changes.subscribeWeak((_, change) => changes = change::changes)
+    var subscription = liveValue.changes.subscribeWeak(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
@@ -83,7 +84,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = new Var[Int](0)
     
-    var subscription = liveValue.changes.subscribe((_, change) => changes = change::changes)
+    var subscription = liveValue.changes.subscribe(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
@@ -184,7 +185,7 @@ class TestSimpleProperty {
     val liveB = new Var[Int](1)
     val liveC = traceSpoils(traceSpoils(liveA) + traceSpoils(liveB))
     var counter = 0
-    liveC.spoils.subscribe { (_, spoilEvent) =>
+    liveC.spoils.subscribe { spoilEvent =>
       for (entry <- spoilEvent.trace) {
         counter += 1
       }
