@@ -55,7 +55,7 @@ class DemoTableView extends javafx.application.Application {
 
     //The button uses an inner class to handle the button click event
     val vegFruitBut = new Button("Fruit or Veg")
-    vegFruitBut.setOnAction(new EventHandler[ActionEvent] {
+    vegFruitBut.onActionProperty().set(new EventHandler[ActionEvent] {
       override def handle(event: ActionEvent): Unit = {
         //switch the visibility for each FlowPane
         choicePane.setVisible(!choicePane.isVisible())
