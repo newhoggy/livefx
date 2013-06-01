@@ -8,6 +8,8 @@ import javafx.scene.input.KeyEvent
 import java.io.PrintStream
 import java.io.OutputStream
 import scala.util.DynamicVariable
+import javafx.scene.control.ButtonBase
+import javafx.scene.control.Button
 
 object Debug {
   val originalOut = System.out
@@ -27,20 +29,23 @@ object Debug {
 
 object GenerateRiches {
   def main(args: Array[String]): Unit = {
-    for (dec <- typeTag[Node].tpe.declarations) {
+    for (dec <- typeTag[ButtonBase].tpe.declarations) {
       if (dec.isMethod) {
-        val returnType = dec.asMethod.returnType
+        val method = dec.asMethod
+        val returnType = method.returnType
         if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
           returnType match {
             case TypeRef(_, _, handlerType :: Nil) => {
+              println(s"--> ${method.name}: ${handlerType}")
               handlerType match {
                 case ExistentialType(q::Nil, u) => {
                   q.typeSignature match {
                     case TypeBounds(lower, upper) => {
-                      println(s"--> $lower, $upper")
+                      println(s"--> ${method.name} $lower, $upper")
                     }
                   }
                 }
+                case TypeRef(_, _, eventType :: Nil) => println(s"--> ${method.name} $eventType")
                 case _ =>
               }
             }
