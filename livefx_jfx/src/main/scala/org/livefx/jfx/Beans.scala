@@ -313,27 +313,6 @@ object Beans {
         return unmodifiableObservableSet(targetSet)
       }
     }
-
-    class EventsWithEventsHandler[E <: Event] extends EventSource[E] with EventHandler[E] {
-      override def handle(event: E): Unit = publish(event)
-    }
-
-    def eventProperty[E <: Event](eventHandlerProperty: ObjectProperty[EventHandler[E]]): Events[E] = {
-      eventHandlerProperty.get() match {
-        case events: EventsWithEventsHandler[E] => events
-        case null =>
-          val events = new EventsWithEventsHandler[E]
-          eventHandlerProperty.setValue(events)
-          events
-        case _ => throw new UnsupportedOperationException("event handler already installed")
-      }
-    }
-  }
-
-  def unmodifiableIterator[A](iterator: JIterator[A]): JIterator[A] = new JIterator[A] {
-    override def hasNext(): Boolean = iterator.hasNext()
-    override def next(): A = iterator.next()
-    override def remove(): Unit = throw new UnsupportedOperationException
   }
 
   def unmodifiableObservableSet[A](observableSet: ObservableSet[A]): ObservableSet[A] = new UnmodifiableObservableSet(observableSet)
