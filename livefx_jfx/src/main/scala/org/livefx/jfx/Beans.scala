@@ -314,17 +314,17 @@ object Beans {
       }
     }
 
-    class JfxEventsAdapter[E <: Event] extends EventSource[E] with EventHandler[E] {
+    class EventsWithEventsHandler[E <: Event] extends EventSource[E] with EventHandler[E] {
       override def handle(event: E): Unit = publish(event)
     }
 
     def eventProperty[E <: Event](eventHandlerProperty: ObjectProperty[EventHandler[E]]): Events[E] = {
       eventHandlerProperty.get() match {
-        case eventHandler: JfxEventsAdapter[E] => eventHandler
+        case events: EventsWithEventsHandler[E] => events
         case null =>
-          val newHandler = new JfxEventsAdapter[E]
-          eventHandlerProperty.setValue(newHandler)
-          newHandler
+          val events = new EventsWithEventsHandler[E]
+          eventHandlerProperty.setValue(events)
+          events
         case _ => throw new UnsupportedOperationException("event handler already installed")
       }
     }
