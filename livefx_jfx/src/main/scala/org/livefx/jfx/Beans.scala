@@ -44,6 +44,12 @@ import org.livefx.Live
 import org.livefx.Binding
 import org.livefx.util.TidyReferenceQueue
 import org.livefx.util.TidyWeakReference
+import javafx.beans.property.ObjectProperty
+import javafx.scene.control.Button
+import javafx.event.EventHandler
+import javafx.event.Event
+import org.livefx.EventSource
+import org.livefx.Events
 
 object Beans {
   object Implicits {
@@ -306,6 +312,8 @@ object Beans {
         return unmodifiableObservableSet(targetSet)
       }
     }
+
+    def eventProperty[P, E <: Event](eventProperty: ObjectProperty[EventHandler[E]]): EventSource[P, E] = ???
   }
 
   def unmodifiableIterator[A](iterator: JIterator[A]): JIterator[A] = new JIterator[A] {
