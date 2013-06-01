@@ -50,6 +50,7 @@ import javafx.event.EventHandler
 import javafx.event.Event
 import org.livefx.EventSource
 import org.livefx.Events
+import org.livefx.Disposable
 
 object Beans {
   object Implicits {
@@ -313,7 +314,20 @@ object Beans {
       }
     }
 
-    def eventProperty[E <: Event](eventProperty: ObjectProperty[EventHandler[E]]): EventSource[E] = ???
+    class JfxEventsAdapter[E <: Event] extends EventSource[E] with EventHandler[E] {
+      override def handle(event: E): Unit = publish(event)
+    }
+
+    def eventProperty[E <: Event](eventHandlerProperty: ObjectProperty[EventHandler[E]]): Events[E] = {
+      eventHandlerProperty.get() match {
+        case eventHandler: JfxEventsAdapter[E] => eventHandler
+        case null =>
+          val newHandler = new JfxEventsAdapter[E]
+          eventHandlerProperty.setValue(newHandler)
+          newHandler
+        case _ => throw new UnsupportedOperationException("event handler already installed")
+      }
+    }
   }
 
   def unmodifiableIterator[A](iterator: JIterator[A]): JIterator[A] = new JIterator[A] {
