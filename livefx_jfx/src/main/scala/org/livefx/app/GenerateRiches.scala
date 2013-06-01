@@ -29,6 +29,13 @@ object Debug {
 
 object GenerateRiches {
   def main(args: Array[String]): Unit = {
+    val nodeTag = typeTag[Node]
+    val m = runtimeMirror(classOf[Node].getClassLoader)
+    val pp = m.staticPackage("javafx.scene")
+    println(pp.typeSignature.declarations)
+    for (dec <- pp.typeSignature.declarations) {
+      println("==> " + dec)
+    }
     for (dec <- typeTag[ButtonBase].tpe.declarations) {
       if (dec.isMethod) {
         val method = dec.asMethod
