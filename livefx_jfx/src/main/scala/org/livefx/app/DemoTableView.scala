@@ -12,6 +12,7 @@ import javafx.geometry.Insets
 import javafx.scene.control.Button
 import javafx.event.EventHandler
 import javafx.event.ActionEvent
+import org.livefx.jfx.Nodes.Implicits._
 
 class DemoTableView extends javafx.application.Application {
   override def start(primaryStage: Stage): Unit = {
@@ -55,13 +56,10 @@ class DemoTableView extends javafx.application.Application {
 
     //The button uses an inner class to handle the button click event
     val vegFruitBut = new Button("Fruit or Veg")
-    vegFruitBut.onActionProperty().set(new EventHandler[ActionEvent] {
-      override def handle(event: ActionEvent): Unit = {
-        //switch the visibility for each FlowPane
-        choicePane.setVisible(!choicePane.isVisible())
-        listPane.setVisible(!listPane.isVisible())
-      }
-    })
+    vegFruitBut.actions.subscribe { event =>
+      choicePane.setVisible(!choicePane.isVisible())
+      listPane.setVisible(!listPane.isVisible())
+    }
 
     componentLayout.setBottom(vegFruitBut)
 
