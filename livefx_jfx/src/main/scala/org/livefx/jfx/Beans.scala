@@ -1,56 +1,45 @@
 package org.livefx.jfx
 
-import java.util.{ArrayList => JArrayList}
 import java.util.{Collection => JCollection}
 import java.util.{HashMap => JHashMap}
 import java.util.{HashSet => JHashSet}
 import java.util.{Iterator => JIterator}
 import java.util.{List => JList}
 import java.util.{ListIterator => JListIterator}
+
+import scala.collection.JavaConversions.seqAsJavaList
+import scala.collection.immutable.HashMap
+import scala.collection.immutable.HashSet
+import scala.ref.WeakReference
+
+import org.livefx.Binding
+import org.livefx.Live
+import org.livefx.util.TidyReferenceQueue
+import org.livefx.util.TidyWeakReference
+
 import javafx.beans.InvalidationListener
 import javafx.beans.Observable
 import javafx.beans.WeakInvalidationListener
-import javafx.beans.binding.{Binding => JBinding}
-import javafx.beans.binding.BooleanBinding
-import javafx.beans.binding.DoubleBinding
-import javafx.beans.binding.IntegerBinding
-import javafx.beans.binding.BooleanBinding
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.DoubleProperty
 import javafx.beans.property.BooleanProperty
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.Property
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableBooleanValue
 import javafx.beans.value.ObservableDoubleValue
 import javafx.beans.value.ObservableIntegerValue
+import javafx.beans.value.ObservableValue
+import javafx.beans.value.WeakChangeListener
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
+import javafx.collections.MapChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
 import javafx.collections.ObservableSet
-import javafx.beans.value.ObservableValue
-import javafx.beans.value.WeakChangeListener
-import javafx.collections.ListChangeListener
-import javafx.collections.MapChangeListener
 import javafx.collections.SetChangeListener
 import javafx.collections.WeakListChangeListener
 import javafx.collections.WeakMapChangeListener
 import javafx.collections.WeakSetChangeListener
-import scala.annotation.tailrec
-import scala.collection.immutable.HashMap
-import scala.collection.immutable.HashSet
-import scala.collection.JavaConversions._
-import scala.ref.WeakReference
-import org.livefx.Live
-import org.livefx.Binding
-import org.livefx.util.TidyReferenceQueue
-import org.livefx.util.TidyWeakReference
-import javafx.beans.property.ObjectProperty
-import javafx.scene.control.Button
-import javafx.event.EventHandler
-import javafx.event.Event
-import org.livefx.EventSource
-import org.livefx.Events
-import org.livefx.Disposable
 
 object Beans {
   object Implicits {
