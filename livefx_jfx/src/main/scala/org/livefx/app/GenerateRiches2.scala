@@ -5,6 +5,7 @@ import javafx.scene.Node
 import javafx.scene.control.TableView
 import org.reflections.Reflections
 import scala.collection.JavaConversions._
+import org.livefx.util.IndentWriter
 
 object GenerateRiches2 {
   def part1(): Unit = {
@@ -44,8 +45,12 @@ object GenerateRiches2 {
     val classSymbols = classes.flatMap { clazz =>
       try Some(m.classSymbol(clazz)) catch { case e: AssertionError => None }
     }
-    for (classSymbol <- classSymbols) {
-      println(classSymbol.fullName)
+    val filteredClassSymbols = classSymbols.filter(!_.fullName.contains("$"))
+    val out = new IndentWriter(System.out)
+    for (classSymbol <- filteredClassSymbols) {
+      out.indent(2) {
+        out.println(classSymbol.fullName)
+      }
     }
   }
 }
