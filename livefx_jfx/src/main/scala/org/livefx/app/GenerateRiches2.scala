@@ -75,7 +75,16 @@ object GenerateRiches2 {
                         q.typeSignature match {
                           case TypeBounds(lower, upper) =>
                             if (lower <:< typeOf[Event]) {
-                              out.println(s"--> ${method.name} $lower")
+                              val Regex = """on([a-zA-Z0-9_]+)Property""".r
+                              method.name.toString match {
+                                case Regex(name) =>
+                                  if (name.length > 0) {
+                                    val normalName = name(0).toString.toLowerCase + name.substring(1)
+                                    out.println(s"def ${normalName}: Events[$lower] = EventsWithEventHandler.on(self.${method.name}())")
+                                  }
+                                case _ =>
+                                out.println(s"// skipped 0 ${method.name}")
+                              }
                             } else {
                               out.println(s"// skipped 1 ${method.name}")
                             }
