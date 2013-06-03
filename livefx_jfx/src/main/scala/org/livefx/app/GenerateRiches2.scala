@@ -58,62 +58,80 @@ object GenerateRiches2 {
     }
     val filteredClassSymbols = classSymbols.filter(!_.fullName.contains("$"))
     val out = new IndentWriter(System.out)
-    out.println("object JavaFxImplicits {")
+    val Regex = """on([a-zA-Z0-9_]+)Property""".r
+    out.println("package org.livefx.jfx")
+    out.println
+    out.println("object Nodes {")
     out.indent(2) {
-      for (classSymbol <- filteredClassSymbols) {
-        val paramString = classSymbol.asType.typeParams match {
-          case Nil => ""
-          case ps => ps.map(x => x.name).mkString("[", ", ", "]")
-        }
-        out.println(s"implicit class Rich${classSymbol.name}$paramString(self: ${classSymbol.fullName}$paramString) {")
-        out.indent(2) {
-          for (classDeclaration <- classSymbol.typeSignature.declarations) {
-            if (classDeclaration.isMethod) {
-              val method = classDeclaration.asMethod
-              val returnType = method.returnType
-              if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
-                returnType match {
-                  case TypeRef(_, _, handlerType :: Nil) => {
-                    handlerType match {
-                      case ExistentialType(q::Nil, u) => {
-                        q.typeSignature match {
-                          case TypeBounds(lower, upper) =>
-                            if (lower <:< typeOf[Event]) {
-                              val Regex = """on([a-zA-Z0-9_]+)Property""".r
-                              method.name.toString match {
-                                case Regex(name) =>
-                                  if (name.length > 0) {
-                                    val normalName = name(0).toString.toLowerCase + name.substring(1)
-                                    out.println(s"def ${normalName}: Events[$lower] = EventsWithEventHandler.on(self.${method.name}())")
-                                  }
-                                case _ =>
-                                out.println(s"// skipped 0 ${method.name}")
+      out.println("object Implicits {")
+      out.indent(2) {
+        var firstClass = true
+        for (classSymbol <- filteredClassSymbols) {
+          if (!firstClass) out.println()
+          firstClass = false
+          val paramString = classSymbol.asType.typeParams match {
+            case Nil => ""
+            case ps => ps.map(x => x.name).mkString("[", ", ", "]")
+          }
+          out.println(s"implicit class Rich${classSymbol.name}$paramString(self: ${classSymbol.fullName}$paramString) {")
+          out.indent(2) {
+            for (classDeclaration <- classSymbol.typeSignature.declarations) {
+              if (classDeclaration.isMethod) {
+                val method = classDeclaration.asMethod
+                val returnType = method.returnType
+                if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
+                  returnType match {
+                    case TypeRef(_, _, handlerType :: Nil) => {
+                      handlerType match {
+                        case ExistentialType(q::Nil, u) => {
+                          q.typeSignature match {
+                            case TypeBounds(lower, upper) =>
+                              if (lower <:< typeOf[Event]) {
+                                method.name.toString match {
+                                  case Regex(name) =>
+                                    if (name.length > 0) {
+                                      val normalName = name(0).toString.toLowerCase + name.substring(1)
+                                      out.println(s"def ${normalName}: Events[$lower] = EventsWithEventHandler.on(self.${method.name}())")
+                                    }
+                                  case _ =>
+                                  out.println(s"// skipped 0 ${method.name}")
+                                }
+                              } else {
+                                out.println(s"// skipped 1 ${method.name}")
                               }
-                            } else {
-                              out.println(s"// skipped 1 ${method.name}")
+                            case _ => 
+                              out.println(s"// skipped 2 ${method.name}")
+                          }
+                        }
+                        case TypeRef(_, _, eventType :: Nil) =>
+                          if (eventType <:< typeOf[Event]) {
+                            method.name.toString match {
+                              case Regex(name) =>
+                                if (name.length > 0) {
+                                  val normalName = name(0).toString.toLowerCase + name.substring(1)
+                                  out.println(s"def ${normalName}: Events[$eventType] = EventsWithEventHandler.on(self.${method.name}())")
+                                } else {
+                                  out.println(s"// skipped 3 ${method.name}")
+                                }
+                              case _ =>
+                              out.println(s"// skipped 4 ${method.name}")
                             }
-                          case _ => 
-                            out.println(s"// skipped 2 ${method.name}")
-                        }
+                          } else {
+                            out.println(s"// skipped 5 ${method.name}")
+                          }
+                        case _ => out.println(s"// skipped 6 ${method.name}")
                       }
-                      case TypeRef(_, _, eventType :: Nil) =>
-                        if (eventType <:< typeOf[Event]) {
-                          out.println(s"--> ${method.name} $eventType")
-                        } else {
-                          out.println(s"// skipped 3 ${method.name}")
-                        }
-                      case _ => out.println(s"// skipped 4 ${method.name}")
                     }
+                    case _ =>
                   }
-                  case _ =>
                 }
               }
             }
           }
+          out.println("}")
         }
-        out.println("}")
-        out.println()
       }
+      out.println("}")
     }
     out << "}" << EndLn
   }
