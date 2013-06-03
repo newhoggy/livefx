@@ -6,6 +6,8 @@ import javafx.scene.control.TableView
 import org.reflections.Reflections
 import scala.collection.JavaConversions._
 import org.livefx.util.IndentWriter
+import org.livefx.util.EndLn
+import javafx.beans.property.ObjectProperty
 
 object GenerateRiches2 {
   def part1(): Unit = {
@@ -47,10 +49,41 @@ object GenerateRiches2 {
     }
     val filteredClassSymbols = classSymbols.filter(!_.fullName.contains("$"))
     val out = new IndentWriter(System.out)
-    for (classSymbol <- filteredClassSymbols) {
-      out.indent(2) {
-        out.println(classSymbol.fullName)
+    out.println("object JavaFxImplicits {")
+    out.indent(2) {
+      for (classSymbol <- filteredClassSymbols) {
+        out.println(s"implicit class Rich${classSymbol.name}(self: ${classSymbol.fullName}) {")
+        out.indent(2) {
+          for (classDeclaration <- classSymbol.typeSignature.declarations) {
+            if (classDeclaration.isMethod) {
+              val method = classDeclaration.asMethod
+              val returnType = method.returnType
+              if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
+                returnType match {
+                  case TypeRef(_, _, handlerType :: Nil) => {
+                    out.println(s"--> ${method.name}: ${handlerType}")
+                    handlerType match {
+                      case ExistentialType(q::Nil, u) => {
+                        q.typeSignature match {
+                          case TypeBounds(lower, upper) => {
+                            out.println(s"--> ${method.name} $lower, $upper")
+                          }
+                        }
+                      }
+                      case TypeRef(_, _, eventType :: Nil) => out.println(s"--> ${method.name} $eventType")
+                      case _ =>
+                    }
+                  }
+                  case _ =>
+                }
+              }
+            }
+          }
+        }
+        out.println("}")
+        out.println()
       }
     }
+    out << "}" << EndLn
   }
 }
