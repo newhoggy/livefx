@@ -10,6 +10,8 @@ libraryDependencies += "junit" % "junit" % "4.10" % "test"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.0"
 
+libraryDependencies += "org.reflections" % "reflections" % "0.9.9-RC1"
+
 unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
 
 proguardSettings
