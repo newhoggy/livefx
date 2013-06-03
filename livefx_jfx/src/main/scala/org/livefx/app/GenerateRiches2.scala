@@ -40,19 +40,12 @@ object GenerateRiches2 {
 
   def main(args: Array[String]): Unit = {
     val m = scala.reflect.runtime.currentMirror
-    for (clazz <- subClassesOf(classOf[Node])) {
-      val optionType = try {
-        Some(m.classSymbol(clazz))
-      } catch {
-        case e: AssertionError =>
-          println("could not create type for " + clazz.getCanonicalName())
-          None
-      }
-      optionType match {
-        case Some(tpe) =>
-          println(tpe.fullName)
-        case _ =>
-      }
+    val classes = subClassesOf(classOf[Node])
+    val classSymbols = classes.flatMap { clazz =>
+      try Some(m.classSymbol(clazz)) catch { case e: AssertionError => None }
+    }
+    for (classSymbol <- classSymbols) {
+      println(classSymbol.fullName)
     }
   }
 }
