@@ -61,6 +61,8 @@ object GenerateRiches2 {
     val Regex = """on([a-zA-Z0-9_]+)Property""".r
     out.println("package org.livefx.jfx")
     out.println
+    out.println("import org.livefx.Events")
+    out.println
     out.println("object Nodes {")
     out.indent(2) {
       out.println("object Implicits {")
