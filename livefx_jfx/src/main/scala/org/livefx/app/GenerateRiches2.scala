@@ -61,7 +61,11 @@ object GenerateRiches2 {
     out.println("object JavaFxImplicits {")
     out.indent(2) {
       for (classSymbol <- filteredClassSymbols) {
-        out.println(s"implicit class Rich${classSymbol.name}(self: ${classSymbol.fullName}) {")
+        val paramString = classSymbol.asType.typeParams match {
+          case Nil => ""
+          case ps => ps.map(x => x.name).mkString("[", ", ", "]")
+        }
+        out.println(s"implicit class Rich${classSymbol.name}$paramString(self: ${classSymbol.fullName}$paramString) {")
         out.indent(2) {
           for (classDeclaration <- classSymbol.typeSignature.declarations) {
             if (classDeclaration.isMethod) {
