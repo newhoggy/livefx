@@ -1,13 +1,22 @@
 package org.livefx.app
 
-import scala.reflect.runtime.universe._
+import scala.Option.option2Iterable
+import scala.collection.JavaConversions.asScalaSet
+import scala.reflect.runtime.universe
+import scala.reflect.runtime.universe.ExistentialType
+import scala.reflect.runtime.universe.TypeBounds
+import scala.reflect.runtime.universe.TypeRef
+import scala.reflect.runtime.universe.runtimeMirror
+import scala.reflect.runtime.universe.typeOf
+
+import org.livefx.util.EndLn
+import org.livefx.util.IndentWriter
+import org.reflections.Reflections
+
+import javafx.beans.property.ObjectProperty
+import javafx.event.Event
 import javafx.scene.Node
 import javafx.scene.control.TableView
-import org.reflections.Reflections
-import scala.collection.JavaConversions._
-import org.livefx.util.IndentWriter
-import org.livefx.util.EndLn
-import javafx.beans.property.ObjectProperty
 
 object GenerateRiches2 {
   def part1(): Unit = {
@@ -33,17 +42,17 @@ object GenerateRiches2 {
     println("==3==> " + pp.typeSignature.declarations.toList)
   }
 
-  def subClassesOf[A](clazz: Class[A], packageName: String): Seq[Class[_ <: A]] = {
-    new Reflections("javafx.scene").getSubTypesOf(clazz).toSeq
+  def subClassesOf[A](clazz: Class[A], packageName: String): List[Class[_ <: A]] = {
+    new Reflections("javafx.scene").getSubTypesOf(clazz).toList
   }
 
-  def subClassesOf[A](clazz: Class[A]): Seq[Class[_ <: A]] = {
+  def subClassesOf[A](clazz: Class[A]): List[Class[_ <: A]] = {
     subClassesOf(clazz, clazz.getPackage().getName())
   }
 
   def main(args: Array[String]): Unit = {
     val m = scala.reflect.runtime.currentMirror
-    val classes = subClassesOf(classOf[Node])
+    val classes = classOf[Node]::subClassesOf(classOf[Node])
     val classSymbols = classes.flatMap { clazz =>
       try Some(m.classSymbol(clazz)) catch { case e: AssertionError => None }
     }
@@ -61,17 +70,26 @@ object GenerateRiches2 {
               if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
                 returnType match {
                   case TypeRef(_, _, handlerType :: Nil) => {
-                    out.println(s"--> ${method.name}: ${handlerType}")
                     handlerType match {
                       case ExistentialType(q::Nil, u) => {
                         q.typeSignature match {
-                          case TypeBounds(lower, upper) => {
-                            out.println(s"--> ${method.name} $lower, $upper")
-                          }
+                          case TypeBounds(lower, upper) =>
+                            if (lower <:< typeOf[Event]) {
+                              out.println(s"--> ${method.name} $lower")
+                            } else {
+                              out.println(s"// skipped 1 ${method.name}")
+                            }
+                          case _ => 
+                            out.println(s"// skipped 2 ${method.name}")
                         }
                       }
-                      case TypeRef(_, _, eventType :: Nil) => out.println(s"--> ${method.name} $eventType")
-                      case _ =>
+                      case TypeRef(_, _, eventType :: Nil) =>
+                        if (eventType <:< typeOf[Event]) {
+                          out.println(s"--> ${method.name} $eventType")
+                        } else {
+                          out.println(s"// skipped 3 ${method.name}")
+                        }
+                      case _ => out.println(s"// skipped 4 ${method.name}")
                     }
                   }
                   case _ =>
