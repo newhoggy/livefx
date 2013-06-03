@@ -49,7 +49,8 @@ object GenerateRiches2 {
           None
       }
       optionType match {
-        case Some(tpe) => println(tpe.fullName)
+        case Some(tpe) =>
+          println(tpe.fullName)
         case _ =>
       }
     }
