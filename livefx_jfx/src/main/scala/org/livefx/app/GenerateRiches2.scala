@@ -40,8 +40,17 @@ object GenerateRiches2 {
 
   def main(args: Array[String]): Unit = {
     for (clazz <- subClassesOf(classOf[Node])) {
-      val tpe = runtimeMirror(clazz.getClassLoader).classSymbol(clazz)
-      println(tpe)
+      val optionType = try {
+        Some(runtimeMirror(clazz.getClassLoader).classSymbol(clazz))
+      } catch {
+        case e: AssertionError =>
+          println("could not create type for " + clazz.getCanonicalName())
+          None
+      }
+      optionType match {
+        case Some(tpe) => println(tpe.fullName)
+        case _ =>
+      }
     }
   }
 }
