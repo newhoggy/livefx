@@ -11,7 +11,7 @@ class EventsWithEventHandler[E <: Event] extends EventSource[E] with EventHandle
 }
 
 object EventsWithEventHandler {
-  def on[E <: Event](eventHandlerProperty: ObjectProperty[EventHandler[_ >: E]]): Events[E] = {
+  def on[E <: Event](eventHandlerProperty: ObjectProperty[EventHandler[E]]): Events[E] = {
     eventHandlerProperty.get() match {
       case events: EventsWithEventHandler[E] => events
       case null =>

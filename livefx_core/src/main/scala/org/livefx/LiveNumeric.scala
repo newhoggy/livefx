@@ -34,8 +34,8 @@ trait LiveNumeric[T] extends LiveOrdering[T] { outer =>
   override def ordering: Ordering[T] = numeric 
   
   // TODO: Find another way to do this than instantiate a new simple live value every time.
-  def zero = fromInt(new Var[Int](0))
-  def one = fromInt(new Var[Int](1))
+  def zero = fromInt(Var[Int](0))
+  def one = fromInt(Var[Int](1))
 
   def abs(x: Live[T]): Live[T] = x.map(numeric.abs(_))
   def signum(x: Live[T]): Live[Int] = x.map(numeric.signum(_))

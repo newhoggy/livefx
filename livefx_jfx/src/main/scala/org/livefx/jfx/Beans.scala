@@ -6,17 +6,14 @@ import java.util.{HashSet => JHashSet}
 import java.util.{Iterator => JIterator}
 import java.util.{List => JList}
 import java.util.{ListIterator => JListIterator}
-
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.immutable.HashMap
 import scala.collection.immutable.HashSet
 import scala.ref.WeakReference
-
 import org.livefx.Binding
 import org.livefx.Live
 import org.livefx.util.TidyReferenceQueue
 import org.livefx.util.TidyWeakReference
-
 import javafx.beans.InvalidationListener
 import javafx.beans.Observable
 import javafx.beans.WeakInvalidationListener
@@ -40,6 +37,7 @@ import javafx.collections.SetChangeListener
 import javafx.collections.WeakListChangeListener
 import javafx.collections.WeakMapChangeListener
 import javafx.collections.WeakSetChangeListener
+import org.livefx.Var
 
 object Beans {
   object Implicits {
@@ -72,9 +70,20 @@ object Beans {
       }
     }
 
+    private object RichPropertyKey extends HotKey[Nothing]
     implicit class RichProperty[A](self: Property[A]) {
-      final def <==(value: A): Unit = self.setValue(value)
       final def value: A = self.getValue()
+      final def value_(value: A): Unit = self.setValue(value)
+      final def liveVar: Var[A] = self.cache(RichObservableValueKey: HotKey[Var[A]]) {
+        new Var[A] with JfxBindable {
+          bind(self)
+
+          override def value: A = self.getValue
+
+          override def value_=(newValue: A): Unit = self.setValue(newValue)
+        }
+      }
+      final def <==(value: A): Unit = self.setValue(value)
     }
 
     implicit class RichIntegerProperty(self: IntegerProperty) {

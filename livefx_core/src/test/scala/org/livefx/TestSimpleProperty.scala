@@ -10,7 +10,7 @@ class TestSimpleProperty {
   @Test
   def testGetAndSet(): Unit = {
     var spoilCount = 0
-    val liveValue = new Var[Int](0)
+    val liveValue = Var[Int](0)
     
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
@@ -35,7 +35,7 @@ class TestSimpleProperty {
   @Test
   def testChangeSubscriber(): Unit = {
     var changes = List[Change[Int]]()
-    val liveValue = new Var[Int](0)
+    val liveValue = Var[Int](0)
     
     val subscription = liveValue.changes.subscribe(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
@@ -58,7 +58,7 @@ class TestSimpleProperty {
   @Test
   def testWeakChangeSubscriber(): Unit = {
     var changes = List[Change[Int]]()
-    val liveValue = new Var[Int](0)
+    val liveValue = Var[Int](0)
     
     var subscription = liveValue.changes.subscribeWeak(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
@@ -82,7 +82,7 @@ class TestSimpleProperty {
   @Test
   def testStrongChangeSubscriber(): Unit = {
     var changes = List[Change[Int]]()
-    val liveValue = new Var[Int](0)
+    val liveValue = Var[Int](0)
     
     var subscription = liveValue.changes.subscribe(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
@@ -105,7 +105,7 @@ class TestSimpleProperty {
   
   @Test
   def testMap(): Unit = {
-    val liveValue = new Var[Int](0)
+    val liveValue = Var[Int](0)
     val liveBinding = liveValue.map(_ * 2)
     liveValue.value = 1
     Assert.assertEquals(2, liveBinding.value)
@@ -115,9 +115,9 @@ class TestSimpleProperty {
   
   @Test
   def testForComprehension(): Unit = {
-    val liveA = new Var[Int](0)
-    val liveB = new Var[Int](0)
-    val liveC = new Var[Int](0)
+    val liveA = Var[Int](0)
+    val liveB = Var[Int](0)
+    val liveC = Var[Int](0)
     val liveZ = for {
       a <- liveA
       b <- liveB
@@ -138,9 +138,9 @@ class TestSimpleProperty {
   
   @Test
   def testForComprehensionShort(): Unit = {
-    val liveA = new Var[Short](0)
-    val liveB = new Var[Short](0)
-    val liveC = new Var[Short](0)
+    val liveA = Var[Short](0)
+    val liveB = Var[Short](0)
+    val liveC = Var[Short](0)
     val liveZ = for {
       a <- liveA
       b <- liveB
@@ -162,9 +162,9 @@ class TestSimpleProperty {
   def testComparisons(): Unit = {
     import LiveNumeric.Implicits._
     
-    val liveA = new Var[Int](0)
-    val liveB = new Var[Int](0)
-    val liveC = new Var[Int](0)
+    val liveA = Var[Int](0)
+    val liveB = Var[Int](0)
+    val liveC = Var[Int](0)
     val liveZ = liveA + liveB + liveC
 
     Assert.assertEquals(0, liveZ.value)
@@ -181,8 +181,8 @@ class TestSimpleProperty {
   @Test
   def testTraceSpoils(): Unit = {
     import LiveNumeric.Implicits._
-    val liveA = new Var[Int](1)
-    val liveB = new Var[Int](1)
+    val liveA = Var[Int](1)
+    val liveB = Var[Int](1)
     val liveC = traceSpoils(traceSpoils(liveA) + traceSpoils(liveB))
     var counter = 0
     liveC.spoils.subscribe { spoilEvent =>
@@ -213,10 +213,10 @@ class TestSimpleProperty {
   @Test
   def testOrElse(): Unit = {
     import org.livefx._
-    val liveA = new Var[Int](0)
-    val liveB = new Var[Int](0)
-    val liveC = new Var[Int](0)
-    val liveD = new Var[Option[Live[Int]]](None)
+    val liveA = Var[Int](0)
+    val liveB = Var[Int](0)
+    val liveC = Var[Int](0)
+    val liveD = Var[Option[Live[Int]]](None)
     val liveE = liveD.orElse(liveA)
     
     Assert.assertEquals(0, liveE.value)
@@ -239,8 +239,8 @@ class TestSimpleProperty {
   @Test
   def testSpoilCount(): Unit = {
     import LiveNumeric.Implicits._
-    val liveA = new Var[Int](0)
-    val liveB = new Var[Int](0)
+    val liveA = Var[Int](0)
+    val liveB = Var[Int](0)
     val liveC = liveA + liveB
     val liveACount = liveA.spoilCount
     val liveBCount = liveB.spoilCount
@@ -263,8 +263,8 @@ class TestSimpleProperty {
   @Test
   def testBoolean(): Unit = {
     import LiveNumeric.Implicits._
-    val liveA = new Var[Boolean](false)
-    val liveB = new Var[Boolean](false)
+    val liveA = Var[Boolean](false)
+    val liveB = Var[Boolean](false)
     val liveAnd = liveA && liveB
     val liveOr = liveA || liveB
     val liveNot = !liveA
