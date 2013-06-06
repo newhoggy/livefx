@@ -5,7 +5,6 @@ import org.livefx.Events
 object Nodes {
   object Implicits {
     implicit class RichNode(self: javafx.scene.Node) {
-      // skipped 6 clipProperty
       def contextMenuRequested: Events[javafx.scene.input.ContextMenuEvent] = {
         val handler = self.onContextMenuRequestedProperty().getValue()
         if (handler == null) {
@@ -34,6 +33,7 @@ object Nodes {
           }
         }
       }
+      // skipped 6 clipProperty
       // skipped 6 parentPropertyImpl
       // skipped 6 scenePropertyImpl
       // skipped 6 cursorProperty
@@ -41,20 +41,6 @@ object Nodes {
       // skipped 6 cacheHintProperty
       // skipped 6 effectProperty
       // skipped 6 depthTestProperty
-      def zoom: Events[javafx.scene.input.ZoomEvent] = {
-        val handler = self.onZoomProperty().getValue()
-        if (handler == null) {
-          val events = new EventsWithEventHandler[javafx.scene.input.ZoomEvent]
-          self.onZoomProperty().setValue(events)
-          events
-        } else {
-          if (handler.isInstanceOf[EventsWithEventHandler[_]]) {
-            handler.asInstanceOf[EventsWithEventHandler[javafx.scene.input.ZoomEvent]]
-          } else {
-            throw new UnsupportedOperationException("event handler already installed")
-          }
-        }
-      }
       def dragEntered: Events[javafx.scene.input.DragEvent] = {
         val handler = self.onDragEnteredProperty().getValue()
         if (handler == null) {
@@ -392,6 +378,20 @@ object Nodes {
           }
         }
       }
+      def zoom: Events[javafx.scene.input.ZoomEvent] = {
+        val handler = self.onZoomProperty().getValue()
+        if (handler == null) {
+          val events = new EventsWithEventHandler[javafx.scene.input.ZoomEvent]
+          self.onZoomProperty().setValue(events)
+          events
+        } else {
+          if (handler.isInstanceOf[EventsWithEventHandler[_]]) {
+            handler.asInstanceOf[EventsWithEventHandler[javafx.scene.input.ZoomEvent]]
+          } else {
+            throw new UnsupportedOperationException("event handler already installed")
+          }
+        }
+      }
       def zoomFinished: Events[javafx.scene.input.ZoomEvent] = {
         val handler = self.onZoomFinishedProperty().getValue()
         if (handler == null) {
@@ -564,14 +564,58 @@ object Nodes {
       // skipped 6 eventDispatcherProperty
     }
 
-    implicit class RichScatterChart[X, Y](self: javafx.scene.chart.ScatterChart[X, Y]) {
+    implicit class RichProgressBar(self: javafx.scene.control.ProgressBar) {
     }
 
-    implicit class RichArc(self: javafx.scene.shape.Arc) {
-      // skipped 6 typeProperty
+    implicit class RichTextFieldTableCell[S, T](self: javafx.scene.control.cell.TextFieldTableCell[S, T]) {
+      // skipped 5 converterProperty
     }
 
-    implicit class RichStackedAreaChart[X, Y](self: javafx.scene.chart.StackedAreaChart[X, Y]) {
+    implicit class RichProgressIndicator(self: javafx.scene.control.ProgressIndicator) {
+    }
+
+    implicit class RichTextField(self: javafx.scene.control.TextField) {
+      // skipped 6 alignmentProperty
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def action: Events[javafx.event.ActionEvent] = EventsWithEventHandler.on(self.onActionProperty())
+    }
+
+    implicit class RichTextArea(self: javafx.scene.control.TextArea) {
+    }
+
+    implicit class RichParent(self: javafx.scene.Parent) {
+      // skipped 6 impl_traversalEngineProperty
+    }
+
+    implicit class RichShape(self: javafx.scene.shape.Shape) {
+      // skipped 6 strokeTypeProperty
+      // skipped 6 strokeLineJoinProperty
+      // skipped 6 strokeLineCapProperty
+      // skipped 6 strokeProperty
+      // skipped 6 fillProperty
+    }
+
+    implicit class RichNumberAxis(self: javafx.scene.chart.NumberAxis) {
+    }
+
+    implicit class RichSlider(self: javafx.scene.control.Slider) {
+      // skipped 5 labelFormatterProperty
+      // skipped 6 orientationProperty
+    }
+
+    implicit class RichButtonBase(self: javafx.scene.control.ButtonBase) {
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def action: Events[javafx.event.ActionEvent] = EventsWithEventHandler.on(self.onActionProperty())
+    }
+
+    implicit class RichCheckBoxTableCell[S, T](self: javafx.scene.control.cell.CheckBoxTableCell[S, T]) {
+      // skipped 5 converterProperty
+      // skipped 6 selectedStateCallbackProperty
+    }
+
+    implicit class RichBarChart[X, Y](self: javafx.scene.chart.BarChart[X, Y]) {
     }
 
     implicit class RichAxis[T](self: javafx.scene.chart.Axis[T]) {
@@ -581,78 +625,65 @@ object Nodes {
       // skipped 6 tickLabelFillProperty
     }
 
-    implicit class RichTableRow[T](self: javafx.scene.control.TableRow[T]) {
-      // skipped 5 tableViewPropertyImpl
+    implicit class RichWebView(self: javafx.scene.web.WebView) {
+      // skipped 6 fontSmoothingTypeProperty
     }
 
-    implicit class RichCircle(self: javafx.scene.shape.Circle) {
+    implicit class RichTextFieldTreeCell[T](self: javafx.scene.control.cell.TextFieldTreeCell[T]) {
+      // skipped 5 converterProperty
     }
 
-    implicit class RichSplitMenuButton(self: javafx.scene.control.SplitMenuButton) {
+    implicit class RichHyperlink(self: javafx.scene.control.Hyperlink) {
     }
 
-    implicit class RichMenuButton(self: javafx.scene.control.MenuButton) {
-      // skipped 6 popupSideProperty
+    implicit class RichCheckBoxTreeCell[T](self: javafx.scene.control.cell.CheckBoxTreeCell[T]) {
+      // skipped 5 converterProperty
+      // skipped 6 selectedStateCallbackProperty
+    }
+
+    implicit class RichHTMLEditor(self: javafx.scene.web.HTMLEditor) {
+    }
+
+    implicit class RichListView[T](self: javafx.scene.control.ListView[T]) {
+      // skipped 5 selectionModelProperty
+      // skipped 6 orientationProperty
+      // skipped 6 cellFactoryProperty
+      // skipped 5 focusModelProperty
+      // handlerType: ListView.this.type: class scala.reflect.internal.Types$UniqueThisType, class EditEvent: class scala.reflect.internal.Symbols$ClassSymbol, T: class scala.reflect.internal.Types$TypeRef$$anon$4
+      // a.normalize: javafx.scene.control.ListView
+      // utt: class ListView
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$5
+      def editStart: Events[javafx.scene.control.ListView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditStartProperty())
+      // handlerType: ListView.this.type: class scala.reflect.internal.Types$UniqueThisType, class EditEvent: class scala.reflect.internal.Symbols$ClassSymbol, T: class scala.reflect.internal.Types$TypeRef$$anon$4
+      // a.normalize: javafx.scene.control.ListView
+      // utt: class ListView
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$5
+      def editCommit: Events[javafx.scene.control.ListView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCommitProperty())
+      // handlerType: ListView.this.type: class scala.reflect.internal.Types$UniqueThisType, class EditEvent: class scala.reflect.internal.Symbols$ClassSymbol, T: class scala.reflect.internal.Types$TypeRef$$anon$4
+      // a.normalize: javafx.scene.control.ListView
+      // utt: class ListView
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$5
+      def editCancel: Events[javafx.scene.control.ListView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCancelProperty())
+      // skipped 5 itemsProperty
     }
 
     implicit class RichPieChart(self: javafx.scene.chart.PieChart) {
       // skipped 5 dataProperty
     }
 
-    implicit class RichTableView[S](self: javafx.scene.control.TableView[S]) {
-      // skipped 5 selectionModelProperty
-      // skipped 5 focusModelProperty
-      // skipped 5 itemsProperty
-      // skipped 6 columnResizePolicyProperty
-      // skipped 6 rowFactoryProperty
-      // skipped 6 placeholderProperty
-      // skipped 0 editingCellPropertyImpl
-    }
-
-    implicit class RichComboBox[T](self: javafx.scene.control.ComboBox[T]) {
+    implicit class RichChoiceBox[T](self: javafx.scene.control.ChoiceBox[T]) {
       // skipped 5 converterProperty
       // skipped 5 selectionModelProperty
-      // skipped 6 cellFactoryProperty
       // skipped 5 itemsProperty
-      // skipped 5 buttonCellProperty
+      // skipped 6 valueProperty
     }
 
-    implicit class RichAnchorPane(self: javafx.scene.layout.AnchorPane) {
+    implicit class RichLabel(self: javafx.scene.control.Label) {
+      // skipped 6 labelForProperty
     }
 
-    implicit class RichTreeCell[T](self: javafx.scene.control.TreeCell[T]) {
-      // skipped 6 disclosureNodeProperty
-    }
-
-    implicit class RichProgressBar(self: javafx.scene.control.ProgressBar) {
-    }
-
-    implicit class RichCheckBoxTableCell[S, T](self: javafx.scene.control.cell.CheckBoxTableCell[S, T]) {
-      // skipped 5 converterProperty
-      // skipped 6 selectedStateCallbackProperty
-    }
-
-    implicit class RichComboBoxTableCell[S, T](self: javafx.scene.control.cell.ComboBoxTableCell[S, T]) {
-      // skipped 5 converterProperty
-    }
-
-    implicit class RichChoiceBoxListCell[T](self: javafx.scene.control.cell.ChoiceBoxListCell[T]) {
-      // skipped 5 converterProperty
-    }
-
-    implicit class RichProgressBarTableCell[S](self: javafx.scene.control.cell.ProgressBarTableCell[S]) {
-    }
-
-    implicit class RichRadioButton(self: javafx.scene.control.RadioButton) {
-    }
-
-    implicit class RichStackedBarChart[X, Y](self: javafx.scene.chart.StackedBarChart[X, Y]) {
-    }
-
-    implicit class RichEllipse(self: javafx.scene.shape.Ellipse) {
-    }
-
-    implicit class RichCategoryAxis(self: javafx.scene.chart.CategoryAxis) {
+    implicit class RichTitledPane(self: javafx.scene.control.TitledPane) {
+      // skipped 6 contentProperty
     }
 
     implicit class RichLabeled(self: javafx.scene.control.Labeled) {
@@ -666,37 +697,93 @@ object Nodes {
       // skipped 6 fontProperty
     }
 
-    implicit class RichGroup(self: javafx.scene.Group) {
+    implicit class RichStackedAreaChart[X, Y](self: javafx.scene.chart.StackedAreaChart[X, Y]) {
     }
 
-    implicit class RichSlider(self: javafx.scene.control.Slider) {
-      // skipped 5 labelFormatterProperty
-      // skipped 6 orientationProperty
+    implicit class RichBorderPane(self: javafx.scene.layout.BorderPane) {
+      // skipped 6 centerProperty
+      // skipped 6 bottomProperty
+      // skipped 6 rightProperty
+      // skipped 6 topProperty
+      // skipped 6 leftProperty
+      // skipped 6 createObjectPropertyModelImpl
     }
 
-    implicit class RichComboBoxBase[T](self: javafx.scene.control.ComboBoxBase[T]) {
-      def action: Events[javafx.event.ActionEvent] = EventsWithEventHandler.on(self.onActionProperty())
-      // skipped 6 valueProperty
-      def showing: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onShowingProperty())
-      def shown: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onShownProperty())
-      def hiding: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onHidingProperty())
-      def hidden: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onHiddenProperty())
+    implicit class RichScatterChart[X, Y](self: javafx.scene.chart.ScatterChart[X, Y]) {
     }
 
-    implicit class RichButton(self: javafx.scene.control.Button) {
-    }
-
-    implicit class RichChoiceBox[T](self: javafx.scene.control.ChoiceBox[T]) {
-      // skipped 5 converterProperty
-      // skipped 5 selectionModelProperty
-      // skipped 5 itemsProperty
-      // skipped 6 valueProperty
+    implicit class RichQuadCurve(self: javafx.scene.shape.QuadCurve) {
     }
 
     implicit class RichTilePane(self: javafx.scene.layout.TilePane) {
       // skipped 6 alignmentProperty
       // skipped 6 orientationProperty
       // skipped 6 tileAlignmentProperty
+    }
+
+    implicit class RichPolygon(self: javafx.scene.shape.Polygon) {
+    }
+
+    implicit class RichVBox(self: javafx.scene.layout.VBox) {
+      // skipped 6 alignmentProperty
+    }
+
+    implicit class RichBubbleChart[X, Y](self: javafx.scene.chart.BubbleChart[X, Y]) {
+    }
+
+    implicit class RichCell[T](self: javafx.scene.control.Cell[T]) {
+      // skipped 6 itemProperty
+    }
+
+    implicit class RichChoiceBoxTableCell[S, T](self: javafx.scene.control.cell.ChoiceBoxTableCell[S, T]) {
+      // skipped 5 converterProperty
+    }
+
+    implicit class RichComboBoxTableCell[S, T](self: javafx.scene.control.cell.ComboBoxTableCell[S, T]) {
+      // skipped 5 converterProperty
+    }
+
+    implicit class RichCheckBoxListCell[T](self: javafx.scene.control.cell.CheckBoxListCell[T]) {
+      // skipped 5 converterProperty
+      // skipped 6 selectedStateCallbackProperty
+    }
+
+    implicit class RichToggleButton(self: javafx.scene.control.ToggleButton) {
+      // skipped 6 toggleGroupProperty
+    }
+
+    implicit class RichTreeView[T](self: javafx.scene.control.TreeView[T]) {
+      // skipped 5 rootProperty
+      // skipped 5 selectionModelProperty
+      // skipped 6 cellFactoryProperty
+      // skipped 5 focusModelProperty
+      // skipped 5 editingItemPropertyImpl
+      // handlerType: TreeView.this.type: class scala.reflect.internal.Types$UniqueThisType, class EditEvent: class scala.reflect.internal.Symbols$ClassSymbol, T: class scala.reflect.internal.Types$TypeRef$$anon$4
+      // a.normalize: javafx.scene.control.TreeView
+      // utt: class TreeView
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$5
+      def editStart: Events[javafx.scene.control.TreeView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditStartProperty())
+      // handlerType: TreeView.this.type: class scala.reflect.internal.Types$UniqueThisType, class EditEvent: class scala.reflect.internal.Symbols$ClassSymbol, T: class scala.reflect.internal.Types$TypeRef$$anon$4
+      // a.normalize: javafx.scene.control.TreeView
+      // utt: class TreeView
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$5
+      def editCommit: Events[javafx.scene.control.TreeView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCommitProperty())
+      // handlerType: TreeView.this.type: class scala.reflect.internal.Types$UniqueThisType, class EditEvent: class scala.reflect.internal.Symbols$ClassSymbol, T: class scala.reflect.internal.Types$TypeRef$$anon$4
+      // a.normalize: javafx.scene.control.TreeView
+      // utt: class TreeView
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$5
+      def editCancel: Events[javafx.scene.control.TreeView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCancelProperty())
+    }
+
+    implicit class RichComboBoxListCell[T](self: javafx.scene.control.cell.ComboBoxListCell[T]) {
+      // skipped 5 converterProperty
+    }
+
+    implicit class RichCanvas(self: javafx.scene.canvas.Canvas) {
+    }
+
+    implicit class RichMenuButton(self: javafx.scene.control.MenuButton) {
+      // skipped 6 popupSideProperty
     }
 
     implicit class RichSVGPath(self: javafx.scene.shape.SVGPath) {
@@ -707,7 +794,94 @@ object Nodes {
       // skipped 5 converterProperty
     }
 
-    implicit class RichPasswordField(self: javafx.scene.control.PasswordField) {
+    implicit class RichCubicCurve(self: javafx.scene.shape.CubicCurve) {
+    }
+
+    implicit class RichChart(self: javafx.scene.chart.Chart) {
+      // skipped 6 titleSideProperty
+      // skipped 6 legendProperty
+      // skipped 6 legendSideProperty
+    }
+
+    implicit class RichFlowPane(self: javafx.scene.layout.FlowPane) {
+      // skipped 6 alignmentProperty
+      // skipped 6 columnHalignmentProperty
+      // skipped 6 rowValignmentProperty
+      // skipped 6 orientationProperty
+    }
+
+    implicit class RichRadioButton(self: javafx.scene.control.RadioButton) {
+    }
+
+    implicit class RichIndexedCell[T](self: javafx.scene.control.IndexedCell[T]) {
+    }
+
+    implicit class RichAccordion(self: javafx.scene.control.Accordion) {
+      // skipped 6 expandedPaneProperty
+    }
+
+    implicit class RichLineChart[X, Y](self: javafx.scene.chart.LineChart[X, Y]) {
+    }
+
+    implicit class RichAreaChart[X, Y](self: javafx.scene.chart.AreaChart[X, Y]) {
+    }
+
+    implicit class RichTabPane(self: javafx.scene.control.TabPane) {
+      // skipped 6 sideProperty
+      // skipped 5 selectionModelProperty
+      // skipped 6 tabClosingPolicyProperty
+    }
+
+    implicit class RichComboBox[T](self: javafx.scene.control.ComboBox[T]) {
+      // skipped 5 converterProperty
+      // skipped 5 selectionModelProperty
+      // skipped 6 cellFactoryProperty
+      // skipped 5 itemsProperty
+      // skipped 5 buttonCellProperty
+    }
+
+    implicit class RichImageView(self: javafx.scene.image.ImageView) {
+      // skipped 6 imageProperty
+      // skipped 6 viewportProperty
+    }
+
+    implicit class RichSeparator(self: javafx.scene.control.Separator) {
+      // skipped 6 halignmentProperty
+      // skipped 6 valignmentProperty
+      // skipped 6 orientationProperty
+    }
+
+    implicit class RichMediaView(self: javafx.scene.media.MediaView) {
+      // skipped 6 mediaPlayerProperty
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def error: Events[javafx.scene.media.MediaErrorEvent] = EventsWithEventHandler.on(self.onErrorProperty())
+      // skipped 6 viewportProperty
+    }
+
+    implicit class RichControl(self: javafx.scene.control.Control) {
+      // skipped 6 tooltipProperty
+      // skipped 6 contextMenuProperty
+      // skipped 0 skinProperty
+    }
+
+    implicit class RichRectangle(self: javafx.scene.shape.Rectangle) {
+    }
+
+    implicit class RichProgressBarTableCell[S](self: javafx.scene.control.cell.ProgressBarTableCell[S]) {
+    }
+
+    implicit class RichEllipse(self: javafx.scene.shape.Ellipse) {
+    }
+
+    implicit class RichStackedBarChart[X, Y](self: javafx.scene.chart.StackedBarChart[X, Y]) {
+    }
+
+    implicit class RichCategoryAxis(self: javafx.scene.chart.CategoryAxis) {
+    }
+
+    implicit class RichScrollBar(self: javafx.scene.control.ScrollBar) {
+      // skipped 6 orientationProperty
     }
 
     implicit class RichScrollPane(self: javafx.scene.control.ScrollPane) {
@@ -717,122 +891,139 @@ object Nodes {
       // skipped 6 viewportBoundsProperty
     }
 
-    implicit class RichPane(self: javafx.scene.layout.Pane) {
+    implicit class RichArc(self: javafx.scene.shape.Arc) {
+      // skipped 6 typeProperty
     }
 
-    implicit class RichToolBar(self: javafx.scene.control.ToolBar) {
-      // skipped 6 orientationProperty
+    implicit class RichAnchorPane(self: javafx.scene.layout.AnchorPane) {
     }
 
-    implicit class RichLine(self: javafx.scene.shape.Line) {
-    }
-
-    implicit class RichControl(self: javafx.scene.control.Control) {
-      // skipped 6 tooltipProperty
-      // skipped 6 contextMenuProperty
-      // skipped 0 skinProperty
-    }
-
-    implicit class RichTableCell[S, T](self: javafx.scene.control.TableCell[S, T]) {
-      // skipped 5 tableViewPropertyImpl
+    implicit class RichPagination(self: javafx.scene.control.Pagination) {
+      // skipped 6 pageFactoryProperty
     }
 
     implicit class RichSplitPane(self: javafx.scene.control.SplitPane) {
       // skipped 6 orientationProperty
     }
 
-    implicit class RichXYChart[X, Y](self: javafx.scene.chart.XYChart[X, Y]) {
-      // skipped 6 currentDisplayedXValueProperty
-      // skipped 6 currentDisplayedYValueProperty
-      // skipped 6 currentDisplayedExtraValueProperty
-      // skipped 5 dataProperty
+    implicit class RichStackPane(self: javafx.scene.layout.StackPane) {
+      // skipped 6 alignmentProperty
     }
 
-    implicit class RichListView[T](self: javafx.scene.control.ListView[T]) {
-      // skipped 5 selectionModelProperty
-      // skipped 6 orientationProperty
-      // skipped 6 cellFactoryProperty
-      // skipped 5 focusModelProperty
-      def editStart: Events[javafx.scene.control.ListView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditStartProperty())
-      def editCommit: Events[javafx.scene.control.ListView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCommitProperty())
-      def editCancel: Events[javafx.scene.control.ListView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCancelProperty())
-      // skipped 5 itemsProperty
+    implicit class RichLine(self: javafx.scene.shape.Line) {
     }
 
-    implicit class RichTreeView[T](self: javafx.scene.control.TreeView[T]) {
-      // skipped 5 rootProperty
-      // skipped 5 selectionModelProperty
-      // skipped 6 cellFactoryProperty
-      // skipped 5 focusModelProperty
-      // skipped 5 editingItemPropertyImpl
-      def editStart: Events[javafx.scene.control.TreeView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditStartProperty())
-      def editCommit: Events[javafx.scene.control.TreeView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCommitProperty())
-      def editCancel: Events[javafx.scene.control.TreeView.EditEvent[T]] = EventsWithEventHandler.on(self.onEditCancelProperty())
+    implicit class RichTableCell[S, T](self: javafx.scene.control.TableCell[S, T]) {
+      // skipped 5 tableViewPropertyImpl
     }
 
-    implicit class RichButtonBase(self: javafx.scene.control.ButtonBase) {
-      def action: Events[javafx.event.ActionEvent] = EventsWithEventHandler.on(self.onActionProperty())
+    implicit class RichCircle(self: javafx.scene.shape.Circle) {
     }
 
-    implicit class RichQuadCurve(self: javafx.scene.shape.QuadCurve) {
+    implicit class RichColorPicker(self: javafx.scene.control.ColorPicker) {
     }
 
-    implicit class RichPolygon(self: javafx.scene.shape.Polygon) {
+    implicit class RichTreeCell[T](self: javafx.scene.control.TreeCell[T]) {
+      // skipped 6 disclosureNodeProperty
     }
 
-    implicit class RichImageView(self: javafx.scene.image.ImageView) {
-      // skipped 6 imageProperty
-      // skipped 6 viewportProperty
-    }
-
-    implicit class RichText(self: javafx.scene.text.Text) {
-      // skipped 6 fontSmoothingTypeProperty
-      // skipped 6 textOriginProperty
-      // skipped 6 boundsTypeProperty
-      // skipped 5 impl_selectionShapeProperty
-      // skipped 5 impl_caretShapeProperty
-      // skipped 6 impl_selectionFillProperty
-      // skipped 6 textAlignmentProperty
-      // skipped 6 fontProperty
-    }
-
-    implicit class RichChoiceBoxTreeCell[T](self: javafx.scene.control.cell.ChoiceBoxTreeCell[T]) {
-      // skipped 5 converterProperty
-    }
-
-    implicit class RichTextFieldTableCell[S, T](self: javafx.scene.control.cell.TextFieldTableCell[S, T]) {
-      // skipped 5 converterProperty
+    implicit class RichPolyline(self: javafx.scene.shape.Polyline) {
     }
 
     implicit class RichTextFieldListCell[T](self: javafx.scene.control.cell.TextFieldListCell[T]) {
       // skipped 5 converterProperty
     }
 
-    implicit class RichCheckBox(self: javafx.scene.control.CheckBox) {
+    implicit class RichHBox(self: javafx.scene.layout.HBox) {
+      // skipped 6 alignmentProperty
     }
 
-    implicit class RichLabel(self: javafx.scene.control.Label) {
-      // skipped 6 labelForProperty
+    implicit class RichPath(self: javafx.scene.shape.Path) {
+      // skipped 6 fillRuleProperty
     }
 
-    implicit class RichAreaChart[X, Y](self: javafx.scene.chart.AreaChart[X, Y]) {
+    implicit class RichMenuBar(self: javafx.scene.control.MenuBar) {
     }
 
-    implicit class RichChart(self: javafx.scene.chart.Chart) {
-      // skipped 6 titleSideProperty
-      // skipped 6 legendProperty
-      // skipped 6 legendSideProperty
+    implicit class RichToolBar(self: javafx.scene.control.ToolBar) {
+      // skipped 6 orientationProperty
     }
 
-    implicit class RichTitledPane(self: javafx.scene.control.TitledPane) {
-      // skipped 6 contentProperty
+    implicit class RichGroup(self: javafx.scene.Group) {
     }
 
-    implicit class RichTextFieldTreeCell[T](self: javafx.scene.control.cell.TextFieldTreeCell[T]) {
+    implicit class RichChoiceBoxTreeCell[T](self: javafx.scene.control.cell.ChoiceBoxTreeCell[T]) {
       // skipped 5 converterProperty
     }
 
-    implicit class RichProgressIndicator(self: javafx.scene.control.ProgressIndicator) {
+    implicit class RichTableView[S](self: javafx.scene.control.TableView[S]) {
+      // skipped 5 selectionModelProperty
+      // skipped 5 focusModelProperty
+      // skipped 5 itemsProperty
+      // skipped 6 columnResizePolicyProperty
+      // skipped 6 rowFactoryProperty
+      // skipped 6 placeholderProperty
+      // skipped 0 editingCellPropertyImpl
+    }
+
+    implicit class RichText(self: javafx.scene.text.Text) {
+      // skipped 6 textAlignmentProperty
+      // skipped 6 fontProperty
+      // skipped 6 fontSmoothingTypeProperty
+      // skipped 6 textOriginProperty
+      // skipped 6 boundsTypeProperty
+      // skipped 5 impl_selectionShapeProperty
+      // skipped 5 impl_caretShapeProperty
+      // skipped 6 impl_selectionFillProperty
+    }
+
+    implicit class RichTableRow[T](self: javafx.scene.control.TableRow[T]) {
+      // skipped 5 tableViewPropertyImpl
+    }
+
+    implicit class RichListCell[T](self: javafx.scene.control.ListCell[T]) {
+    }
+
+    implicit class RichPane(self: javafx.scene.layout.Pane) {
+    }
+
+    implicit class RichCheckBox(self: javafx.scene.control.CheckBox) {
+    }
+
+    implicit class RichValueAxis[T <: Number](self: javafx.scene.chart.ValueAxis[T]) {
+      // skipped 5 tickLabelFormatterProperty
+    }
+
+    implicit class RichComboBoxBase[T](self: javafx.scene.control.ComboBoxBase[T]) {
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def action: Events[javafx.event.ActionEvent] = EventsWithEventHandler.on(self.onActionProperty())
+      // skipped 6 valueProperty
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def showing: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onShowingProperty())
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def shown: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onShownProperty())
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def hiding: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onHidingProperty())
+      // not a typeRef
+      // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
+      def hidden: Events[javafx.event.Event] = EventsWithEventHandler.on(self.onHiddenProperty())
+    }
+
+    implicit class RichButton(self: javafx.scene.control.Button) {
+    }
+
+    implicit class RichXYChart[X, Y](self: javafx.scene.chart.XYChart[X, Y]) {
+      // skipped 5 dataProperty
+      // skipped 6 currentDisplayedXValueProperty
+      // skipped 6 currentDisplayedYValueProperty
+      // skipped 6 currentDisplayedExtraValueProperty
+    }
+
+    implicit class RichTextInputControl(self: javafx.scene.control.TextInputControl) {
     }
 
     implicit class RichRegion(self: javafx.scene.layout.Region) {
@@ -844,169 +1035,18 @@ object Nodes {
       // skipped 5 imageBordersProperty
     }
 
-    implicit class RichTextInputControl(self: javafx.scene.control.TextInputControl) {
-    }
-
-    implicit class RichBorderPane(self: javafx.scene.layout.BorderPane) {
-      // skipped 6 centerProperty
-      // skipped 6 bottomProperty
-      // skipped 6 rightProperty
-      // skipped 6 createObjectPropertyModelImpl
-      // skipped 6 topProperty
-      // skipped 6 leftProperty
-    }
-
-    implicit class RichStackPane(self: javafx.scene.layout.StackPane) {
-      // skipped 6 alignmentProperty
-    }
-
-    implicit class RichRectangle(self: javafx.scene.shape.Rectangle) {
-    }
-
-    implicit class RichBarChart[X, Y](self: javafx.scene.chart.BarChart[X, Y]) {
-    }
-
-    implicit class RichMenuBar(self: javafx.scene.control.MenuBar) {
-    }
-
-    implicit class RichAccordion(self: javafx.scene.control.Accordion) {
-      // skipped 6 expandedPaneProperty
-    }
-
-    implicit class RichParent(self: javafx.scene.Parent) {
-      // skipped 6 impl_traversalEngineProperty
-    }
-
-    implicit class RichComboBoxListCell[T](self: javafx.scene.control.cell.ComboBoxListCell[T]) {
+    implicit class RichChoiceBoxListCell[T](self: javafx.scene.control.cell.ChoiceBoxListCell[T]) {
       // skipped 5 converterProperty
     }
 
-    implicit class RichValueAxis[T <: Number](self: javafx.scene.chart.ValueAxis[T]) {
-      // skipped 5 tickLabelFormatterProperty
+    implicit class RichPasswordField(self: javafx.scene.control.PasswordField) {
     }
 
-    implicit class RichCell[T](self: javafx.scene.control.Cell[T]) {
-      // skipped 6 itemProperty
-    }
-
-    implicit class RichVBox(self: javafx.scene.layout.VBox) {
-      // skipped 6 alignmentProperty
-    }
-
-    implicit class RichHyperlink(self: javafx.scene.control.Hyperlink) {
-    }
-
-    implicit class RichCanvas(self: javafx.scene.canvas.Canvas) {
-    }
-
-    implicit class RichCubicCurve(self: javafx.scene.shape.CubicCurve) {
-    }
-
-    implicit class RichCheckBoxListCell[T](self: javafx.scene.control.cell.CheckBoxListCell[T]) {
-      // skipped 5 converterProperty
-      // skipped 6 selectedStateCallbackProperty
-    }
-
-    implicit class RichChoiceBoxTableCell[S, T](self: javafx.scene.control.cell.ChoiceBoxTableCell[S, T]) {
-      // skipped 5 converterProperty
-    }
-
-    implicit class RichPolyline(self: javafx.scene.shape.Polyline) {
-    }
-
-    implicit class RichTextArea(self: javafx.scene.control.TextArea) {
-    }
-
-    implicit class RichColorPicker(self: javafx.scene.control.ColorPicker) {
-    }
-
-    implicit class RichTextField(self: javafx.scene.control.TextField) {
-      // skipped 6 alignmentProperty
-      def action: Events[javafx.event.ActionEvent] = EventsWithEventHandler.on(self.onActionProperty())
-    }
-
-    implicit class RichBubbleChart[X, Y](self: javafx.scene.chart.BubbleChart[X, Y]) {
-    }
-
-    implicit class RichPath(self: javafx.scene.shape.Path) {
-      // skipped 6 fillRuleProperty
-    }
-
-    implicit class RichFlowPane(self: javafx.scene.layout.FlowPane) {
-      // skipped 6 columnHalignmentProperty
-      // skipped 6 rowValignmentProperty
-      // skipped 6 alignmentProperty
-      // skipped 6 orientationProperty
-    }
-
-    implicit class RichTabPane(self: javafx.scene.control.TabPane) {
-      // skipped 6 sideProperty
-      // skipped 5 selectionModelProperty
-      // skipped 6 tabClosingPolicyProperty
-    }
-
-    implicit class RichLineChart[X, Y](self: javafx.scene.chart.LineChart[X, Y]) {
-    }
-
-    implicit class RichPagination(self: javafx.scene.control.Pagination) {
-      // skipped 6 pageFactoryProperty
-    }
-
-    implicit class RichListCell[T](self: javafx.scene.control.ListCell[T]) {
-    }
-
-    implicit class RichMediaView(self: javafx.scene.media.MediaView) {
-      // skipped 6 mediaPlayerProperty
-      def error: Events[javafx.scene.media.MediaErrorEvent] = EventsWithEventHandler.on(self.onErrorProperty())
-      // skipped 6 viewportProperty
+    implicit class RichSplitMenuButton(self: javafx.scene.control.SplitMenuButton) {
     }
 
     implicit class RichGridPane(self: javafx.scene.layout.GridPane) {
       // skipped 6 alignmentProperty
-    }
-
-    implicit class RichToggleButton(self: javafx.scene.control.ToggleButton) {
-      // skipped 6 toggleGroupProperty
-    }
-
-    implicit class RichNumberAxis(self: javafx.scene.chart.NumberAxis) {
-    }
-
-    implicit class RichHTMLEditor(self: javafx.scene.web.HTMLEditor) {
-    }
-
-    implicit class RichSeparator(self: javafx.scene.control.Separator) {
-      // skipped 6 halignmentProperty
-      // skipped 6 valignmentProperty
-      // skipped 6 orientationProperty
-    }
-
-    implicit class RichScrollBar(self: javafx.scene.control.ScrollBar) {
-      // skipped 6 orientationProperty
-    }
-
-    implicit class RichHBox(self: javafx.scene.layout.HBox) {
-      // skipped 6 alignmentProperty
-    }
-
-    implicit class RichIndexedCell[T](self: javafx.scene.control.IndexedCell[T]) {
-    }
-
-    implicit class RichShape(self: javafx.scene.shape.Shape) {
-      // skipped 6 strokeTypeProperty
-      // skipped 6 strokeLineJoinProperty
-      // skipped 6 strokeLineCapProperty
-      // skipped 6 strokeProperty
-      // skipped 6 fillProperty
-    }
-
-    implicit class RichWebView(self: javafx.scene.web.WebView) {
-      // skipped 6 fontSmoothingTypeProperty
-    }
-
-    implicit class RichCheckBoxTreeCell[T](self: javafx.scene.control.cell.CheckBoxTreeCell[T]) {
-      // skipped 5 converterProperty
-      // skipped 6 selectedStateCallbackProperty
     }
   }
 }

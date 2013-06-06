@@ -4,6 +4,7 @@ import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaSet
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.ExistentialType
+import scala.reflect.runtime.universe.ThisType
 import scala.reflect.runtime.universe.TypeBounds
 import scala.reflect.runtime.universe.TypeRef
 import scala.reflect.runtime.universe.runtimeMirror
@@ -110,7 +111,20 @@ object GenerateRiches {
                               case Regex(name) =>
                                 if (name.length > 0) {
                                   val normalName = name(0).toString.toLowerCase + name.substring(1)
-                                  out.println(s"def ${normalName}: Events[$eventType] = EventsWithEventHandler.on(self.${method.name}())")
+                                  eventType match {
+                                    case TypeRef(pre, sym, handlerType :: Nil) =>
+                                      out.println(s"// handlerType: $pre: ${pre.getClass}, $sym: ${sym.getClass}, $handlerType: ${handlerType.getClass}")
+                                      out.println(s"// a.normalize: ${pre.typeSymbol.fullName}")
+                                      pre match {
+                                        case ThisType(utt) => out.println(s"// utt: ${utt}")
+                                      }
+                                      out.println(s"// eventType.class: ${eventType.getClass()}")
+                                      out.println(s"def ${normalName}: Events[${pre.typeSymbol.fullName}.${sym.name}[$handlerType]] = EventsWithEventHandler.on(self.${method.name}())")
+                                    case _ =>
+                                      out.println(s"// not a typeRef")
+                                      out.println(s"// eventType.class: ${eventType.getClass()}")
+                                      out.println(s"def ${normalName}: Events[$eventType] = EventsWithEventHandler.on(self.${method.name}())")
+                                  }
                                 } else {
                                   out.println(s"// skipped 3 ${method.name}")
                                 }
