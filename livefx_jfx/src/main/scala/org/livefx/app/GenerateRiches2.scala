@@ -8,15 +8,14 @@ import scala.reflect.runtime.universe.TypeBounds
 import scala.reflect.runtime.universe.TypeRef
 import scala.reflect.runtime.universe.runtimeMirror
 import scala.reflect.runtime.universe.typeOf
-
 import org.livefx.util.EndLn
 import org.livefx.util.IndentWriter
 import org.reflections.Reflections
-
 import javafx.beans.property.ObjectProperty
 import javafx.event.Event
 import javafx.scene.Node
 import javafx.scene.control.TableView
+import org.livefx.util.IO
 
 object GenerateRiches2 {
   def part1(): Unit = {
@@ -81,7 +80,7 @@ object GenerateRiches2 {
               if (classDeclaration.isMethod) {
                 val method = classDeclaration.asMethod
                 val returnType = method.returnType
-                if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
+                if (IO.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
                   returnType match {
                     case TypeRef(_, _, handlerType :: Nil) => {
                       handlerType match {

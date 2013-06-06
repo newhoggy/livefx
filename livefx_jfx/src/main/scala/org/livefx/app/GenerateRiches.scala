@@ -10,22 +10,7 @@ import java.io.OutputStream
 import scala.util.DynamicVariable
 import javafx.scene.control.ButtonBase
 import javafx.scene.control.Button
-
-object Debug {
-  val originalOut = System.out
-  val suppressed = new DynamicVariable[Boolean](false)
-  val switchedOut = new PrintStream(new OutputStream() {
-    override def write(b: Int): Unit = {
-      if (!suppressed.value) {
-        originalOut.write(b)
-      }
-    }
-  })
-  System.setOut(switchedOut)
-  def suppressStdOut[A](f: => A): A = {
-    suppressed.withValue(true)(f)
-  }
-}
+import org.livefx.util.IO
 
 object GenerateRiches {
   def main(args: Array[String]): Unit = {
@@ -40,7 +25,7 @@ object GenerateRiches {
       if (dec.isMethod) {
         val method = dec.asMethod
         val returnType = method.returnType
-        if (Debug.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
+        if (IO.suppressStdOut(returnType <:< typeOf[ObjectProperty[_]])) {
           returnType match {
             case TypeRef(_, _, handlerType :: Nil) => {
               println(s"--> ${method.name}: ${handlerType}")
