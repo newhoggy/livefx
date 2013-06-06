@@ -3,38 +3,23 @@ package org.livefx.jfx
 import org.livefx.Events
 
 object Nodes {
-  trait Event
-  trait DerivedEvent extends Event
-  trait EventHandler[E <: Event] {
-    def handle(event: E): Unit
-  }
-  val handler: EventHandler[_ >: DerivedEvent <: Event] = ???
-  handler match {
-    case _ => ???
-  }
-  
-  
   object Implicits {
     implicit class RichNode(self: javafx.scene.Node) {
       import javafx.scene.input.ContextMenuEvent
-      def contextMenuRequested: EventsWithEventHandler[ContextMenuEvent] = {
+
+      def contextMenuRequested: Events[ContextMenuEvent] = {
         val handler = self.onContextMenuRequestedProperty().getValue()
         if (handler == null) {
             val events = new EventsWithEventHandler[ContextMenuEvent]
             self.onContextMenuRequestedProperty().setValue(events)
             events
         } else {
-          if (handler.isInstanceOf[EventsWithEventHandler[ContextMenuEvent]]) {
+          if (handler.isInstanceOf[EventsWithEventHandler[_]]) {
             handler.asInstanceOf[EventsWithEventHandler[ContextMenuEvent]]
           } else {
             throw new UnsupportedOperationException("event handler already installed")
           }
-//          handler match {
-//            case events: EventsWithEventHandler[ContextMenuEvent] => events
-//            case _ => throw new UnsupportedOperationException("event handler already installed")
-//          }
         }
-        ???
       } 
         //EventsWithEventHandler.on(self.onContextMenuRequestedProperty())
 //      def inputMethodTextChanged: Events[javafx.scene.input.InputMethodEvent] = EventsWithEventHandler.on(self.onInputMethodTextChangedProperty())
