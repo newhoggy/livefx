@@ -93,7 +93,30 @@ object GenerateRiches2 {
                                   case Regex(name) =>
                                     if (name.length > 0) {
                                       val normalName = name(0).toString.toLowerCase + name.substring(1)
-                                      out.println(s"def ${normalName}: Events[$lower] = EventsWithEventHandler.on(self.${method.name}())")
+                                      out.println(s"def ${normalName}: Events[$lower] = {")
+                                      out.indent(2) {
+                                        out.println(s"val handler = self.${method.name}().getValue()")
+                                        out.println("if (handler == null) {")
+                                        out.indent(2) {
+                                          out.println(s"val events = new EventsWithEventHandler[$lower]")
+                                          out.println(s"self.${method.name}().setValue(events)")
+                                          out.println("events")
+                                        }
+                                        out.println("} else {")
+                                        out.indent(2) {
+                                          out.println("if (handler.isInstanceOf[EventsWithEventHandler[_]]) {")
+                                          out.indent(2) {
+                                            out.println(s"handler.asInstanceOf[EventsWithEventHandler[$lower]]")
+                                          }
+                                          out.println("} else {")
+                                          out.indent(2) {
+                                            out.println("throw new UnsupportedOperationException(\"event handler already installed\")")
+                                          }
+                                          out.println("}")
+                                        }
+                                        out.println("}")
+                                      }
+                                      out.println("}")
                                     }
                                   case _ =>
                                   out.println(s"// skipped 0 ${method.name}")
