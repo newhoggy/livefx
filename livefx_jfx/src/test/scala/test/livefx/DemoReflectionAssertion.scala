@@ -3,6 +3,8 @@ package test.livefx
 import org.reflections.Reflections
 import javafx.scene.Node
 import scala.collection.JavaConversions._
+import javafx.scene.Node
+import javafx.scene.Node
 
 object DemoReflectionAssertion {
   def subClassesOf[A](clazz: Class[A], packageName: String): Seq[Class[_ <: A]] = {
