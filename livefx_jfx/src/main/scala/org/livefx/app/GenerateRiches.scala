@@ -7,6 +7,7 @@ import scala.reflect.runtime.universe.ExistentialType
 import scala.reflect.runtime.universe.ThisType
 import scala.reflect.runtime.universe.TypeBounds
 import scala.reflect.runtime.universe.TypeRef
+import scala.reflect.runtime.universe.TypeSymbol
 import scala.reflect.runtime.universe.runtimeMirror
 import scala.reflect.runtime.universe.typeOf
 import org.livefx.util.EndLn
@@ -48,11 +49,32 @@ object GenerateRiches {
         for (classSymbol <- filteredClassSymbols) {
           if (!firstClass) out.println()
           firstClass = false
+          out.println(s"// classSymbol: ${classSymbol.asType}")
+          val boundedParamString = classSymbol.asType.typeParams match {
+            case Nil => ""
+            case ps =>
+              out.println(s"// ps: $ps")
+              ps.map{x =>
+                x.typeSignature match {
+                  case TypeBounds(lo, hi) =>
+                    val loName = if (!(typeOf[Nothing] =:= lo)) lo.typeSymbol.fullName + " <: " else ""
+                    val hiName = if (!(hi =:= typeOf[Any]))     " <: " + hi.typeSymbol.fullName else ""
+                    loName + x.name + hiName
+                }
+              }.mkString("[", ", ", "]")
+          }
           val paramString = classSymbol.asType.typeParams match {
             case Nil => ""
-            case ps => ps.map(x => x.name).mkString("[", ", ", "]")
+            case ps =>
+              out.println(s"// ps: $ps")
+              ps.map{x =>
+                x.typeSignature match {
+                  case TypeBounds(lo, hi) =>
+                    x.name
+                }
+              }.mkString("[", ", ", "]")
           }
-          out.println(s"implicit class Rich${classSymbol.name}$paramString(self: ${classSymbol.fullName}$paramString) {")
+          out.println(s"implicit class Rich${classSymbol.name}$boundedParamString(self: ${classSymbol.fullName}$paramString) {")
           out.indent(2) {
             for (classDeclaration <- classSymbol.typeSignature.declarations) {
               if (classDeclaration.isMethod) {
