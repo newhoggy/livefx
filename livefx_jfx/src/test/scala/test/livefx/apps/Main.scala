@@ -1,4 +1,4 @@
-package org.livefx.app
+package test.livefx.apps
 
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.FlowPane

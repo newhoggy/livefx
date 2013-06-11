@@ -11,8 +11,8 @@ import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.scene.control.Button
 import org.livefx.jfx.Nodes.Implicits._
-import org.livefx.app.Main
-import org.livefx.app.Main
+import test.livefx.apps.Main
+import test.livefx.apps.Main
 
 class DemoTableView extends javafx.application.Application {
   override def start(primaryStage: Stage): Unit = {
