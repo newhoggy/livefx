@@ -1,4 +1,4 @@
-package test.livefx
+package test.livefx.apps
 
 import javafx.scene.Scene
 import javafx.stage.Stage
@@ -11,6 +11,7 @@ import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.scene.control.Button
 import org.livefx.jfx.Nodes.Implicits._
+import org.livefx.app.Main
 import org.livefx.app.Main
 
 class DemoTableView extends javafx.application.Application {
