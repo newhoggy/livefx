@@ -1,4 +1,4 @@
-package org.livefx.app
+package test.livefx
 
 import javafx.scene.Scene
 import javafx.stage.Stage
@@ -10,9 +10,8 @@ import javafx.scene.control.ListView
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
 import javafx.scene.control.Button
-import javafx.event.EventHandler
-import javafx.event.ActionEvent
 import org.livefx.jfx.Nodes.Implicits._
+import org.livefx.app.Main
 
 class DemoTableView extends javafx.application.Application {
   override def start(primaryStage: Stage): Unit = {
