@@ -17,6 +17,11 @@ trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
   def value: A
 
   def value_=(newValue: A): Unit
+
+  def :=(value: A): this.type = {
+    this.value = value
+    this
+  }
 }
 
 object Var {
