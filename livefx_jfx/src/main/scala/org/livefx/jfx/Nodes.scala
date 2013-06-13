@@ -19,14 +19,10 @@ object Nodes {
     }
 
     // classSymbol: class AreaChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichAreaChart[X, Y](self: javafx.scene.chart.AreaChart[X, Y]) {
     }
 
     // classSymbol: class Axis
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichAxis[T](self: javafx.scene.chart.Axis[T]) {
       // skipped 6 labelProperty
       // skipped 6 sideProperty
@@ -35,8 +31,6 @@ object Nodes {
     }
 
     // classSymbol: class BarChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichBarChart[X, Y](self: javafx.scene.chart.BarChart[X, Y]) {
     }
 
@@ -51,8 +45,6 @@ object Nodes {
     }
 
     // classSymbol: class BubbleChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichBubbleChart[X, Y](self: javafx.scene.chart.BubbleChart[X, Y]) {
     }
 
@@ -76,8 +68,6 @@ object Nodes {
     }
 
     // classSymbol: class Cell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichCell[T](self: javafx.scene.control.Cell[T]) {
       // skipped 6 itemProperty
     }
@@ -94,32 +84,24 @@ object Nodes {
     }
 
     // classSymbol: class CheckBoxListCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichCheckBoxListCell[T](self: javafx.scene.control.cell.CheckBoxListCell[T]) {
       // skipped 5 converterProperty
       // skipped 6 selectedStateCallbackProperty
     }
 
     // classSymbol: class CheckBoxTableCell
-    // ps: List(type S, type T)
-    // ps: List(type S, type T)
     implicit class RichCheckBoxTableCell[S, T](self: javafx.scene.control.cell.CheckBoxTableCell[S, T]) {
       // skipped 5 converterProperty
       // skipped 6 selectedStateCallbackProperty
     }
 
     // classSymbol: class CheckBoxTreeCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichCheckBoxTreeCell[T](self: javafx.scene.control.cell.CheckBoxTreeCell[T]) {
       // skipped 5 converterProperty
       // skipped 6 selectedStateCallbackProperty
     }
 
     // classSymbol: class ChoiceBox
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichChoiceBox[T](self: javafx.scene.control.ChoiceBox[T]) {
       // skipped 5 converterProperty
       // skipped 5 itemsProperty
@@ -128,22 +110,16 @@ object Nodes {
     }
 
     // classSymbol: class ChoiceBoxListCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichChoiceBoxListCell[T](self: javafx.scene.control.cell.ChoiceBoxListCell[T]) {
       // skipped 5 converterProperty
     }
 
     // classSymbol: class ChoiceBoxTableCell
-    // ps: List(type S, type T)
-    // ps: List(type S, type T)
     implicit class RichChoiceBoxTableCell[S, T](self: javafx.scene.control.cell.ChoiceBoxTableCell[S, T]) {
       // skipped 5 converterProperty
     }
 
     // classSymbol: class ChoiceBoxTreeCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichChoiceBoxTreeCell[T](self: javafx.scene.control.cell.ChoiceBoxTreeCell[T]) {
       // skipped 5 converterProperty
     }
@@ -157,8 +133,6 @@ object Nodes {
     }
 
     // classSymbol: class ComboBox
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichComboBox[T](self: javafx.scene.control.ComboBox[T]) {
       // skipped 5 buttonCellProperty
       // skipped 6 cellFactoryProperty
@@ -168,8 +142,6 @@ object Nodes {
     }
 
     // classSymbol: class ComboBoxBase
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichComboBoxBase[T](self: javafx.scene.control.ComboBoxBase[T]) {
       // not a typeRef
       // eventType.class: class scala.reflect.internal.Types$TypeRef$$anon$6
@@ -190,22 +162,16 @@ object Nodes {
     }
 
     // classSymbol: class ComboBoxListCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichComboBoxListCell[T](self: javafx.scene.control.cell.ComboBoxListCell[T]) {
       // skipped 5 converterProperty
     }
 
     // classSymbol: class ComboBoxTableCell
-    // ps: List(type S, type T)
-    // ps: List(type S, type T)
     implicit class RichComboBoxTableCell[S, T](self: javafx.scene.control.cell.ComboBoxTableCell[S, T]) {
       // skipped 5 converterProperty
     }
 
     // classSymbol: class ComboBoxTreeCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichComboBoxTreeCell[T](self: javafx.scene.control.cell.ComboBoxTreeCell[T]) {
       // skipped 5 converterProperty
     }
@@ -262,8 +228,6 @@ object Nodes {
     }
 
     // classSymbol: class IndexedCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichIndexedCell[T](self: javafx.scene.control.IndexedCell[T]) {
     }
 
@@ -289,20 +253,14 @@ object Nodes {
     }
 
     // classSymbol: class LineChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichLineChart[X, Y](self: javafx.scene.chart.LineChart[X, Y]) {
     }
 
     // classSymbol: class ListCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichListCell[T](self: javafx.scene.control.ListCell[T]) {
     }
 
     // classSymbol: class ListView
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichListView[T](self: javafx.scene.control.ListView[T]) {
       // skipped 6 cellFactoryProperty
       // skipped 5 focusModelProperty
@@ -950,8 +908,6 @@ object Nodes {
     }
 
     // classSymbol: class ProgressBarTableCell
-    // ps: List(type S)
-    // ps: List(type S)
     implicit class RichProgressBarTableCell[S](self: javafx.scene.control.cell.ProgressBarTableCell[S]) {
     }
 
@@ -987,8 +943,6 @@ object Nodes {
     }
 
     // classSymbol: class ScatterChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichScatterChart[X, Y](self: javafx.scene.chart.ScatterChart[X, Y]) {
     }
 
@@ -1042,14 +996,10 @@ object Nodes {
     }
 
     // classSymbol: class StackedAreaChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichStackedAreaChart[X, Y](self: javafx.scene.chart.StackedAreaChart[X, Y]) {
     }
 
     // classSymbol: class StackedBarChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichStackedBarChart[X, Y](self: javafx.scene.chart.StackedBarChart[X, Y]) {
     }
 
@@ -1061,22 +1011,16 @@ object Nodes {
     }
 
     // classSymbol: class TableCell
-    // ps: List(type S, type T)
-    // ps: List(type S, type T)
     implicit class RichTableCell[S, T](self: javafx.scene.control.TableCell[S, T]) {
       // skipped 5 tableViewPropertyImpl
     }
 
     // classSymbol: class TableRow
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichTableRow[T](self: javafx.scene.control.TableRow[T]) {
       // skipped 5 tableViewPropertyImpl
     }
 
     // classSymbol: class TableView
-    // ps: List(type S)
-    // ps: List(type S)
     implicit class RichTableView[S](self: javafx.scene.control.TableView[S]) {
       // skipped 6 columnResizePolicyProperty
       // skipped 0 editingCellPropertyImpl
@@ -1112,22 +1056,16 @@ object Nodes {
     }
 
     // classSymbol: class TextFieldListCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichTextFieldListCell[T](self: javafx.scene.control.cell.TextFieldListCell[T]) {
       // skipped 5 converterProperty
     }
 
     // classSymbol: class TextFieldTableCell
-    // ps: List(type S, type T)
-    // ps: List(type S, type T)
     implicit class RichTextFieldTableCell[S, T](self: javafx.scene.control.cell.TextFieldTableCell[S, T]) {
       // skipped 5 converterProperty
     }
 
     // classSymbol: class TextFieldTreeCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichTextFieldTreeCell[T](self: javafx.scene.control.cell.TextFieldTreeCell[T]) {
       // skipped 5 converterProperty
     }
@@ -1159,15 +1097,11 @@ object Nodes {
     }
 
     // classSymbol: class TreeCell
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichTreeCell[T](self: javafx.scene.control.TreeCell[T]) {
       // skipped 6 disclosureNodeProperty
     }
 
     // classSymbol: class TreeView
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichTreeView[T](self: javafx.scene.control.TreeView[T]) {
       // skipped 6 cellFactoryProperty
       // skipped 5 editingItemPropertyImpl
@@ -1197,8 +1131,6 @@ object Nodes {
     }
 
     // classSymbol: class ValueAxis
-    // ps: List(type T)
-    // ps: List(type T)
     implicit class RichValueAxis[T <: java.lang.Number](self: javafx.scene.chart.ValueAxis[T]) {
       // skipped 5 tickLabelFormatterProperty
     }
@@ -1209,8 +1141,6 @@ object Nodes {
     }
 
     // classSymbol: class XYChart
-    // ps: List(type X, type Y)
-    // ps: List(type X, type Y)
     implicit class RichXYChart[X, Y](self: javafx.scene.chart.XYChart[X, Y]) {
       // skipped 6 currentDisplayedExtraValueProperty
       // skipped 6 currentDisplayedXValueProperty

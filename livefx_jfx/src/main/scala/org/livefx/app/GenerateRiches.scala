@@ -61,18 +61,14 @@ object GenerateRiches {
           out.println(s"// classSymbol: ${classSymbol.asType}")
           val boundedParamString = classSymbol.asType.typeParams match {
             case Nil => ""
-            case ps =>
-              out.println(s"// ps: $ps")
-              ps.map(_.asString).mkString("[", ", ", "]")
+            case ps => ps.map(_.asString).mkString("[", ", ", "]")
           }
           val paramString = classSymbol.asType.typeParams match {
             case Nil => ""
             case ps =>
-              out.println(s"// ps: $ps")
-              ps.map{x =>
+              ps.map { x =>
                 x.typeSignature match {
-                  case TypeBounds(lo, hi) =>
-                    x.name
+                  case TypeBounds(lo, hi) => x.name
                 }
               }.mkString("[", ", ", "]")
           }
