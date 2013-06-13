@@ -43,7 +43,7 @@ object GenerateRiches {
     val classSymbols = classes.flatMap { clazz =>
       try Some(m.classSymbol(clazz)) catch { case e: AssertionError => None }
     }
-    val filteredClassSymbols = classSymbols.filter(!_.fullName.contains("$"))
+    val filteredClassSymbols = classSymbols.filter(!_.fullName.contains("$")).sortBy(_.name.toString)
     val out = new IndentWriter(System.out)
     val Regex = """on([a-zA-Z0-9_]+)Property""".r
     out.println("package org.livefx.jfx")
