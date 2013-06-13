@@ -63,14 +63,7 @@ object GenerateRiches {
             case Nil => ""
             case ps =>
               out.println(s"// ps: $ps")
-              ps.map{x =>
-                x.typeSignature match {
-                  case TypeBounds(lo, hi) =>
-                    val loName = if (!(typeOf[Nothing] =:= lo)) lo.typeSymbol.fullName + " <: " else ""
-                    val hiName = if (!(hi =:= typeOf[Any]))     " <: " + hi.typeSymbol.fullName else ""
-                    loName + x.name + hiName
-                }
-              }.mkString("[", ", ", "]")
+              ps.map(_.asString).mkString("[", ", ", "]")
           }
           val paramString = classSymbol.asType.typeParams match {
             case Nil => ""
