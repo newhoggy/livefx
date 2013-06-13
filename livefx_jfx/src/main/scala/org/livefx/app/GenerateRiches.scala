@@ -78,7 +78,7 @@ object GenerateRiches {
           }
           out.println(s"implicit class Rich${classSymbol.name}$boundedParamString(self: ${classSymbol.fullName}$paramString) {")
           out.indent(2) {
-            for (classDeclaration <- classSymbol.typeSignature.declarations) {
+            for (classDeclaration <- classSymbol.typeSignature.declarations.toList.sortBy(_.name.toString)) {
               if (classDeclaration.isMethod) {
                 val method = classDeclaration.asMethod
                 val returnType = method.returnType
