@@ -58,7 +58,6 @@ object GenerateRiches {
         for (classSymbol <- filteredClassSymbols) {
           if (!firstClass) out.println()
           firstClass = false
-          out.println(s"// classSymbol: ${classSymbol.asType}")
           val boundedParamString = classSymbol.asType.typeParams match {
             case Nil => ""
             case ps => ps.map(_.asString).mkString("[", ", ", "]")
