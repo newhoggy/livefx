@@ -65,12 +65,7 @@ object GenerateRiches {
           }
           val paramString = classSymbol.asType.typeParams match {
             case Nil => ""
-            case ps =>
-              ps.map { x =>
-                x.typeSignature match {
-                  case TypeBounds(lo, hi) => x.name
-                }
-              }.mkString("[", ", ", "]")
+            case ps => ps.map(_.name.toString).mkString("[", ", ", "]")
           }
           out.println(s"implicit class Rich${classSymbol.name}$boundedParamString(self: ${classSymbol.fullName}$paramString) {")
           out.indent(2) {
