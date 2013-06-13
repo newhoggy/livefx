@@ -20,6 +20,15 @@ import javafx.scene.control.TableView
 import org.livefx.util.IO
 
 object GenerateRiches {
+  implicit class RichSymbol(self: reflect.runtime.universe.Symbol) {
+    def asString: String = self.typeSignature match {
+      case TypeBounds(lo, hi) =>
+        val loName = if (!(typeOf[Nothing] =:= lo)) lo.typeSymbol.fullName + " <: " else ""
+        val hiName = if (!(hi =:= typeOf[Any]))     " <: " + hi.typeSymbol.fullName else ""
+        loName + self.name + hiName
+    }
+  }
+
   def subClassesOf[A](clazz: Class[A], packageName: String): List[Class[_ <: A]] = {
     new Reflections("javafx.scene").getSubTypesOf(clazz).toList
   }
