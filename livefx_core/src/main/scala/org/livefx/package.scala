@@ -3,6 +3,7 @@ package org
 import org.livefx.script._
 import scala.util.DynamicVariable
 import org.livefx.trees.n23.Tree
+import scalaz._, Scalaz._
 
 package object livefx {
   implicit class RichLiveValueBoolean(val self: Live[Boolean]) {
@@ -64,4 +65,9 @@ package object livefx {
   }
 
   def const[A](value: A): Const[A] = Const(value)
+
+  implicit object LiveMonad extends Monad[Live] {
+    def point[A](a: => A): org.livefx.Live[A] = const(a)
+    def bind[A, B](liveA: org.livefx.Live[A])(f: A => org.livefx.Live[B]): org.livefx.Live[B] = liveA.flatMap(f)
+  }
 }
