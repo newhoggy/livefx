@@ -12,6 +12,6 @@ trait Validity extends Message[Nothing] {
 
 sealed case class Invalid(val trace: List[StackTraceElement] = Nil) extends Validity
 
-sealed case class Valid(val trace: List[StackTraceElement] = Nil) extends Validity
+sealed case class Renew(val trace: List[StackTraceElement] = Nil) extends Validity
 
 case object Ping extends Message[Nothing]
