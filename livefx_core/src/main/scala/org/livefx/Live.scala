@@ -2,7 +2,7 @@ package org.livefx
 
 import org.livefx.script.Change
 import org.livefx.script.Message
-import org.livefx.script.Spoil
+import org.livefx.script.Validity
 
 trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   def value: A
@@ -24,7 +24,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
     val source = this
     val binding = new Binding[B] {
       var nested: Live[B] = f(source.value)
-      val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
+      val nestedSpoilHandler = { spoilEvent: Validity => spoil(spoilEvent) }
       var ref: Any = nested.spoils.subscribeWeak(nestedSpoilHandler)
       val ref1 = source.spoils.subscribeWeak { spoilEvent =>
         nested.spoils.unsubscribe(nestedSpoilHandler)

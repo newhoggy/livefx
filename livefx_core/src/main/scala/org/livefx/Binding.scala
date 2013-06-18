@@ -1,14 +1,15 @@
 package org.livefx
 
 import org.livefx.script.Change
-import org.livefx.script.Spoil
+import org.livefx.script.Invalid
+import org.livefx.script.Validity
 
 abstract class Binding[A] extends Live[A] with Unspoilable {
-  private lazy val _spoils = new EventSource[Spoil]
+  private lazy val _spoils = new EventSource[Validity]
   
-  protected override def spoilsSource: EventSink[Spoil] = _spoils
+  protected override def spoilsSource: EventSink[Validity] = _spoils
   
-  override def spoils: Events[Spoil] = _spoils
+  override def spoils: Events[Validity] = _spoils
 
   lazy val _changes = new EventSource[Change[A]] {
     lazy val spoilHandler: Any => Unit = { _ => Binding.this.value }
