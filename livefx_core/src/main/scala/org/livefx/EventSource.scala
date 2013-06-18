@@ -31,7 +31,7 @@ class EventSource[E] extends Events[E] with EventSink[E] {
   override def unsubscribe(subscriber: E => Unit): Unit = { subscribers -= subscriber }
 
   override def publish(event: E): Unit = {
-    subscribers.foreach { entry => entry(event) }
+    subscribers.foreach(s => s(event))
   }
 
   final def isEmpty: Boolean = subscribers.isEmpty
