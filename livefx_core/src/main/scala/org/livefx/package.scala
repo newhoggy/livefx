@@ -40,9 +40,9 @@ package object livefx {
 
     println(s"(${source}:${line}:${column}) => ${snippet}")
     new Binding[Int] {
-      liveValue.spoils.subscribe { _ =>
+      liveValue.spoils.subscribe { spoilEvent =>
         bindTraceEntries.withValue(newBindTraceEntry :: bindTraceEntries.value) {
-          spoil(Spoil(true))
+          spoil(spoilEvent.copy())
         }
       }
   
@@ -57,7 +57,7 @@ package object livefx {
 
     new Binding[V] {
       val ref = liveValue.spoils.subscribeWeak { spoilEvent =>
-        spoil(Spoil(true, caller :: spoilEvent.trace))
+        spoil(spoilEvent.copy(trace = caller :: spoilEvent.trace))
       }
   
       protected def computeValue: V = liveValue.value
@@ -77,13 +77,7 @@ package object livefx {
 //      new Exception("XXX").printStackTrace(System.out)
 //      bind(f)(f => map(fa)(f))
 //    }
-    override def map[A, B](liveA: Live[A])(f: A => B) = {
-      new Exception("YYY").printStackTrace(System.out)
-      liveA map f
-    }
-    override def bind[A, B](liveA: org.livefx.Live[A])(f: A => org.livefx.Live[B]): org.livefx.Live[B] = {
-      new Exception("ZZZ").printStackTrace(System.out)
-      liveA.flatMap(f)
-    }
+    override def map[A, B](liveA: Live[A])(f: A => B) = liveA map f
+    override def bind[A, B](liveA: org.livefx.Live[A])(f: A => org.livefx.Live[B]): org.livefx.Live[B] = liveA.flatMap(f)
   }
 }

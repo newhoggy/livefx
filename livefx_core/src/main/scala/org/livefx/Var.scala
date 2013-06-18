@@ -2,6 +2,8 @@ package org.livefx
 
 import org.livefx.script.Change
 import org.livefx.script.Spoil
+import java.util.concurrent.atomic.AtomicReference
+import scala.collection.immutable.HashSet
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
   private lazy val _spoils = new EventSource[Spoil]
@@ -34,8 +36,7 @@ object Var {
 
     protected def updateValue(oldValue: A, newValue: A): Unit = {
       _value = newValue
-      spoil(Spoil(false))
-      spoil(Spoil(true))
+      spoil(Spoil(new AtomicReference(HashSet.empty[Spoilable])))
       _changes.publish(Change(oldValue, newValue))
     }
   }

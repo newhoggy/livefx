@@ -9,5 +9,14 @@ trait Spoilable extends Publisher {
 
   def spoiled: Boolean = false
 
-  protected def spoil(spoilEvent: Spoil): Unit = spoilsSource.publish(spoilEvent)
+  protected def spoil(spoilEvent: Spoil): Unit = {
+    var done = false
+
+    while (!done) {
+      val oldRenewables = spoilEvent.renewables.get()
+      if (spoilEvent.renewables.compareAndSet(oldRenewables, oldRenewables + this)) done = true
+    }
+
+    spoilsSource.publish(spoilEvent)
+  }
 }

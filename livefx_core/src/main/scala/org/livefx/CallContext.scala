@@ -16,7 +16,7 @@ class CallContext {
   
   def traceSpoils[V](liveValue: Live[V]): Live[V] = new Binding[V] {
     spoils.subscribe { spoilEvent =>
-      spoil(Spoil(spoilEvent.renewable, spoilEvent.trace))
+      spoil(spoilEvent.copy())
     }
 
     protected def computeValue: V = liveValue.value
