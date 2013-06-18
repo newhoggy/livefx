@@ -31,6 +31,7 @@ class EventSource[E] extends Events[E] with EventSink[E] {
   override def unsubscribe(subscriber: E => Unit): Unit = { subscribers -= subscriber }
 
   override def publish(event: E): Unit = {
+    TidyReferenceQueue.tidy(1)
     subscribers.foreach(s => s(event))
   }
 
