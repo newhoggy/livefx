@@ -37,7 +37,7 @@ object Var {
     protected def updateValue(oldValue: A, newValue: A): Unit = {
       _value = newValue
       spoil(Spoil(new AtomicReference(HashSet.empty[Spoilable])))
-      _changes.publish(Change(oldValue, newValue))
+      _changes.publish(Change(oldValue, newValue))(PublishingStrategy.depthFirst)
     }
   }
 }

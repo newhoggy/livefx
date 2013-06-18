@@ -5,9 +5,10 @@ import org.livefx.EventSource
 import javafx.event.EventHandler
 import javafx.beans.property.ObjectProperty
 import org.livefx.Events
+import org.livefx.PublishingStrategy
 
 class EventsWithEventHandler[E <: Event] extends EventSource[E] with EventHandler[E] {
-  override def handle(event: E): Unit = publish(event)
+  override def handle(event: E): Unit = publish(event)(PublishingStrategy.depthFirst)
 }
 
 object EventsWithEventHandler {

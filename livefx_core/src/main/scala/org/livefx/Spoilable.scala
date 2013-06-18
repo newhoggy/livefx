@@ -17,6 +17,6 @@ trait Spoilable extends Publisher {
       if (spoilEvent.renewables.compareAndSet(oldRenewables, oldRenewables + this)) done = true
     }
 
-    spoilsSource.publish(spoilEvent)
+    spoilsSource.publish(spoilEvent)(PublishingStrategy.depthFirst)
   }
 }

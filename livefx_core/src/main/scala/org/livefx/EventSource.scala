@@ -30,9 +30,9 @@ class EventSource[E] extends Events[E] with EventSink[E] {
 
   override def unsubscribe(subscriber: E => Unit): Unit = { subscribers -= subscriber }
 
-  override def publish(event: E): Unit = {
+  override def publish(event: E)(implicit strategy: PublishingStrategy): Unit = {
     TidyReferenceQueue.tidy(1)
-    subscribers.foreach(s => s(event))
+    strategy.publishTo(subscribers)(event)
   }
 
   final def isEmpty: Boolean = subscribers.isEmpty

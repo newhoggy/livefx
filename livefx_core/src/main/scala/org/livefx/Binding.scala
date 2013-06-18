@@ -41,7 +41,7 @@ abstract class Binding[A] extends Live[A] with Unspoilable {
       val newValue = computeValue
       _value = newValue
       unspoil()
-      _changes.publish(Change(oldValue, newValue))
+      _changes.publish(Change(oldValue, newValue))(PublishingStrategy.depthFirst)
     }
     
     _value
