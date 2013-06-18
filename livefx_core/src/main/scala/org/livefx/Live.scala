@@ -12,7 +12,6 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   def asliveValue: Live[A] = this
 
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = {
-    new Exception("AAA").printStackTrace(System.out)
     val source = this
     new Binding[B] {
       val ref = source.spoils.subscribeWeak(spoilEvent => spoil(spoilEvent))
@@ -22,7 +21,6 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   }
 
   def flatMap[B](f: A => Live[B]): Live[B] = {
-    new Exception("BBB").printStackTrace(System.out)
     val source = this
     val binding = new Binding[B] {
       var nested: Live[B] = f(source.value)

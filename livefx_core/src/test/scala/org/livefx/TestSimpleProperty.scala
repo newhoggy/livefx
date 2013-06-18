@@ -280,4 +280,19 @@ class TestSimpleProperty {
     liveB.value = false
     Assert.assertEquals((false, false, true), live3.value)
   }
+  
+  @Test
+  def testGlitch(): Unit = {
+    import LiveNumeric.Implicits._
+    val liveA = Var[Int](0)
+    val liveB1 = liveA.map(x => x)
+    val liveB2 = liveA.map(x => x)
+    val liveC = liveB1 + liveB2
+    var changes = List.empty[Change[Int]]
+
+    println("--> result: " + liveC.value)
+    liveC.changes.subscribe { change => changes ::= change }
+    liveA.value = 1
+    println("--> result: " + changes)
+  }
 }
