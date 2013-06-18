@@ -42,7 +42,7 @@ package object livefx {
     new Binding[Int] {
       liveValue.spoils.subscribe { _ =>
         bindTraceEntries.withValue(newBindTraceEntry :: bindTraceEntries.value) {
-          spoil()
+          spoil(Spoil(true))
         }
       }
   
@@ -57,7 +57,7 @@ package object livefx {
 
     new Binding[V] {
       val ref = liveValue.spoils.subscribeWeak { spoilEvent =>
-        spoil(Invalid(caller :: spoilEvent.trace))
+        spoil(Spoil(true, caller :: spoilEvent.trace))
       }
   
       protected def computeValue: V = liveValue.value

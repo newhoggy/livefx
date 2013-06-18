@@ -1,13 +1,13 @@
 package org.livefx
 
-import org.livefx.script.Validity
+import org.livefx.script.Spoil
 
 trait Spoilable extends Publisher {
-  protected def spoilsSource: EventSink[Validity]
+  protected def spoilsSource: EventSink[Spoil]
 
-  def spoils: Events[Validity]
+  def spoils: Events[Spoil]
 
   def spoiled: Boolean = false
 
-  protected def spoil(spoilEvent: Validity): Unit = spoilsSource.publish(spoilEvent)
+  protected def spoil(spoilEvent: Spoil): Unit = spoilsSource.publish(spoilEvent)
 }

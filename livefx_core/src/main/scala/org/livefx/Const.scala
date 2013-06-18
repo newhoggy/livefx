@@ -1,14 +1,14 @@
 package org.livefx
 
 import org.livefx.script.Change
-import org.livefx.script.Validity
+import org.livefx.script.Spoil
 
 case class Const[A](value: A) extends Live[A] {
-  def spoils: Events[Validity] = NoEvents
+  def spoils: Events[Spoil] = NoEvents
 
   def changes: Events[Change[A]] = NoEvents
 
-  def spoilsSource: org.livefx.EventSink[Validity] = ???
+  def spoilsSource: org.livefx.EventSink[Spoil] = ???
 }
 
 object NoEvents extends Events[Nothing] with EventSink[Nothing] {

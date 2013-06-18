@@ -1,7 +1,6 @@
 package org.livefx
 
-import org.livefx.script.Invalid
-import org.livefx.script.Validity
+import org.livefx.script.Spoil
 
 trait Unspoilable extends Spoilable {
   type Pub <: Unspoilable
@@ -12,7 +11,7 @@ trait Unspoilable extends Spoilable {
 
   override def spoiled: Boolean = _spoiled
 
-  protected override def spoil(spoilEvent: Validity = Invalid()): Unit = if (!_spoiled) {
+  protected override def spoil(spoilEvent: Spoil): Unit = if (!_spoiled) {
     _spoiled = true
     super.spoil(spoilEvent)
   }

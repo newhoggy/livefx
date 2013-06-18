@@ -1,15 +1,14 @@
 package org.livefx
 
 import org.livefx.script.Change
-import org.livefx.script.Validity
-import org.livefx.script.Invalid
+import org.livefx.script.Spoil
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
-  private lazy val _spoils = new EventSource[Validity]
+  private lazy val _spoils = new EventSource[Spoil]
 
-  protected override def spoilsSource: EventSink[Validity] = _spoils
+  protected override def spoilsSource: EventSink[Spoil] = _spoils
 
-  override def spoils: Events[Validity] = _spoils
+  override def spoils: Events[Spoil] = _spoils
 
   lazy val _changes = new EventSource[Change[A]]
 
@@ -35,7 +34,8 @@ object Var {
 
     protected def updateValue(oldValue: A, newValue: A): Unit = {
       _value = newValue
-      spoil(Invalid())
+      spoil(Spoil(false))
+      spoil(Spoil(true))
       _changes.publish(Change(oldValue, newValue))
     }
   }

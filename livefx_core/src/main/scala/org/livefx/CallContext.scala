@@ -1,8 +1,7 @@
 package org.livefx
 
 import scala.util.DynamicVariable
-import org.livefx.script.Validity
-import org.livefx.script.Invalid
+import org.livefx.script.Spoil
 
 class CallContext {
   val myCaller: StackTraceElement = getCaller(2)
@@ -17,7 +16,7 @@ class CallContext {
   
   def traceSpoils[V](liveValue: Live[V]): Live[V] = new Binding[V] {
     spoils.subscribe { spoilEvent =>
-      spoil(Invalid(spoilEvent.trace))
+      spoil(Spoil(spoilEvent.renewable, spoilEvent.trace))
     }
 
     protected def computeValue: V = liveValue.value
