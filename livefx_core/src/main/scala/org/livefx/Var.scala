@@ -6,13 +6,13 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.collection.immutable.HashSet
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
-  private lazy val _spoils = new EventSource[Spoil]
+  private lazy val _spoils = new EventSource[Spoil] with DepthFirst[Spoil]
 
   protected override def spoilsSource: EventSink[Spoil] = _spoils
 
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new EventSource[Change[A]]
+  lazy val _changes = new EventSource[Change[A]] with DepthFirst[Change[A]]
 
   override def changes: Events[Change[A]] = _changes
 
@@ -37,7 +37,7 @@ object Var {
     protected def updateValue(oldValue: A, newValue: A): Unit = {
       _value = newValue
       spoil(Spoil(new AtomicReference(HashSet.empty[Spoilable])))
-      _changes.publish(Change(oldValue, newValue))(PublishingStrategy.depthFirst)
+      _changes.publish(Change(oldValue, newValue))
     }
   }
 }

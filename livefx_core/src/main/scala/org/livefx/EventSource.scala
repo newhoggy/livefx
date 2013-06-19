@@ -4,8 +4,8 @@ import scala.collection.immutable.HashSet
 import org.livefx.util.TidyWeakReference
 import org.livefx.util.TidyReferenceQueue
 
-class EventSource[E] extends Events[E] with EventSink[E] {
-  private var subscribers = HashSet.empty[E => Unit]
+trait EventSource[E] extends Events[E] with EventSink[E] {
+  protected var subscribers = HashSet.empty[E => Unit]
 
   override def subscribe(subscriber: E => Unit): Disposable = new Disposable {
     TidyReferenceQueue.tidy(1)
@@ -29,11 +29,6 @@ class EventSource[E] extends Events[E] with EventSink[E] {
   }
 
   override def unsubscribe(subscriber: E => Unit): Unit = { subscribers -= subscriber }
-
-  override def publish(event: E)(implicit strategy: PublishingStrategy): Unit = {
-    TidyReferenceQueue.tidy(1)
-    strategy.publishTo(subscribers)(this, event)
-  }
 
   final def isEmpty: Boolean = subscribers.isEmpty
 }

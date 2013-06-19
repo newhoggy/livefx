@@ -1,13 +1,10 @@
 package org.livefx
 
-trait PublishingStrategy {
-  def publishTo[E](subscribers: Iterable[E => Unit])(source: EventSource[E], event: E): Unit
-}
+import org.livefx.util.TidyReferenceQueue
 
-object PublishingStrategy {
-  object depthFirst extends PublishingStrategy {
-    override def publishTo[E](subscribers: Iterable[E => Unit])(source: EventSource[E], event: E): Unit = {
-      subscribers.foreach(s => s(event))
-    }
+trait DepthFirst[E] { self: EventSource[E] =>
+  def publish(event: E): Unit = {
+    TidyReferenceQueue.tidy(1)
+    subscribers.foreach(s => s(event))
   }
 }
