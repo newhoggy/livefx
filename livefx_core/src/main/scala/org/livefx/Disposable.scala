@@ -12,7 +12,7 @@ trait Disposable {
 
   protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(Unit)
 
-  def dispose()(implicit ectx: ExecutionContext): Future[Unit] = {
+  final def dispose()(implicit ectx: ExecutionContext): Future[Unit] = {
     if (!_disposed.getAndSet(true)) {
       disposed.completeWith(dispose(true))
     }

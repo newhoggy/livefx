@@ -13,7 +13,7 @@ trait EventSource[E] extends Events[E] with EventSink[E] {
 
     subscribers += subscriber
 
-    override def dispose()(implicit ectx: ExecutionContext): Future[Unit] = future(subscribers -= subscriber)
+    override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(subscribers -= subscriber)
   }
 
   override def subscribeWeak(subscriber: E => Unit): Disposable = {

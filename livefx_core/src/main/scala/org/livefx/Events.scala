@@ -12,7 +12,7 @@ trait Events[+E] { self =>
     def subscribe(subscriber: F => Unit): Disposable = new Disposable {
       val disposable1 = self.subscribe(subscriber)
       val disposable2 = that.subscribe(subscriber)
-      override def dispose()(implicit ectx: ExecutionContext): Future[Unit] = for {
+      override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = for {
         _ <- disposable1.dispose()
         _ <- disposable2.dispose()
       } yield Unit
@@ -21,7 +21,7 @@ trait Events[+E] { self =>
     def subscribeWeak(subscriber: F => Unit): Disposable = new Disposable {
       val disposable1 = self.subscribe(subscriber)
       val disposable2 = that.subscribe(subscriber)
-      override def dispose()(implicit ectx: ExecutionContext): Future[Unit] = for {
+      override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = for {
         _ <- disposable1.dispose()
         _ <- disposable2.dispose()
       } yield Unit

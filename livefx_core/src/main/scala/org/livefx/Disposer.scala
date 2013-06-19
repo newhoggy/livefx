@@ -18,8 +18,8 @@ class Disposer extends Disposable {
       disposables = Nil
       mydisposables
     }
-  
-  override def dispose()(implicit ectx: ExecutionContext): Future[Unit] = {
+
+  override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = {
     takeDisposables.foldLeft(future {}) { (f, disposable) =>
       for {
         _ <- f
