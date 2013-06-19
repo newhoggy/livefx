@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Spoil
 
 trait Spoilable extends Publisher {
-  protected def spoilsSource: EventSink[Spoil]
+  protected def spoilSink: EventSink[Spoil]
 
   def spoils: Events[Spoil]
 
@@ -17,6 +17,6 @@ trait Spoilable extends Publisher {
       if (spoilEvent.renewables.compareAndSet(oldRenewables, oldRenewables + this)) done = true
     }
 
-    spoilsSource.publish(spoilEvent)
+    spoilSink.publish(spoilEvent)
   }
 }

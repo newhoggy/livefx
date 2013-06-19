@@ -10,7 +10,7 @@ trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
 
   private lazy val _spoils = new EventSource[Spoil] with PublishingStrategy[Spoil]
 
-  protected override def spoilsSource: EventSink[Spoil] = _spoils
+  protected override def spoilSink: EventSink[Spoil] = _spoils
 
   override def spoils: Events[Spoil] = _spoils
 

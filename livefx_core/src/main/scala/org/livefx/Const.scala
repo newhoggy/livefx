@@ -8,7 +8,7 @@ case class Const[A](value: A) extends Live[A] {
 
   def changes: Events[Change[A]] = NoEvents
 
-  def spoilsSource: org.livefx.EventSink[Spoil] = ???
+  def spoilSink: org.livefx.EventSink[Spoil] = ???
 }
 
 object NoEvents extends Events[Nothing] with EventSink[Nothing] {
