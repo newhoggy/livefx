@@ -3,6 +3,7 @@ package org.livefx
 import scala.collection.immutable.HashSet
 import org.livefx.util.TidyWeakReference
 import org.livefx.util.TidyReferenceQueue
+import scala.concurrent._
 
 trait EventSource[E] extends Events[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
@@ -12,7 +13,7 @@ trait EventSource[E] extends Events[E] with EventSink[E] {
 
     subscribers += subscriber
 
-    override def dispose(): Unit = subscribers -= subscriber
+    override def dispose()(implicit ectx: ExecutionContext): Future[Unit] = future(subscribers -= subscriber)
   }
 
   override def subscribeWeak(subscriber: E => Unit): Disposable = {

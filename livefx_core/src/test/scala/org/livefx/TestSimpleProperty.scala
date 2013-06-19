@@ -5,6 +5,11 @@ import org.junit.Assert
 import org.livefx.script.Change
 import scala.reflect.macros.Context
 import scala.collection.script.Update
+import scala.concurrent.ExecutionContext
+import ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import java.util.concurrent.TimeUnit
+import scala.concurrent.Await
 
 class TestSimpleProperty {
   @Test
@@ -25,7 +30,8 @@ class TestSimpleProperty {
     Assert.assertEquals(2, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
 
-    subscription.dispose
+    Await.result(subscription.dispose(), Duration(1, TimeUnit.SECONDS))
+    
     liveValue.value = 3
     Assert.assertEquals(1, spoilCount)
     Assert.assertEquals(3, liveValue.value)
@@ -49,7 +55,7 @@ class TestSimpleProperty {
     Assert.assertEquals(12, liveValue.value)
     Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
     
-    subscription.dispose
+    Await.result(subscription.dispose(), Duration(1, TimeUnit.SECONDS))
     liveValue.value = 13
     Assert.assertEquals(13, liveValue.value)
     Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)

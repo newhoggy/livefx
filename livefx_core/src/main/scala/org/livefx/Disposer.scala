@@ -1,5 +1,7 @@
 package org.livefx
 
+import scala.concurrent._
+
 class Disposer extends Disposable {
   private var lock = new Object
   private var disposables = List[Disposable]()
@@ -17,5 +19,12 @@ class Disposer extends Disposable {
       mydisposables
     }
   
-  def dispose(): Unit = for (disposable <- takeDisposables) disposable.dispose()
+  override def dispose()(implicit ectx: ExecutionContext): Future[Unit] = {
+    takeDisposables.foldLeft(future {}) { (f, disposable) =>
+      for {
+        _ <- f
+        _ <- disposable.dispose()
+      } yield Unit
+    }
+  }
 }
