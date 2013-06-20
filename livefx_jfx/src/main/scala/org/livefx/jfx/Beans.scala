@@ -178,7 +178,7 @@ object Beans {
         private val binding = new Binding[ObservableList[T]] {
           var oldValue: Seq[T] = Nil
           val underlying = FXCollections.observableArrayList[T]
-          private val subscription = self.spoils.subscribeWeak { e =>
+          private val subscription = self.spoils.subscribe { e =>
             for (weakListener <- invalidationListeners) {
               weakListener match {
                 case WeakReference(listener) => listener.invalidated(target)

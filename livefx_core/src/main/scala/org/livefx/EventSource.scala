@@ -9,7 +9,7 @@ import ExecutionContext.Implicits.global
 trait EventSource[E] extends Events[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
 
-  override def subscribeWeak(subscriber: E => Unit): Disposable = {
+  override def subscribe(subscriber: E => Unit): Disposable = {
     TidyReferenceQueue.tidy(2)
 
     val ref = new TidyWeakReference[E => Unit](subscriber, TidyReferenceQueue) with (E => Unit) {

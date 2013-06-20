@@ -40,7 +40,7 @@ package object livefx {
 
     println(s"(${source}:${line}:${column}) => ${snippet}")
     new Binding[Int] {
-      val subscription = liveValue.spoils.subscribeWeak { spoilEvent =>
+      val subscription = liveValue.spoils.subscribe { spoilEvent =>
         bindTraceEntries.withValue(newBindTraceEntry :: bindTraceEntries.value) {
           spoil(spoilEvent.copy())
         }
@@ -56,7 +56,7 @@ package object livefx {
     val caller = CallContext.caller
 
     new Binding[V] {
-      val ref = liveValue.spoils.subscribeWeak { spoilEvent =>
+      val ref = liveValue.spoils.subscribe { spoilEvent =>
         spoil(spoilEvent.copy(trace = caller :: spoilEvent.trace))
       }
   

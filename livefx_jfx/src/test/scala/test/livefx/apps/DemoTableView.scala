@@ -55,7 +55,7 @@ class DemoTableView extends javafx.application.Application {
 
     //The button uses an inner class to handle the button click event
     val vegFruitBut = new Button("Fruit or Veg")
-    val subscription = vegFruitBut.action.subscribeWeak { event =>
+    val subscription = vegFruitBut.action.subscribe { event =>
       choicePane.setVisible(!choicePane.isVisible())
       listPane.setVisible(!listPane.isVisible())
     }
