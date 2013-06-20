@@ -3,11 +3,11 @@ package org.livefx
 import scala.concurrent._
 
 trait Events[+E] { self =>
-  def subscribe(subscriber: E => Unit): Dependency
+  def subscribe(subscriber: E => Unit): Disposable
   def asEvents: Events[E] = this
 
   def +[F >: E](that: Events[F]): Events[F] = new Events[F] {
-    def subscribe(subscriber: F => Unit): Dependency = new Dependency {
+    def subscribe(subscriber: F => Unit): Disposable = new Disposable {
       private var subscription1 = self.subscribe(subscriber)
       private var subscription2 = that.subscribe(subscriber)
       override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = for {

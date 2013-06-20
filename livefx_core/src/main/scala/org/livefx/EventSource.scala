@@ -9,10 +9,10 @@ import ExecutionContext.Implicits.global
 trait EventSource[E] extends Events[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
 
-  override def subscribe(subscriber: E => Unit): Dependency = {
+  override def subscribe(subscriber: E => Unit): Disposable = {
     TidyReferenceQueue.tidy(2)
 
-    val ref = new TidyWeakReference[E => Unit](subscriber, TidyReferenceQueue) with (E => Unit) with Dependency {
+    val ref = new TidyWeakReference[E => Unit](subscriber, TidyReferenceQueue) with (E => Unit) {
       override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = {
         subscribers -= this
         future {}
