@@ -4,6 +4,7 @@ import org.livefx.script.Change
 import org.livefx.script.Spoil
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.immutable.HashSet
+import scalaz.concurrent.Atomic
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
   type PublishingStrategy[A] = DepthFirst[A]
@@ -38,7 +39,7 @@ object Var {
 
     protected def updateValue(oldValue: A, newValue: A): Unit = {
       _value = newValue
-      spoil(Spoil(new AtomicReference(HashSet.empty[Spoilable])))
+      spoil(Spoil(Atomic.newAtomic(HashSet.empty[Spoilable]).unsafePerformIO))
       _changes.publish(Change(oldValue, newValue))
     }
   }

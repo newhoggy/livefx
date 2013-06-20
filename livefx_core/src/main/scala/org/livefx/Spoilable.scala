@@ -1,6 +1,7 @@
 package org.livefx
 
 import org.livefx.script.Spoil
+import scalaz.effect.IO
 
 trait Spoilable extends Publisher {
   protected def spoilSink: EventSink[Spoil]
@@ -12,10 +13,7 @@ trait Spoilable extends Publisher {
   protected def spoil(spoilEvent: Spoil): Unit = {
     var done = false
 
-    while (!done) {
-      val oldRenewables = spoilEvent.renewables.get()
-      if (spoilEvent.renewables.compareAndSet(oldRenewables, oldRenewables + this)) done = true
-    }
+    spoilEvent.renewables.update(renewables => renewables + this).unsafePerformIO
 
     spoilSink.publish(spoilEvent)
   }
