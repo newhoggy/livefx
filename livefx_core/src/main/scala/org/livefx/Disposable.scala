@@ -14,10 +14,7 @@ trait Disposable {
 
   final def dispose()(implicit ectx: ExecutionContext): Future[Unit] = {
     if (!_disposed.getAndSet(true)) {
-      println("true")
       disposed.completeWith(dispose(true))
-    } else {
-      println("false")
     }
 
     disposed.future
