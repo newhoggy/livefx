@@ -14,22 +14,12 @@ abstract class Binding[A] extends Live[A] with Unspoilable {
 
   lazy val _changes = new EventSource[Change[A]] with PublishingStrategy[Change[A]] {
     lazy val spoilHandler: Any => Unit = { _ => Binding.this.value }
+    var subscription: Disposable = Disposed
 
-    override def subscribe(subscriber: Change[A] => Unit): Disposable = {
-      Binding.this.spoils.subscribe(spoilHandler)
-      Binding.this.value
-      super.subscribe(subscriber)
-    }
-
-    override def subscribeWeak(subscriber: Change[A] => Unit): Disposable ={
-      Binding.this.spoils.subscribeWeak(spoilHandler)
+    override def subscribeWeak(subscriber: Change[A] => Unit): Disposable = {
+      subscription = Binding.this.spoils.subscribeWeak(spoilHandler)
       Binding.this.value
       super.subscribeWeak(subscriber)
-    }
-  
-    override def unsubscribe(subscriber: Change[A] => Unit): Unit = {
-      super.unsubscribe(subscriber)
-      if (isEmpty) Binding.this.spoils.unsubscribe(spoilHandler)
     }
   }
 

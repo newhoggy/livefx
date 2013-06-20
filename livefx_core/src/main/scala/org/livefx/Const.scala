@@ -12,8 +12,6 @@ case class Const[A](value: A) extends Live[A] {
 }
 
 object NoEvents extends Events[Nothing] with EventSink[Nothing] {
-  override def subscribe(subscriber: Nothing => Unit): Disposable = Disposed
   override def subscribeWeak(subscriber: Nothing => Unit): Disposable = Disposed
-  override def unsubscribe(subscriber: Nothing => Unit): Unit = Disposed
   override def publish(event: Nothing): Unit = Unit
 }

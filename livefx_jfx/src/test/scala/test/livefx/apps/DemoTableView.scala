@@ -1,18 +1,17 @@
 package test.livefx.apps
 
-import javafx.scene.Scene
-import javafx.stage.Stage
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.FlowPane
-import javafx.scene.control.Label
-import javafx.scene.control.ChoiceBox
-import javafx.scene.control.ListView
+import org.livefx.jfx.Nodes.Implicits.RichButtonBase
+
 import javafx.collections.FXCollections
 import javafx.geometry.Insets
+import javafx.scene.Scene
 import javafx.scene.control.Button
-import org.livefx.jfx.Nodes.Implicits._
-import test.livefx.apps.Main
-import test.livefx.apps.Main
+import javafx.scene.control.ChoiceBox
+import javafx.scene.control.Label
+import javafx.scene.control.ListView
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.FlowPane
+import javafx.stage.Stage
 
 class DemoTableView extends javafx.application.Application {
   override def start(primaryStage: Stage): Unit = {
@@ -56,7 +55,7 @@ class DemoTableView extends javafx.application.Application {
 
     //The button uses an inner class to handle the button click event
     val vegFruitBut = new Button("Fruit or Veg")
-    vegFruitBut.action.subscribe { event =>
+    val subscription = vegFruitBut.action.subscribeWeak { event =>
       choicePane.setVisible(!choicePane.isVisible())
       listPane.setVisible(!listPane.isVisible())
     }

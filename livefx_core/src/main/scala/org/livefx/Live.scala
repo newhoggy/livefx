@@ -3,6 +3,8 @@ package org.livefx
 import org.livefx.script.Change
 import org.livefx.script.Message
 import org.livefx.script.Spoil
+import scala.concurrent._
+import ExecutionContext.Implicits.global
 
 trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
   def value: A
@@ -25,11 +27,11 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable {
     val binding = new Binding[B] {
       var nested: Live[B] = f(source.value)
       val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
-      var ref: Any = nested.spoils.subscribeWeak(nestedSpoilHandler)
+      var nestedSubscription: Disposable = nested.spoils.subscribeWeak(nestedSpoilHandler)
       val ref1 = source.spoils.subscribeWeak { spoilEvent =>
-        nested.spoils.unsubscribe(nestedSpoilHandler)
+        nestedSubscription.dispose()
         nested = f(source.value)
-        ref = nested.spoils.subscribeWeak(nestedSpoilHandler)
+        nestedSubscription = nested.spoils.subscribeWeak(nestedSpoilHandler)
         spoil(spoilEvent)
       }
       

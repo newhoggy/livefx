@@ -38,6 +38,8 @@ import javafx.collections.WeakListChangeListener
 import javafx.collections.WeakMapChangeListener
 import javafx.collections.WeakSetChangeListener
 import org.livefx.Var
+import scala.concurrent._
+import ExecutionContext.Implicits.global
 
 object Beans {
   object Implicits {
@@ -61,7 +63,7 @@ object Beans {
           case None => {
             val value = f
             val weakRef = new TidyWeakReference[T](value, TidyReferenceQueue) {
-              override def dispose(): Unit = store.properties -= key
+              override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(store.properties -= key)
             }
             store.properties += (key -> weakRef)
             value
@@ -176,7 +178,7 @@ object Beans {
         private val binding = new Binding[ObservableList[T]] {
           var oldValue: Seq[T] = Nil
           val underlying = FXCollections.observableArrayList[T]
-          private val ref = self.spoils.subscribe { e =>
+          private val subscription = self.spoils.subscribeWeak { e =>
             for (weakListener <- invalidationListeners) {
               weakListener match {
                 case WeakReference(listener) => listener.invalidated(target)
@@ -241,25 +243,25 @@ object Beans {
         override def addListener(listener: InvalidationListener): Unit = {
           TidyReferenceQueue.tidy()
           invalidationListeners += new TidyWeakReference(listener, TidyReferenceQueue) {
-            override def dispose(): Unit = invalidationListeners -= this
+            override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit]  = future(invalidationListeners -= this)
           }
         }
         override def removeListener(listener: InvalidationListener): Unit = {
           TidyReferenceQueue.tidy()
           invalidationListeners -= new TidyWeakReference(listener, TidyReferenceQueue) {
-            override def dispose(): Unit = invalidationListeners -= this
+            override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(invalidationListeners -= this)
           }
         }
         override def addListener(listener: ListChangeListener[_ >: T]): Unit = {
           TidyReferenceQueue.tidy()
           listChangeListeners += new TidyWeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) {
-            override def dispose(): Unit = listChangeListeners -= this
+            override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(listChangeListeners -= this)
           }
         }
         override def removeListener(listener: ListChangeListener[_ >: T]): Unit = {
           TidyReferenceQueue.tidy()
           listChangeListeners -= new TidyWeakReference[ListChangeListener[_ >: T]](listener, TidyReferenceQueue) {
-            override def dispose(): Unit = listChangeListeners -= this
+            override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(listChangeListeners -= this)
           }
         }
       }

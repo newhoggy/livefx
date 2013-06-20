@@ -40,7 +40,7 @@ package object livefx {
 
     println(s"(${source}:${line}:${column}) => ${snippet}")
     new Binding[Int] {
-      liveValue.spoils.subscribe { spoilEvent =>
+      val subscription = liveValue.spoils.subscribeWeak { spoilEvent =>
         bindTraceEntries.withValue(newBindTraceEntry :: bindTraceEntries.value) {
           spoil(spoilEvent.copy())
         }

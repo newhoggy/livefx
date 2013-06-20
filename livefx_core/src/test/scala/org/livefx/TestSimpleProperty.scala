@@ -23,7 +23,7 @@ class TestSimpleProperty {
     Assert.assertEquals(1, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
     
-    val subscription = liveValue.spoils.subscribe(_ => spoilCount += 1)
+    val subscription = liveValue.spoils.subscribeWeak(_ => spoilCount += 1)
     Assert.assertEquals(0, spoilCount)
     liveValue.value = 2
     Assert.assertEquals(1, spoilCount)
@@ -36,6 +36,7 @@ class TestSimpleProperty {
     Assert.assertEquals(1, spoilCount)
     Assert.assertEquals(3, liveValue.value)
     Assert.assertEquals(false, liveValue.spoiled)
+    subscription.dispose
   }
 
   @Test
@@ -43,7 +44,7 @@ class TestSimpleProperty {
     var changes = List[Change[Int]]()
     val liveValue = Var[Int](0)
     
-    val subscription = liveValue.changes.subscribe(change => changes = change::changes)
+    val subscription = liveValue.changes.subscribeWeak(change => changes = change::changes)
     Assert.assertEquals(0, liveValue.value)
     Assert.assertEquals(Nil, changes)
 
@@ -85,30 +86,6 @@ class TestSimpleProperty {
     Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
   }
 
-  @Test
-  def testStrongChangeSubscriber(): Unit = {
-    var changes = List[Change[Int]]()
-    val liveValue = Var[Int](0)
-    
-    var subscription = liveValue.changes.subscribe(change => changes = change::changes)
-    Assert.assertEquals(0, liveValue.value)
-    Assert.assertEquals(Nil, changes)
-
-    liveValue.value = 11
-    Assert.assertEquals(11, liveValue.value)
-    Assert.assertEquals(List(Change(0, 11)), changes)
-
-    liveValue.value = 12
-    Assert.assertEquals(12, liveValue.value)
-    Assert.assertEquals(List(Change(11, 12), Change(0, 11)), changes)
-    
-    subscription = null
-    System.gc()
-    liveValue.value = 13
-    Assert.assertEquals(13, liveValue.value)
-    Assert.assertEquals(List(Change(12, 13), Change(11, 12), Change(0, 11)), changes)
-  }
-  
   @Test
   def testMap(): Unit = {
     val liveValue = Var[Int](0)
@@ -191,7 +168,7 @@ class TestSimpleProperty {
     val liveB = Var[Int](1)
     val liveC = traceSpoils(traceSpoils(liveA) + traceSpoils(liveB))
     var counter = 0
-    liveC.spoils.subscribe { spoilEvent =>
+    val subscription = liveC.spoils.subscribeWeak { spoilEvent =>
       for (entry <- spoilEvent.trace) {
         counter += 1
       }
@@ -297,7 +274,7 @@ class TestSimpleProperty {
     var changes = List.empty[Change[Int]]
 
     println("--> result: " + liveC.value)
-    liveC.changes.subscribe { change => changes ::= change }
+    val subscription = liveC.changes.subscribeWeak { change => changes ::= change }
     liveA.value = 1
     println("--> result: " + changes)
   }
