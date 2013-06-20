@@ -14,7 +14,6 @@ trait EventSource[E] extends Events[E] with EventSink[E] {
 
     val ref = new TidyWeakReference[E => Unit](subscriber, TidyReferenceQueue) with (E => Unit) {
       override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = {
-        println("dispose")
         subscribers -= this
         future {}
       }
