@@ -4,15 +4,13 @@ import org.livefx.script.Change
 import org.livefx.script.Spoil
 
 abstract class Binding[A] extends Live[A] with Unspoilable {
-  type PublishingStrategy[A] = DepthFirst[A]
-
-  private lazy val _spoils = new EventSource[Spoil] with PublishingStrategy[Spoil]
+  private lazy val _spoils = new EventSource[Spoil]
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
   
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new EventSource[Change[A]] with PublishingStrategy[Change[A]] {
+  lazy val _changes = new EventSource[Change[A]] {
     lazy val spoilHandler: Any => Unit = { _ => Binding.this.value }
     var subscription: Disposable = Disposed
 

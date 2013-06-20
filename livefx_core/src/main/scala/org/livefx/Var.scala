@@ -7,15 +7,13 @@ import scala.collection.immutable.HashSet
 import scalaz.concurrent.Atomic
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
-  type PublishingStrategy[A] = DepthFirst[A]
-
-  private lazy val _spoils = new EventSource[Spoil] with PublishingStrategy[Spoil]
+  private lazy val _spoils = new EventSource[Spoil]
 
   protected override def spoilSink: EventSink[Spoil] = _spoils
 
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new EventSource[Change[A]] with PublishingStrategy[Change[A]]
+  lazy val _changes = new EventSource[Change[A]]
 
   override def changes: Events[Change[A]] = _changes
 
