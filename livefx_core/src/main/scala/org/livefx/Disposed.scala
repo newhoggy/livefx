@@ -1,5 +1,10 @@
 package org.livefx
 
-object Disposed extends Disposable {
-  def dispose(): Unit = Unit
-}
+import scala.concurrent.ExecutionContext
+import ExecutionContext.Implicits.global
+
+trait Disposed extends Disposable {
+  dispose()
+} 
+
+object Disposed extends Disposed

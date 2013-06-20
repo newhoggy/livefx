@@ -16,7 +16,7 @@ abstract class Binding[A] extends Live[A] with Unspoilable {
     lazy val spoilHandler: Any => Unit = { _ => Binding.this.value }
     var subscription: Disposable = Disposed
 
-    override def subscribe(subscriber: Change[A] => Unit): Disposable = {
+    override def subscribe(subscriber: Change[A] => Unit): Dependency = {
       subscription = Binding.this.spoils.subscribe(spoilHandler)
       Binding.this.value
       super.subscribe(subscriber)
