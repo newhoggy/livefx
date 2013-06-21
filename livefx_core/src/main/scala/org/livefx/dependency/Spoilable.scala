@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.dependency
 
 import org.livefx.script.Spoil
 import scalaz.effect.IO

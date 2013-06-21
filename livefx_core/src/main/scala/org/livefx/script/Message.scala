@@ -9,5 +9,4 @@ import scalaz.concurrent.Atomic
 case class Change[@specialized(Boolean, Int, Long, Double) +A](oldElem: A, newElem: A)
 
 sealed case class Spoil(
-    val renewables: Atomic[HashSet[Spoilable]],
     val trace: List[StackTraceElement] = Nil)

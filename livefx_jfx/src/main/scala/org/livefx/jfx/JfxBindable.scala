@@ -14,6 +14,6 @@ import scalaz.concurrent.Atomic
 trait JfxBindable { self: Live[_] =>
   def bind(that: Observable): InvalidationListener = new InvalidationListener {
     that.addListener(this.weak)
-    override def invalidated(observable: Observable): Unit = self.spoil(Spoil(Atomic.newAtomic(HashSet.empty[Spoilable]).unsafePerformIO))
+    override def invalidated(observable: Observable): Unit = self.spoil(Spoil())
   }
 }

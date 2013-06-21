@@ -5,8 +5,6 @@ import scala.concurrent._
 import org.livefx.util.TidyReferenceQueue
 import org.livefx.util.TidyWeakReference
 import org.livefx.Disposable
-import org.livefx.EventSink
-import org.livefx.Events
 
 class EventSource[E] extends Events[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
