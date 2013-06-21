@@ -40,6 +40,8 @@ import javafx.collections.WeakSetChangeListener
 import org.livefx.Var
 import scala.concurrent._
 import ExecutionContext.Implicits.global
+import org.livefx.dependency.Dependency
+import org.livefx.dependency.Independent
 
 object Beans {
   object Implicits {
@@ -108,6 +110,7 @@ object Beans {
       final def value: A = self.getValue()
       final def live: Live[A] = self.cache(RichObservableValueKey: HotKey[Binding[A]]) {
         new Binding[A] with JfxBindable {
+          override val dependency: Dependency = Independent
           bind(self)
 
           override def computeValue: A = self.value
@@ -120,6 +123,7 @@ object Beans {
       final def value: Int = self.get()
       final def live: Live[Int] = self.cache(RichObservableIntegerValueKey) {
         new Binding[Int] with JfxBindable {
+          override val dependency: Dependency = Independent
           bind(self)
   
           override def computeValue: Int = self.value
@@ -132,6 +136,7 @@ object Beans {
       def value: Double = self.get()
       def live: Live[Double] = self.cache(RichObservableDoubleValueKey) {
         new Binding[Double] with JfxBindable {
+          override val dependency: Dependency = Independent
           bind(self)
 
           override def computeValue: Double = self.value
@@ -144,6 +149,7 @@ object Beans {
       def value: Boolean = self.get()
       def live: Live[Boolean] = self.cache(RichObservableBooleanValueKey) {
        new Binding[Boolean] with JfxBindable {
+          override val dependency: Dependency = Independent
           bind(self)
   
           override def computeValue: Boolean = self.value
@@ -176,6 +182,7 @@ object Beans {
         private var invalidationListeners = HashSet.empty[WeakReference[InvalidationListener]]
         private var listChangeListeners = HashSet.empty[WeakReference[ListChangeListener[_ >: T]]]
         private val binding = new Binding[ObservableList[T]] {
+          override val dependency: Dependency = Independent
           var oldValue: Seq[T] = Nil
           val underlying = FXCollections.observableArrayList[T]
           private val subscription = self.spoils.subscribe { e =>

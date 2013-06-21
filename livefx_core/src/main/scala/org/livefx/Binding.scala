@@ -2,21 +2,27 @@ package org.livefx
 
 import org.livefx.script.Change
 import org.livefx.script.Spoil
+import org.livefx.dependency.Dependency
 
-abstract class Binding[A] extends Live[A] with Unspoilable {
-  private lazy val _spoils = new GlitchFreeEventSource[Spoil]
+abstract class Binding[A] extends Live[A] with Unspoilable { self =>
+  def dependency: Dependency
+  
+  private lazy val _spoils = new EventSource[Spoil] {
+    override def dependency: Dependency = self.dependency
+  }
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
   
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new GlitchFreeEventSource[Change[A]] {
-    lazy val spoilHandler: Any => Unit = { _ => Binding.this.value }
+  lazy val _changes = new EventSource[Change[A]] {
+    lazy val dependency = _spoils.dependency
+    lazy val spoilHandler: Any => Unit = { _ => self.value }
     var subscription: Disposable = Disposed
 
     override def subscribe(subscriber: Change[A] => Unit): Disposable = {
-      subscription = Binding.this.spoils.subscribe(spoilHandler)
-      Binding.this.value
+      subscription = self.spoils.subscribe(spoilHandler)
+      self.value
       super.subscribe(subscriber)
     }
   }

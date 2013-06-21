@@ -6,7 +6,7 @@ import org.livefx.util.TidyReferenceQueue
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
-trait EventSource[E] extends Events[E] with EventSink[E] {
+abstract class EventSource[E] extends Events[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
 
   override def subscribe(subscriber: E => Unit): Disposable = {
@@ -27,5 +27,8 @@ trait EventSource[E] extends Events[E] with EventSink[E] {
 
   final def isEmpty: Boolean = subscribers.isEmpty
 
-  def publish(event: E): Unit
+  def publish(event: E): Unit = {
+    TidyReferenceQueue.tidy(1)
+    subscribers.foreach(s => s(event))
+  }
 }

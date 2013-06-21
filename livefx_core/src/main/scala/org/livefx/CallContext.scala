@@ -2,6 +2,7 @@ package org.livefx
 
 import scala.util.DynamicVariable
 import org.livefx.script.Spoil
+import org.livefx.dependency.Dependency
 
 class CallContext {
   val myCaller: StackTraceElement = getCaller(2)
@@ -15,7 +16,8 @@ class CallContext {
   private val spoilTrace = new DynamicVariable[List[StackTraceElement]](Nil)
   
   def traceSpoils[V](liveValue: Live[V]): Live[V] = new Binding[V] {
-    val subscription = spoils.subscribe { spoilEvent =>
+    override val dependency: Dependency = liveValue.spoils.dependency
+    val subscription = liveValue.spoils.subscribe { spoilEvent =>
       spoil(spoilEvent.copy())
     }
 

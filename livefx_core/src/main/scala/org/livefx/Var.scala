@@ -5,15 +5,21 @@ import org.livefx.script.Spoil
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.immutable.HashSet
 import scalaz.concurrent.Atomic
+import org.livefx.dependency.Dependency
+import org.livefx.dependency.Independent
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
-  private lazy val _spoils = new GlitchFreeEventSource[Spoil]
+  private lazy val _spoils = new EventSource[Spoil] {
+    def dependency: Dependency = Independent
+  }
 
   protected override def spoilSink: EventSink[Spoil] = _spoils
 
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new GlitchFreeEventSource[Change[A]]
+  lazy val _changes = new EventSource[Change[A]] {
+    def dependency: Dependency = Independent
+  }
 
   override def changes: Events[Change[A]] = _changes
 

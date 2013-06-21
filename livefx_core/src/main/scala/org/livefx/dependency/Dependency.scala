@@ -10,6 +10,10 @@ trait Dependency extends Spoilable {
   
   def asliveValue: Dependency = this
 
+  def max(that: Dependency): Dependency = for (a <- this; b <- that) yield a max b
+  
+  def incremented: Dependency = this.map(_ + 1)
+  
   def map(f: Int => Int): Dependency = {
     val source = this
     new Binding {
