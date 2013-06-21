@@ -13,7 +13,7 @@ trait Dependency extends Spoilable {
 
   def map(f: Int => Int): Dependency = {
     val source = this
-    new DependencyBinding {
+    new Binding {
       val ref = source.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
       protected override def computeValue: Int = f(source.value)
@@ -22,7 +22,7 @@ trait Dependency extends Spoilable {
 
   def flatMap[B](f: Int => Dependency): Dependency = {
     val source = this
-    val binding = new DependencyBinding {
+    val binding = new Binding {
       var nested: Dependency = f(source.value)
       val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
       var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)

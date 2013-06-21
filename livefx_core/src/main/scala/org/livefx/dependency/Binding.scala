@@ -5,8 +5,8 @@ import org.livefx.EventSink
 import org.livefx.Events
 import org.livefx.Unspoilable
 
-abstract class DependencyBinding extends Dependency with Unspoilable {
-  private lazy val _spoils = new DependencyEventSource[Spoil]
+abstract class Binding extends Dependency with Unspoilable {
+  private lazy val _spoils = new EventSource[Spoil]
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
   

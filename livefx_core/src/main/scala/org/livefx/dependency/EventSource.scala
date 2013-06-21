@@ -8,7 +8,7 @@ import org.livefx.Disposable
 import org.livefx.EventSink
 import org.livefx.Events
 
-class DependencyEventSource[E] extends Events[E] with EventSink[E] {
+class EventSource[E] extends Events[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
 
   override def subscribe(subscriber: E => Unit): Disposable = {
