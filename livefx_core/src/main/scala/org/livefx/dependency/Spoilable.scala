@@ -1,7 +1,6 @@
 package org.livefx.dependency
 
 import org.livefx.script.Spoil
-import scalaz.effect.IO
 
 trait Spoilable extends Publisher {
   protected def spoilSink: EventSink[Spoil]
