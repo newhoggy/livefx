@@ -3,7 +3,7 @@ package org.livefx
 import org.livefx.script.Spoil
 
 abstract class DependencyBinding extends Dependency with Unspoilable {
-  private lazy val _spoils = new GlitchFreeEventSource[Spoil]
+  private lazy val _spoils = new DepthFirstEventSource[Spoil]
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
   
