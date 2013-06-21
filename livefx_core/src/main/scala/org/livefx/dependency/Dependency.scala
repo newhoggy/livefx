@@ -1,9 +1,10 @@
-package org.livefx
+package org.livefx.dependency
 
-import org.livefx.script.Change
 import org.livefx.script.Spoil
 import scala.concurrent._
 import ExecutionContext.Implicits.global
+import org.livefx.Disposable
+import org.livefx.Spoilable
 
 trait Dependency extends Spoilable {
   def value: Int

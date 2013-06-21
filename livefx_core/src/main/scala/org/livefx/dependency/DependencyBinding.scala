@@ -1,6 +1,9 @@
-package org.livefx
+package org.livefx.dependency
 
 import org.livefx.script.Spoil
+import org.livefx.EventSink
+import org.livefx.Events
+import org.livefx.Unspoilable
 
 abstract class DependencyBinding extends Dependency with Unspoilable {
   private lazy val _spoils = new DependencyEventSource[Spoil]
