@@ -7,5 +7,5 @@ object Independent extends Dependency {
 
   final override def spoils: Events[Spoil] = NoEvents
   
-  final override def value: Int = 0
+  final override def depth: Int = 0
 }

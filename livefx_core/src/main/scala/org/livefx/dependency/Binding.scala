@@ -9,18 +9,18 @@ abstract class Binding extends Dependency with Renewable {
   
   override def spoils: Events[Spoil] = _spoils
 
-  private var _value: Int = 0
+  private var _depth: Int = 0
   
-  override def value: Int = {
+  override def depth: Int = {
     if (spoiled) {
-      val oldValue = _value
-      val newValue = computeValue
-      _value = newValue
+      val oldDepth = _depth
+      val newDepth = computeDepth
+      _depth = newDepth
       renew()
     }
-    
-    _value
+
+    _depth
   }
 
-  protected def computeValue: Int
+  protected def computeDepth: Int
 }

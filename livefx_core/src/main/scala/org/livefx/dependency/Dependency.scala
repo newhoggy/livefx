@@ -6,7 +6,7 @@ import ExecutionContext.Implicits.global
 import org.livefx.Disposable
 
 trait Dependency extends Spoilable {
-  def value: Int
+  def depth: Int
   
   def asliveValue: Dependency = this
 
@@ -19,24 +19,24 @@ trait Dependency extends Spoilable {
     new Binding {
       val ref = source.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
-      protected override def computeValue: Int = f(source.value)
+      protected override def computeDepth: Int = f(source.depth)
     }
   }
 
   def flatMap[B](f: Int => Dependency): Dependency = {
     val source = this
     val binding = new Binding {
-      var nested: Dependency = f(source.value)
+      var nested: Dependency = f(source.depth)
       val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
       var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
       val ref1 = source.spoils.subscribe { spoilEvent =>
         nestedSubscription.dispose()
-        nested = f(source.value)
+        nested = f(source.depth)
         nestedSubscription = nested.spoils.subscribe(nestedSpoilHandler)
         spoil(spoilEvent)
       }
       
-      protected override def computeValue: Int = nested.value
+      protected override def computeDepth: Int = nested.depth
     }
     binding
   }
