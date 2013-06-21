@@ -1,7 +1,6 @@
 package org.livefx
 
 import org.livefx.script.Change
-import org.livefx.script.Message
 import org.livefx.script.Spoil
 import scala.concurrent._
 import ExecutionContext.Implicits.global
