@@ -2,12 +2,12 @@ package org.livefx.dependency
 
 import org.livefx.script.Spoil
 
-trait Unspoilable extends Spoilable {
-  type Pub <: Unspoilable
+trait Renewable extends Spoilable {
+  type Pub <: Renewable
   
   private var _spoiled: Boolean = true
   
-  protected def unspoil(): Unit = _spoiled = false
+  protected def renew(): Unit = _spoiled = false
 
   override def spoiled: Boolean = _spoiled
 

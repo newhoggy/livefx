@@ -2,7 +2,7 @@ package org.livefx.dependency
 
 import org.livefx.script.Spoil
 
-abstract class Binding extends Dependency with Unspoilable {
+abstract class Binding extends Dependency with Renewable {
   private lazy val _spoils = new EventSource[Spoil]
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
@@ -16,7 +16,7 @@ abstract class Binding extends Dependency with Unspoilable {
       val oldValue = _value
       val newValue = computeValue
       _value = newValue
-      unspoil()
+      renew()
     }
     
     _value
