@@ -27,7 +27,7 @@ class EventSource[E] extends Events[E] with EventSink[E] {
 
   final def isEmpty: Boolean = subscribers.isEmpty
 
-  def publish(event: E): Unit = {
+  override def publish(event: E): Unit = {
     TidyReferenceQueue.tidy(1)
     subscribers.foreach(s => s(event))
   }
