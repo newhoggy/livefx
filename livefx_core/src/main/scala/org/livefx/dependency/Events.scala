@@ -33,6 +33,9 @@ trait Events[+E] { self =>
     }
   }
   
+  /**
+   * flatMap
+   */
   def flatMap[F](f: E => Events[F]): Events[F] = new EventSource[F] {
     private var mapped = Option.empty[Disposable]
     val ref = self.subscribe { e =>
