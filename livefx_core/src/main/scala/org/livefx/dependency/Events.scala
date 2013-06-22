@@ -1,6 +1,7 @@
 package org.livefx.dependency
 
 import scala.concurrent._
+import ExecutionContext.Implicits.global
 import org.livefx.Disposable
 
 trait Events[+E] { self =>
@@ -29,6 +30,14 @@ trait Events[+E] { self =>
       } yield {
         subscription = null
       }
+    }
+  }
+  
+  def flatMap[F](f: E => Events[F]): Events[F] = new EventSource[F] {
+    private var mapped = Option.empty[Disposable]
+    val ref = self.subscribe { e =>
+      mapped.foreach(_.dispose)
+      mapped = Some(f(e).subscribe(publish))
     }
   }
 }
