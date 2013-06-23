@@ -22,12 +22,11 @@ trait Dependency extends Spoilable { self =>
 
   def flatMap[B](f: Int => Dependency): Dependency = new Binding {
     var nested: Dependency = f(self.depth)
-    val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
-    var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
+    var nestedSubscription: Disposable = nested.spoils.subscribe(spoil)
     val ref1 = self.spoils.subscribe { spoilEvent =>
       nestedSubscription.dispose()
       nested = f(self.depth)
-      nestedSubscription = nested.spoils.subscribe(nestedSpoilHandler)
+      nestedSubscription = nested.spoils.subscribe(spoil)
       spoil(spoilEvent)
     }
     
