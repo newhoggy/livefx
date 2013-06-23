@@ -14,28 +14,23 @@ trait Dependency extends Spoilable { self =>
   
   def incremented: Dependency = this.map(_ + 1)
   
-  def map(f: Int => Int): Dependency = {
-    new Binding {
-      val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
+  def map(f: Int => Int): Dependency = new Binding {
+    val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
-      protected override def computeDepth: Int = f(self.depth)
-    }
+    protected override def computeDepth: Int = f(self.depth)
   }
 
-  def flatMap[B](f: Int => Dependency): Dependency = {
-    val binding = new Binding {
-      var nested: Dependency = f(self.depth)
-      val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
-      var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
-      val ref1 = self.spoils.subscribe { spoilEvent =>
-        nestedSubscription.dispose()
-        nested = f(self.depth)
-        nestedSubscription = nested.spoils.subscribe(nestedSpoilHandler)
-        spoil(spoilEvent)
-      }
-      
-      protected override def computeDepth: Int = nested.depth
+  def flatMap[B](f: Int => Dependency): Dependency = new Binding {
+    var nested: Dependency = f(self.depth)
+    val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
+    var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
+    val ref1 = self.spoils.subscribe { spoilEvent =>
+      nestedSubscription.dispose()
+      nested = f(self.depth)
+      nestedSubscription = nested.spoils.subscribe(nestedSpoilHandler)
+      spoil(spoilEvent)
     }
-    binding
+    
+    protected override def computeDepth: Int = nested.depth
   }
 }
