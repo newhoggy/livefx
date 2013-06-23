@@ -20,23 +20,23 @@ trait Live[A] extends Spoilable { self =>
   }
 
   def flatMap[B](f: A => Live[B]): Live[B] = new Binding[B] {
-    private var nested: Live[B] = null
+    private var child: Live[B] = null
     
-    private var childSubscription = self.spoils.subscribe { e =>
-      nested = null
+    private val childSubscription: Disposable = self.spoils.subscribe { e =>
+      child = null
+      valueSubscription.dispose
       spoil(e)
     }
     
-    private val valueSubscription: Disposable = Disposed
+    private var valueSubscription: Disposable = Disposed
     
     protected override def computeValue: B = {
-      if (nested == null) {
-        nested = f(self.value)
-        childSubscription.dispose
-        childSubscription = nested.spoils.subscribe(spoil)
+      if (child == null) {
+        child = f(self.value)
+        valueSubscription = child.spoils.subscribe(spoil)
       }
       
-      nested.value
+      child.value
     }
   }
 }

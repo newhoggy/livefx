@@ -13,13 +13,11 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
   
   def asliveValue: Live[A] = this
 
-  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = {
-    new Binding[B] {
-      override val dependency: dep.Live[Int] = self.spoils.dependency
-      val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
+  def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = new Binding[B] {
+    override val dependency: dep.Live[Int] = self.spoils.dependency
+    val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
-      protected override def computeValue: B = f(self.value)
-    }
+    protected override def computeValue: B = f(self.value)
   }
 
   def flatMap[B](f: A => Live[B]): Live[B] = {

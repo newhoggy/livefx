@@ -34,6 +34,18 @@ class SpecLive extends SpecificationWithJUnit {
       ds must_== List(1)
       liveC.value = 2
       ds must_== List(1)
+      liveA.value = 3
+      ds must_== List(2, 1)
+      liveB.value = 4
+      ds must_== List(2, 1)
+      liveC.value = 5
+      ds must_== List(5, 2, 1)
+      liveA.value = 6
+      ds must_== List(4, 5, 2, 1)
+      liveB.value = 7
+      ds must_== List(7, 4, 5, 2, 1)
+      liveC.value = 8
+      ds must_== List(7, 4, 5, 2, 1)
     }
   }
 }
