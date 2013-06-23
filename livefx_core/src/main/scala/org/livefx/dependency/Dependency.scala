@@ -5,7 +5,7 @@ import scala.concurrent._
 import ExecutionContext.Implicits.global
 import org.livefx.Disposable
 
-trait Dependency extends Spoilable {
+trait Dependency extends Spoilable { self =>
   def depth: Int
   
   def asliveValue: Dependency = this
@@ -15,23 +15,21 @@ trait Dependency extends Spoilable {
   def incremented: Dependency = this.map(_ + 1)
   
   def map(f: Int => Int): Dependency = {
-    val source = this
     new Binding {
-      val ref = source.spoils.subscribe(spoilEvent => spoil(spoilEvent))
+      val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
-      protected override def computeDepth: Int = f(source.depth)
+      protected override def computeDepth: Int = f(self.depth)
     }
   }
 
   def flatMap[B](f: Int => Dependency): Dependency = {
-    val source = this
     val binding = new Binding {
-      var nested: Dependency = f(source.depth)
+      var nested: Dependency = f(self.depth)
       val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
       var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
-      val ref1 = source.spoils.subscribe { spoilEvent =>
+      val ref1 = self.spoils.subscribe { spoilEvent =>
         nestedSubscription.dispose()
-        nested = f(source.depth)
+        nested = f(self.depth)
         nestedSubscription = nested.spoils.subscribe(nestedSpoilHandler)
         spoil(spoilEvent)
       }
