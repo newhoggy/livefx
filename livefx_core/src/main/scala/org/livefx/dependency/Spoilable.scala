@@ -9,9 +9,5 @@ trait Spoilable extends Publisher {
 
   def spoiled: Boolean = false
 
-  protected def spoil(spoilEvent: Spoil): Unit = {
-    var done = false
-
-    spoilSink.publish(spoilEvent)
-  }
+  protected def spoil(spoilEvent: Spoil): Unit = spoilSink.publish(spoilEvent)
 }
