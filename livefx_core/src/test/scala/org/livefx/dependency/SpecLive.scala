@@ -9,8 +9,10 @@ class SpecLive extends SpecificationWithJUnit {
       val liveB = liveA.map(_ + 1)
       var as = List.empty[Int]
       var bs = List.empty[Int]
-      liveA.spoils.subscribe(e => as ::= liveA.value)
-      liveB.spoils.subscribe(e => bs ::= liveB.value)
+      liveA.value
+      liveB.value
+      val ref1 = liveA.spoils.subscribe(e => as ::= liveA.value)
+      val ref2 = liveB.spoils.subscribe{e => bs ::= liveB.value}
       liveA.value = 1
       as must_== List(1)
       bs must_== List(2)
