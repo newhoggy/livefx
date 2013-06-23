@@ -4,7 +4,7 @@ import org.livefx.script.Change
 import org.livefx.script.Spoil
 import scala.concurrent._
 import ExecutionContext.Implicits.global
-import org.livefx.dependency.Dependency
+import org.livefx.{dependency => dep}
 
 trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self =>
   def value: A
@@ -15,7 +15,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
 
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = {
     new Binding[B] {
-      override val dependency: Dependency = self.spoils.dependency
+      override val dependency: dep.Live[Int] = self.spoils.dependency
       val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
       protected override def computeValue: B = f(self.value)
@@ -24,7 +24,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
 
   def flatMap[B](f: A => Live[B]): Live[B] = {
     val binding = new Binding[B] {
-      override val dependency: Dependency = self.spoils.dependency // TODO also must include nested
+      override val dependency: dep.Live[Int] = self.spoils.dependency // TODO also must include nested
       var nested: Live[B] = f(self.value)
       val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
       var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
@@ -42,7 +42,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
 
   def spoilCount: Live[Long] = {
     new Binding[Long] {
-      override def dependency: Dependency = self.spoils.dependency.incremented
+      override def dependency: dep.Live[Int] = self.spoils.dependency.incremented
       private var counter = 0L
       private val ref = self.spoils.subscribe { spoilEvent =>
         counter += 1

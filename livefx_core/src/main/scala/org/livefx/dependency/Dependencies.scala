@@ -1,9 +1,9 @@
 package org.livefx.dependency
 
-class Dependencies(protected var _children: List[Dependency]) extends Dependency {
-  def children: List[Dependency] = this.synchronized(_children)
+class Dependencies(protected var _children: List[Live[Int]]) extends Live[Int] {
+  def children: List[Live[Int]] = this.synchronized(_children)
   
-  def children_=(list: List[Dependency]): Unit = this.synchronized {
+  def children_=(list: List[Live[Int]]): Unit = this.synchronized {
     _children = list
   }
   

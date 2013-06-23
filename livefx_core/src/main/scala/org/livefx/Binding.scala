@@ -2,13 +2,13 @@ package org.livefx
 
 import org.livefx.script.Change
 import org.livefx.script.Spoil
-import org.livefx.dependency.Dependency
+import org.livefx.{dependency => dep}
 
 abstract class Binding[A] extends Live[A] with Unspoilable { self =>
-  def dependency: Dependency
+  def dependency: dep.Live[Int]
   
   private lazy val _spoils = new EventSource[Spoil] {
-    override def dependency: Dependency = self.dependency
+    override def dependency: dep.Live[Int] = self.dependency
   }
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
