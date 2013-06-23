@@ -4,6 +4,7 @@ import org.livefx.script.Spoil
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import org.livefx.Disposable
+import org.livefx.Disposed
 
 trait Live[A] extends Spoilable { self =>
   def value: A
@@ -19,13 +20,23 @@ trait Live[A] extends Spoilable { self =>
   }
 
   def flatMap[B](f: A => Live[B]): Live[B] = new Binding[B] {
-    private var nested: Live[B] = f(self.value)
+    private var nested: Live[B] = null
     
-    private val nestedSubscription = self.spoils.flatMap { _ =>
-      nested = f(self.value)
-      nested.spoils
-    }.subscribe(spoil)
+    private var childSubscription = self.spoils.subscribe { e =>
+      nested = null
+      spoil(e)
+    }
     
-    protected override def computeValue: B = nested.value
+    private val valueSubscription: Disposable = Disposed
+    
+    protected override def computeValue: B = {
+      if (nested == null) {
+        nested = f(self.value)
+        childSubscription.dispose
+        childSubscription = nested.spoils.subscribe(spoil)
+      }
+      
+      nested.value
+    }
   }
 }

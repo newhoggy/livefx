@@ -24,11 +24,16 @@ class SpecLive extends SpecificationWithJUnit {
       val liveA = Var[Int](0)
       val liveB = Var[Int](0)
       val liveC = Var[Int](0)
-      val liveD: Live[Int] = liveA.flatMap(value => if (value % 2 == 0) liveB else liveC)
+      val liveD: Live[Int] = liveA.flatMap(value => if (value % 2 == 0) { println("B"); liveB}  else {println("D"); liveC})
       var ds = List.empty[Int]
-      val subD = liveD.spoils.subscribe(_ => ds ::= 1)
+      liveD.value
+      val subD = liveD.spoils.subscribe(_ => ds ::= liveD.value)
       
-      ds must_== List(8, 7, 4, 3)
+      ds must_== List()
+      liveB.value = 1
+      ds must_== List(1)
+      liveC.value = 2
+      ds must_== List(1)
     }
   }
 }
