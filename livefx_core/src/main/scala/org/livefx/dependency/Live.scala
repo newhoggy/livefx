@@ -15,7 +15,7 @@ trait Live[A] extends Spoilable { self =>
   def map(f: A => A): Live[A] = new Binding[A] {
     val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
-    protected override def computeDepth: A = f(self.value)
+    protected override def computeValue: A = f(self.value)
   }
 
   def flatMap[B](f: A => Live[B]): Live[B] = new Binding[B] {
@@ -26,6 +26,6 @@ trait Live[A] extends Spoilable { self =>
       nested.spoils
     }.subscribe(spoil)
     
-    protected override def computeDepth: B = nested.value
+    protected override def computeValue: B = nested.value
   }
 }
