@@ -54,5 +54,18 @@ class SpecEvents extends SpecificationWithJUnit {
       fs.publish(3)
       zsValues must_== List(3, 2, 1, 0)
     }
+    "should implement impeded" ! {
+      val es = new EventSource[Int]
+      val esi = es.impeded
+      var esiValues = List.empty[Int]
+      esi.subscribe(v => esiValues ::= v)
+      esiValues must_== List()
+      es.publish(0)
+      esiValues must_== List()
+      es.publish(1)
+      esiValues must_== List(0)
+      es.publish(2)
+      esiValues must_== List(1, 0)
+    }
   }
 }

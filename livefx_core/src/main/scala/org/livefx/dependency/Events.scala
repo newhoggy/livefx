@@ -19,6 +19,20 @@ trait Events[+E] { self =>
       subscription2 = null
     }
   }
+  
+  def impeded: Events[E] = new EventSource[E] with Disposable {
+    private var stored = Option.empty[E]
+    private var subscription = self.subscribe { e =>
+      stored.foreach(publish(_))
+      stored = Some(e)
+    }
+
+    override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = try {
+      subscription.dispose
+    } finally {
+      subscription = null
+    }
+  }
 
   def map[F >: E](f: E => F): Events[F] = new EventSource[F] with Disposable {
     private var subscription = self.subscribe(e => publish(f(e)))
