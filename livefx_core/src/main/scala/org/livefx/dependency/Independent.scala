@@ -7,5 +7,5 @@ object Independent extends Live[Int] {
 
   final override def spoils: Events[Spoil] = NoEvents
   
-  final override def depth: Int = 0
+  final override def value: Int = 0
 }

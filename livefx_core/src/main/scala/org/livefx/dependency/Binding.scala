@@ -9,18 +9,18 @@ abstract class Binding[A] extends Live[A] with Renewable {
   
   override def spoils: Events[Spoil] = _spoils
 
-  private var _depth: Int = 0
+  private var _depth: Option[A] = null
   
-  override def depth: Int = {
+  override def value: A = {
     if (spoiled) {
       val oldDepth = _depth
       val newDepth = computeDepth
-      _depth = newDepth
+      _depth = Some(newDepth)
       renew()
     }
 
-    _depth
+    _depth.get
   }
 
-  protected def computeDepth: Int
+  protected def computeDepth: A
 }

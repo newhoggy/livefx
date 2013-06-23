@@ -7,7 +7,7 @@ class Dependencies(protected var _children: List[Live[Int]]) extends Live[Int] {
     _children = list
   }
   
-  override def depth: Int = 0
+  override def value: Int = 0
 
   protected def spoilSink: org.livefx.dependency.EventSink[org.livefx.script.Spoil] = ???
 
