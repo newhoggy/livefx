@@ -42,5 +42,17 @@ class SpecEvents extends SpecificationWithJUnit {
       rs.publish(9)
       zsValues must_== List(8, 7, 4, 3)
     }
+    "should implement |" ! {
+      val es = new EventSource[Int]
+      val fs = new EventSource[Int]
+      val zs = es | fs
+      var zsValues = List.empty[Int]
+      zs.subscribe(v => zsValues ::= v)
+      es.publish(0)
+      fs.publish(1)
+      es.publish(2)
+      fs.publish(3)
+      zsValues must_== List(3, 2, 1, 0)
+    }
   }
 }

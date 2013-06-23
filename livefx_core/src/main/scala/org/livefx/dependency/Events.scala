@@ -9,7 +9,6 @@ trait Events[+E] { self =>
   def asEvents: Events[E] = this
 
   def |[F >: E](that: Events[F]): Events[F] = new EventSource[F] with Disposable {
-    private var mapped = Option.empty[Disposable]
     private var subscription1 = self.subscribe(publish)
     private var subscription2 = that.subscribe(publish)
 
@@ -23,7 +22,6 @@ trait Events[+E] { self =>
   }
 
   def map[F >: E](f: E => F): Events[F] = new EventSource[F] with Disposable {
-    private var mapped = Option.empty[Disposable]
     private var subscription = self.subscribe(e => publish(f(e)))
 
     override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = for {
