@@ -13,7 +13,7 @@ trait Live[A] extends Spoilable { self =>
   def max(that: Live[A])(implicit ev: Ordering[A]): Live[A] = for (a <- this; b <- that) yield Ordering[A].max(a, b)
   
   def map(f: A => A): Live[A] = new Binding[A] {
-    val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
+    private val ref = self.spoils.subscribe(spoil)
 
     protected override def computeValue: A = f(self.value)
   }
