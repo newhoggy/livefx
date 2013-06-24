@@ -24,12 +24,11 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
     val binding = new Binding[B] {
       override val dependency: dep.Live[Int] = self.spoils.dependency.incremented // TODO also must include nested
       var nested: Live[B] = f(self.value)
-      val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
-      var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
+      var nestedSubscription: Disposable = nested.spoils.subscribe(spoil)
       val ref1 = self.spoils.subscribe { spoilEvent =>
         nestedSubscription.dispose()
         nested = f(self.value)
-        nestedSubscription = nested.spoils.subscribe(nestedSpoilHandler)
+        nestedSubscription = nested.spoils.subscribe(spoil)
         spoil(spoilEvent)
       }
       
