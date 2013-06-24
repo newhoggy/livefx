@@ -19,16 +19,15 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
   }
 
   def flatMap[B](f: A => Live[B]): Live[B] = {
-    val binding = new Binding[B] {
-      var child: Live[B] = null
-      
+    var child: Live[B] = null
+    var valueSubscription: Disposable = Disposed
+    
+    new Binding[B] {
       private val childSubscription: Disposable = self.spoils.subscribe { e =>
         child = null
         valueSubscription.dispose
         spoil(e)
       }
-      
-      var valueSubscription: Disposable = Disposed
       
       protected override def computeValue: B = {
         if (child == null) {
@@ -39,7 +38,6 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
         child.value
       }
     }
-    binding
   }
 
   def spoilCount: Live[Long] = {

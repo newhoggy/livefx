@@ -5,7 +5,6 @@ import scala.util.DynamicVariable
 import org.livefx.trees.n23.Tree
 import scalaz._
 import Scalaz._
-import org.livefx.{dependency => dep}
 
 package object livefx {
   implicit class RichLiveValueBoolean(val self: Live[Boolean]) {
