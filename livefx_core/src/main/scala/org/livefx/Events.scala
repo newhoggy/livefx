@@ -49,14 +49,15 @@ trait Events[+E] { self =>
   }
 
   def flatMap[F](f: E => Events[F]): Events[F] = new EventSource[F] with Disposable {
+    private val mappedEvents = self.map(e => f(e))
     override val dependency: dep.Live[Int] = new dep.Binding[Int] {
       protected override def computeValue: Int = self.dependency.value
     }
     
     private var mapped = Option.empty[Disposable]
-    private var subscription = self.subscribe { e =>
+    private var subscription = mappedEvents.subscribe { events =>
       mapped.foreach(_.dispose)
-      mapped = Some(f(e).subscribe(publish))
+      mapped = Some(events.subscribe(publish))
     }
 
     override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = try {
