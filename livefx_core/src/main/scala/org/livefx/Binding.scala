@@ -16,7 +16,7 @@ trait Binding[A] extends Live[A] with Unspoilable { self =>
   override def spoils: Events[Spoil] = _spoils
 
   lazy val _changes = new EventSource[Change[A]] {
-    lazy val dependency = _spoils.dependency
+    lazy val dependency = _spoils.dependency.incremented
     lazy val spoilHandler: Any => Unit = { _ => self.value }
     var subscription: Disposable = Disposed
 
