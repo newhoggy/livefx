@@ -40,8 +40,6 @@ import javafx.collections.WeakSetChangeListener
 import org.livefx.Var
 import scala.concurrent._
 import ExecutionContext.Implicits.global
-import org.livefx.{dependency => dep}
-import org.livefx.dependency.Independent
 
 object Beans {
   object Implicits {

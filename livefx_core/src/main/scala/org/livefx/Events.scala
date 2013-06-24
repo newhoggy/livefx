@@ -2,7 +2,6 @@ package org.livefx
 
 import scala.concurrent._
 import ExecutionContext.Implicits.global
-import org.livefx.{dependency => dep}
 import org.livefx.script.Spoil
 
 trait Events[+E] { self =>

@@ -1,7 +1,5 @@
 package org.livefx
 
-import org.livefx.{dependency => dep}
-
 trait LiveEquiv[T] extends Any with Serializable {
   def equiv(x: Live[T], y: Live[T]): Live[Boolean]
 }

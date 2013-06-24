@@ -2,7 +2,6 @@ package org.livefx
 
 import scala.util.DynamicVariable
 import org.livefx.script.Spoil
-import org.livefx.{dependency => dep}
 
 class CallContext {
   val myCaller: StackTraceElement = getCaller(2)

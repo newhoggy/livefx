@@ -5,9 +5,8 @@ import org.livefx.script.Spoil
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.immutable.HashSet
 import scalaz.concurrent.Atomic
-import org.livefx.{dependency => dep}
 
-trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
+trait Var[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) A] extends Live[A] {
   private lazy val _spoils = new EventSource[Spoil]
 
   protected override def spoilSink: EventSink[Spoil] = _spoils
@@ -29,7 +28,7 @@ trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
 }
 
 object Var {
-  def apply[@specialized(Boolean, Int, Long, Double) A](initialValue: A): Var[A] = new Var[A] {
+  def apply[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) A](initialValue: A): Var[A] = new Var[A] {
     var _value: A = initialValue
 
     override def value: A = _value
