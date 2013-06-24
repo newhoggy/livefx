@@ -25,7 +25,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
       override val dependency: dep.Live[Int] = self.spoils.dependency.incremented // TODO also must include nested
       var nested: Live[B] = f(self.value)
       var nestedSubscription: Disposable = nested.spoils.subscribe(spoil)
-      val ref1 = self.spoils.subscribe { spoilEvent =>
+      val subscription = self.spoils.subscribe { spoilEvent =>
         nestedSubscription.dispose()
         nested = f(self.value)
         nestedSubscription = nested.spoils.subscribe(spoil)
