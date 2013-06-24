@@ -3,6 +3,7 @@ package org.livefx
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import org.livefx.{dependency => dep}
+import org.livefx.script.Spoil
 
 trait Events[+E] { self =>
   def dependency: dep.Live[Int]
@@ -51,7 +52,12 @@ trait Events[+E] { self =>
   def flatMap[F](f: E => Events[F]): Events[F] = new EventSource[F] with Disposable {
     private val mappedEvents = self.map(e => f(e))
     override val dependency: dep.Live[Int] = new dep.Binding[Int] {
-      protected override def computeValue: Int = self.dependency.value
+      var lastEvents: Events[F] = NoEvents
+      protected override def computeValue: Int = self.dependency.value + lastEvents.dependency.value
+      mappedEvents.subscribe { events =>
+        lastEvents = events
+        spoil(Spoil())
+      }
     }
     
     private var mapped = Option.empty[Disposable]
