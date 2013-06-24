@@ -4,17 +4,16 @@ import org.livefx.script.Change
 import org.livefx.script.Spoil
 import scala.concurrent._
 import ExecutionContext.Implicits.global
-import org.livefx.{dependency => dep}
 
 trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self =>
   def value: A
   
-  def changes: Events[Change[A]]
-  
   def asliveValue: Live[A] = this
 
+  def changes: Events[Change[A]]
+  
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = new Binding[B] {
-    val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
+    val ref = self.spoils.subscribe(spoil)
 
     protected override def computeValue: B = f(self.value)
   }
