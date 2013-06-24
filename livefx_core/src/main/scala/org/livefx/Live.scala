@@ -23,16 +23,24 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
   def flatMap[B](f: A => Live[B]): Live[B] = {
     val binding = new Binding[B] {
       override val dependency: dep.Live[Int] = self.spoils.dependency.incremented // TODO also must include nested
-      var nested: Live[B] = f(self.value)
-      var nestedSubscription: Disposable = nested.spoils.subscribe(spoil)
-      val subscription = self.spoils.subscribe { spoilEvent =>
-        nestedSubscription.dispose()
-        nested = f(self.value)
-        nestedSubscription = nested.spoils.subscribe(spoil)
-        spoil(spoilEvent)
+      var child: Live[B] = null
+      
+      private val childSubscription: Disposable = self.spoils.subscribe { e =>
+        child = null
+        valueSubscription.dispose
+        spoil(e)
       }
       
-      protected override def computeValue: B = nested.value
+      var valueSubscription: Disposable = Disposed
+      
+      protected override def computeValue: B = {
+        if (child == null) {
+          child = f(self.value)
+          valueSubscription = child.spoils.subscribe(spoil)
+        }
+        
+        child.value
+      }
     }
     binding
   }
