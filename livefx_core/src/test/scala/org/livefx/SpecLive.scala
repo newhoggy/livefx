@@ -1,6 +1,8 @@
 package org.livefx
 
 import org.specs2.mutable.SpecificationWithJUnit
+import org.junit.runner.RunWith
+import org.junit.runners.Suite
 
 class SpecLive extends SpecificationWithJUnit {
   "Live" should {
@@ -49,3 +51,7 @@ class SpecLive extends SpecificationWithJUnit {
     }
   }
 }
+
+@RunWith(classOf[Suite])
+@Suite.SuiteClasses(Array(classOf[SpecLive]))
+object SpecLive extends SpecLive
