@@ -2,7 +2,7 @@ package org.livefx.dependency
 
 import org.livefx.script.Spoil
 
-abstract class Binding[A] extends Live[A] {
+trait Binding[A] extends Live[A] {
   type Pub <: Renewable
   
   private var _spoiled: Boolean = true
