@@ -8,7 +8,7 @@ trait Disposable {
 
   val disposed = promise[Unit]
 
-  def live(): Boolean = _disposed.get
+  def live: Boolean = !_disposed.get
 
   protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = future(Unit)
 
