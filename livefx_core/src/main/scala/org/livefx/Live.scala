@@ -14,7 +14,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
   def asliveValue: Live[A] = this
 
   def map[@specialized(Boolean, Int, Long, Double) B](f: A => B): Live[B] = new Binding[B] {
-    override val dependency: dep.Live[Int] = self.spoils.dependency
+    override val dependency: dep.Live[Int] = self.spoils.dependency.incremented
     val ref = self.spoils.subscribe(spoilEvent => spoil(spoilEvent))
 
     protected override def computeValue: B = f(self.value)
@@ -22,7 +22,7 @@ trait Live[@specialized(Boolean, Int, Long, Double) +A] extends Spoilable { self
 
   def flatMap[B](f: A => Live[B]): Live[B] = {
     val binding = new Binding[B] {
-      override val dependency: dep.Live[Int] = self.spoils.dependency // TODO also must include nested
+      override val dependency: dep.Live[Int] = self.spoils.dependency.incremented // TODO also must include nested
       var nested: Live[B] = f(self.value)
       val nestedSpoilHandler = { spoilEvent: Spoil => spoil(spoilEvent) }
       var nestedSubscription: Disposable = nested.spoils.subscribe(nestedSpoilHandler)
