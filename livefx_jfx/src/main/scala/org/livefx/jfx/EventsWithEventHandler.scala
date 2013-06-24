@@ -10,7 +10,6 @@ import org.livefx.{dependency => dep}
 import org.livefx.dependency.Independent
 
 class EventsWithEventHandler[E <: Event] extends EventSource[E] with EventHandler[E] {
-  override val dependency: dep.Live[Int] = Independent
   override def handle(event: E): Unit = publish(event)
 }
 

@@ -5,18 +5,13 @@ import org.livefx.script.Spoil
 import org.livefx.{dependency => dep}
 
 trait Binding[A] extends Live[A] with Unspoilable { self =>
-  def dependency: dep.Live[Int]
-  
-  private lazy val _spoils = new EventSource[Spoil] {
-    override def dependency: dep.Live[Int] = self.dependency.incremented
-  }
+  private lazy val _spoils = new EventSource[Spoil]
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
   
   override def spoils: Events[Spoil] = _spoils
 
   lazy val _changes = new EventSource[Change[A]] {
-    lazy val dependency = _spoils.dependency.incremented
     lazy val spoilHandler: Any => Unit = { _ => self.value }
     var subscription: Disposable = Disposed
 

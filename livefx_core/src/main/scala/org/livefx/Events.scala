@@ -6,12 +6,10 @@ import org.livefx.{dependency => dep}
 import org.livefx.script.Spoil
 
 trait Events[+E] { self =>
-  def dependency: dep.Live[Int]
   def subscribe(subscriber: E => Unit): Disposable
   def asEvents: Events[E] = this
 
   def |[F >: E](that: Events[F]): Events[F] = new EventSource[F] with Disposable {
-    override val dependency: dep.Live[Int] = (self.dependency max that.dependency).incremented
     private var subscription1 = self.subscribe(publish)
     private var subscription2 = that.subscribe(publish)
 
@@ -24,7 +22,6 @@ trait Events[+E] { self =>
   }
   
   def impeded: Events[E] = new EventSource[E] with Disposable {
-    override val dependency: dep.Live[Int] = self.dependency.incremented
     private var stored = Option.empty[E]
     private var subscription = self.subscribe { e =>
       stored.foreach(publish(_))
@@ -39,7 +36,6 @@ trait Events[+E] { self =>
   }
 
   def map[F](f: E => F): Events[F] = new EventSource[F] with Disposable {
-    override val dependency: dep.Live[Int] = self.dependency.incremented
     private var subscription = self.subscribe(e => publish(f(e)))
 
     override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = try {
@@ -50,16 +46,7 @@ trait Events[+E] { self =>
   }
 
   def flatMap[F](f: E => Events[F]): Events[F] = new EventSource[F] with Disposable {
-    private val mappedEvents = self.map(e => f(e))
-    override val dependency: dep.Live[Int] = new dep.Binding[Int] {
-      var lastEvents: Events[F] = NoEvents
-      protected override def computeValue: Int = self.dependency.value + lastEvents.dependency.value
-      mappedEvents.subscribe { events =>
-        lastEvents = events
-        spoil(Spoil())
-      }
-    }
-    
+    private val mappedEvents = self.map(e => f(e))    
     private var mapped = Option.empty[Disposable]
     private var subscription = mappedEvents.subscribe { events =>
       mapped.foreach(_.dispose)

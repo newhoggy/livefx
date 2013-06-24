@@ -8,17 +8,13 @@ import scalaz.concurrent.Atomic
 import org.livefx.{dependency => dep}
 
 trait Var[@specialized(Boolean, Int, Long, Double) A] extends Live[A] {
-  private lazy val _spoils = new EventSource[Spoil] {
-    def dependency: dep.Live[Int] = dep.Independent
-  }
+  private lazy val _spoils = new EventSource[Spoil]
 
   protected override def spoilSink: EventSink[Spoil] = _spoils
 
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new EventSource[Change[A]] {
-    def dependency: dep.Live[Int] = dep.Independent
-  }
+  lazy val _changes = new EventSource[Change[A]]
 
   override def changes: Events[Change[A]] = _changes
 
