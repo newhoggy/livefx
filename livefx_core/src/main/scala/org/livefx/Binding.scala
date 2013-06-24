@@ -4,7 +4,7 @@ import org.livefx.script.Change
 import org.livefx.script.Spoil
 import org.livefx.{dependency => dep}
 
-abstract class Binding[A] extends Live[A] with Unspoilable { self =>
+trait Binding[A] extends Live[A] with Unspoilable { self =>
   def dependency: dep.Live[Int]
   
   private lazy val _spoils = new EventSource[Spoil] {
