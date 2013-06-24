@@ -1,5 +1,7 @@
 package org.livefx
 
+import scala.language.implicitConversions
+
 trait LiveOrdering[T] extends LivePartialOrdering[T] with Serializable {
   outer =>
 

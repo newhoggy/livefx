@@ -1,5 +1,7 @@
 package org.livefx
 
+import scala.language.implicitConversions
+
 trait LiveIntegral[T] extends LiveNumeric[T] {
   def quot(x: Live[T], y: Live[T]): Live[T] = for (xv <- x; yv <- y) yield integral.quot(xv, yv)
   def rem(x: Live[T], y: Live[T]): Live[T] = for (xv <- x; yv <- y) yield integral.rem(xv, yv)

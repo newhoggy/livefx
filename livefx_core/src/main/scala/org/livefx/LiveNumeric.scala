@@ -1,5 +1,7 @@
 package org.livefx
 
+import scala.language.implicitConversions
+
 object LiveNumeric {
   trait ExtraImplicits {
     /** These implicits create conversions from a value for which an implicit Numeric
