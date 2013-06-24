@@ -8,7 +8,7 @@ trait Binding[A] extends Live[A] with Unspoilable { self =>
   def dependency: dep.Live[Int]
   
   private lazy val _spoils = new EventSource[Spoil] {
-    override def dependency: dep.Live[Int] = self.dependency
+    override def dependency: dep.Live[Int] = self.dependency.incremented
   }
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
