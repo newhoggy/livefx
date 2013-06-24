@@ -34,7 +34,7 @@ trait Events[+E] { self =>
     }
   }
 
-  def map[F >: E](f: E => F): Events[F] = new EventSource[F] with Disposable {
+  def map[F](f: E => F): Events[F] = new EventSource[F] with Disposable {
     private var subscription = self.subscribe(e => publish(f(e)))
 
     override protected def dispose(disposing: Boolean)(implicit ectx: ExecutionContext): Future[Unit] = try {
