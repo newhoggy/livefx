@@ -62,3 +62,9 @@ pomExtra := (
     </developer>
   </developers>)
 
+autoCompilerPlugins := true
+
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.1")
+
+scalacOptions += "-P:continuations:enable"
+
