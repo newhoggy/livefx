@@ -2,7 +2,7 @@ package scala.react.test
 
 import org.specs2.mutable.SpecificationWithJUnit
 
-trait ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
+class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 	import scala.react._
 
 	"basicDef1" ! {
