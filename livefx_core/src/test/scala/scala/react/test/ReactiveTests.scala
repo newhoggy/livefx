@@ -1,29 +1,27 @@
 package scala.react.test
 
-import org.scalatest.junit.ShouldMatchersForJUnit._
+import org.specs2.mutable.SpecificationWithJUnit
 
-import org.scalatest.FunSuite
-
-trait ReactiveTests extends FunSuite with ReactiveTestUtils {
+trait ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 	import scala.react._
 
-	test("basicDef1") {
+	"basicDef1" ! {
 		val x = Var(1)
 		assert(x.now === 1)
 		assert(x.current(Observer.Nil) === 1)
 		assert(x.message(Observer.Nil) === None)
-		val y = Signal { assert(x() === 1) }
+		val y = Signal { x() must_== 1 }
 		y.now
 	}
 
-	test("basicDef2") {
+	"basicDef2" ! {
 		val x = Var(1)
 		val y = Var(2)
 		val sum = Signal { x() + y() }
-		assert(sum.now === 3)
+		sum.now must_== 3
 	}
 
-	test("basicNonInjective") {
+	"basicNonInjective" ! {
 		val msgs = new MsgLog
 
 		// mostly testing messages here:
@@ -33,16 +31,16 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		val mock = mockOb(xy) {}
 		val mockX = mockOb(x) { msgs.log(xy.message(Observer.Nil)) }
 		val mockY = mockOb(y) { msgs.log(xy.message(Observer.Nil)) }
-		assert(xy.now === 0)
+		xy.now must_== 0
 		x() = 3
-		assert(xy.now === 0)
+		xy.now must_== 0
 		y() = 10
-		assert(xy.now === 30)
-		mock.currents.assert(30)
-		msgs.assert(None, Some(30))
+		xy.now must_== 30
+		mock.currents.values must_== List(30)
+		msgs.values must_== List(None, Some(30))
 	}
 
-	test("basicGlitch") {
+	"basicGlitch" ! {
 		val x = Var(true)
 		val y = Cache { !x() }
 		val res = Cache { x() && y() } // always false!
@@ -52,37 +50,37 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		assert(res.now === false)
 		x() = true
 		assert(res.now === false)
-		mock.currents.assert() // no currents please
-		mock.messages.assert() // no messages please
+		mock.currents.values must_== List() // no currents please
+		mock.messages.values must_== List() // no messages please
 	}
 
-	test("basicPropagate1") {
+	"basicPropagate1" ! {
 		val x = Var(1)
 		val x2 = Cache { 2 * x() }
 		val mock = mockOb(x2) {}
-		assert(x2.now === 2)
-		assert(x2.message(Observer.Nil) == None)
-		assert(x2.level === 1)
-		x2.dependents should equal(Set(mock))
-		x.dependents should equal(Set(x2))
+		x2.now must_== 2
+		x2.message(Observer.Nil) must_== None
+		x2.level must_== 1
+		x2.dependents must_== Set(mock)
+		x.dependents must_== Set(x2)
 		x() = 3
 		assert(x2.now === 6)
 		x() = 10
 		assert(x2.now === 20)
-		mock.currents.assert(6, 20)
-		mock.messages.assert(6, 20)
+		mock.currents.values must_== List(6, 20)
+		mock.messages.values must_== List(6, 20)
 	}
 
-	test("basicPropagate2") {
+	"basicPropagate2" ! {
 		val x = Var(1)
 		val y = Var(2)
 		val sum = Cache { x() + y() }
 		val mock = mockOb(sum)()
 		assert(sum.current(mock) === 3)
 		assert(sum.level === 1)
-		sum.dependents should equal(Set(mock))
-		x.dependents should equal(Set(sum))
-		y.dependents should equal(Set(sum))
+		sum.dependents must_== Set(mock)
+		x.dependents must_== Set(sum)
+		y.dependents must_== Set(sum)
 		assert(sum.now === 3)
 		x() = 10
 		assert(sum.now === 12)
@@ -93,115 +91,115 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		x() = 30
 		y() = 4
 		assert(sum.now === 34)
-		mock.currents.assert(12, 13, 23, 33, 34)
+		mock.currents.values must_== List(12, 13, 23, 33, 34)
 	}
 
 	// do not subscribe (so don't trigger any subscription side effects!)
-	test("basicPropagate3") {
+	"basicPropagate3" ! {
 		val x = Var(1)
 		val x2 = Cache { 2 * x() }
-		assert(x2.now === 2)
-		assert(x2.message(Observer.Nil) == None)
-		assert(x2.level === 1)
-		x2.dependents should equal(Set())
-		x.dependents should equal(Set(x2))
+		x2.now must_== 2
+		x2.message(Observer.Nil) must_== None
+		x2.level must_== 1
+		x2.dependents must_== Set()
+		x.dependents must_== Set(x2)
 		x() = 3
-		assert(x2.now === 6)
+		x2.now must_== 6
 		x() = 10
-		assert(x2.now === 20)
+		x2.now must_== 20
 	}
 
-	test("deepCachedPropagate") {
+	"deepCachedPropagate" ! {
 		val x = Var(1)
 		val y = Var(2)
 		val sum = Cache { x() + y() }
 		val prod = Cache { x() * y() }
 		val res = Cache { sum() + prod() }
-		assert(sum.now === 3)
-		assert(prod.now === 2)
-		assert(res.now === 5)
+		sum.now must_== 3
+		prod.now must_== 2
+		res.now must_== 5
 		val mock = mockOb(res)()
 
-		x.dependents should equal(Set(sum, prod))
-		y.dependents should equal(Set(sum, prod))
-		sum.dependents should equal(Set(res))
-		prod.dependents should equal(Set(res))
+		x.dependents must_== Set(sum, prod)
+		y.dependents must_== Set(sum, prod)
+		sum.dependents must_== Set(res)
+		prod.dependents must_== Set(res)
 
 		x() = 7
 		assert(sum.now === 9)
 		assert(prod.now === 14)
 		assert(res.now === 23)
-		mock.currents.assert(23)
+		mock.currents.values must_== List(23)
 	}
 
-	test("deepCachedPropagateWithIntermediateVar") {
+	"deepCachedPropagateWithIntermediateVar" ! {
 		val x = Var(1)
 		val y = Var(2)
 		val sum = Cache { x() + y() }
 		val prod = Cache { x() * y() }
 		val z = Var(3)
 		val res = Cache { z() * (sum() + prod()) }
-		assert(sum.now === 3)
-		assert(prod.now === 2)
-		assert(res.now === 3 * 5)
+		sum.now must_== 3
+		prod.now must_== 2
+		res.now must_== 3 * 5
 
 		val mock = mockOb(res)()
 
 		x() = 7
-		assert(sum.now === 9)
-		assert(prod.now === 14)
-		assert(res.now === 3 * 23)
+		sum.now must_== 9
+		prod.now must_== 14
+		res.now must_== 3 * 23
 		z() = 10
-		assert(sum.now === 9)
-		assert(prod.now === 14)
-		assert(res.now === 10 * 23)
-		mock.currents.assert(3 * 23, 10 * 23)
+		sum.now must_== 9
+		prod.now must_== 14
+		res.now must_== 10 * 23
+		mock.currents.values must_== List(3 * 23, 10 * 23)
 	}
 
-	test("deepMixedPropagateWithIntermediateVar") {
+	"deepMixedPropagateWithIntermediateVar" ! {
 		val x = Var(1)
 		val y = Var(2)
 		val sum = Signal { x() + y() }
 		val prod = Cache { x() * y() }
 		val z = Var(3)
 		val res = Cache { z() * (sum() + prod()) }
-		assert(sum.now === 3)
-		assert(prod.now === 2)
-		assert(res.now === 3 * 5)
+		sum.now must_== 3
+		prod.now must_== 2
+		res.now must_== 3 * 5
 
 		val mock = mockOb(res)()
 
 		x() = 7
-		assert(sum.now === 9)
-		assert(prod.now === 14)
-		assert(res.now === 3 * 23)
+		sum.now must_== 9
+		prod.now must_== 14
+		res.now must_== 3 * 23
 		z() = 10
-		assert(sum.now === 9)
-		assert(prod.now === 14)
-		assert(res.now === 10 * 23)
+		sum.now must_== 9
+		prod.now must_== 14
+		res.now must_== 10 * 23
 
-		mock.currents.assert(3 * 23, 10 * 23)
+		mock.currents.values must_== List(3 * 23, 10 * 23)
 	}
 
-	test("levelMismatch") {
+	"levelMismatch" ! {
 		val x = Var(2) // level 0
 		val x2 = Cache { 2 * x() } // level 1
 		val x6 = Cache { 3 * x2() } // level 2
 		val cond = Cache { if (x() == 2) x2() else x6() } // level 2 or 3
-		assert(x.now === 2)
-		assert(x2.now === 4)
-		assert(x6.now === 12)
-		assert(cond.now === 4)
+		x.now must_== 2
+		x2.now must_== 4
+		x6.now must_== 12
+		cond.now must_== 4
 
 		val mock = mockOb(cond)()
 
-		x.dependents should equal(Set(x2, cond))
-		x2.dependents should equal(Set(cond, x6))
-		x6.dependents should equal(Set())
-		assert(x.level === 0)
-		assert(x2.level === 1)
-		assert(x6.level === 2)
-		assert(cond.level === 2)
+		x.dependents must_== Set(x2, cond)
+		x2.dependents must_== Set(cond, x6)
+		x6.dependents must_== Set()
+		x.level must_== 0
+		x2.level must_== 1
+		x6.level must_== 2
+		cond.level must_== 2
 		// x6 has no dependents, so cond will try to reevaluate with an outdated (but seemingly valid) x6
 
 		x() = 3
@@ -210,10 +208,10 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		assert(x6.now === 18)
 		assert(cond.level === 3)
 
-		mock.currents.assert(18)
+		mock.currents.values must_== List(18)
 	}
 
-	test("levelMismatchWithNow") {
+	"levelMismatchWithNow" ! {
 		val x = Var(1) // level 0
 		val x2 = Cache { 2 * x() } // level 1
 		val x6 = Cache { 3 * x2() } // level 2
@@ -237,23 +235,23 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 
 		val mock = mockOb(cond)()
 
-		x.dependents should equal(Set(x2, cond))
-		x2.dependents should equal(Set(cond, x6))
-		x6.dependents should equal(Set(x24))
-		x24.dependents should equal(Set())
+		x.dependents must_== Set(x2, cond)
+		x2.dependents must_== Set(cond, x6)
+		x6.dependents must_== Set(x24)
+		x24.dependents must_== Set()
 
 		x() = 3
-		assert(x.now === 3)
-		assert(cond.now === 72)
-		assert(x2.now === 6)
-		assert(x6.now === 18)
-		assert(x24.now === 72)
-		assert(cond.level === 4)
+		x.now must_== 3
+		cond.now must_== 72
+		x2.now must_== 6
+		x6.now must_== 18
+		x24.now must_== 72
+		cond.level must_== 4
 
-		mock.currents.assert(72)
+		mock.currents.values must_== List(72)
 	}
 
-	test("mutuallyRecursiveSignals") {
+	"mutuallyRecursiveSignals" ! {
 		val c = Var(true)
 		object o {
 			val x: CachedSignal[Int] = Cache { if (c()) 0 else y() }
@@ -262,21 +260,21 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		import o._
 		val mockX = mockOb(o.x) {}
 		val mockY = mockOb(o.y) {}
-		assert(x.now === 0)
-		assert(y.now === 0)
-		assert(x.level === 1)
-		assert(y.level === 2)
+		x.now must_== 0
+		y.now must_== 0
+		x.level must_== 1
+		y.level must_== 2
 		c() = false
-		assert(x.now === 1)
-		assert(y.now === 1)
+		x.now must_== 1
+		y.now must_== 1
 		c() = true
 		c() = false
 		c() = true
-		assert(x.level === 5)
-		assert(y.level === x.level + 1)
+		x.level must_== 5
+		y.level must_== x.level + 1
 	}
 
-	test("signalDotChanges") {
+	"signalDotChanges" ! {
 		val x = Var(2)
 		val y = Var(0)
 		val es = Cache { x() * y() }.changes
@@ -288,22 +286,22 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		x() = 5 // nope
 		y() = 10
 		x() = 5 // nope
-		mock.messages.assert(30, 0, 5 * 10)
+		mock.messages.values must_== List(30, 0, 5 * 10)
 	}
 
-	test("eventSource") {
+	"eventSource" ! {
 		val es = new EventSource[Int]
 		val mock = mockOb(es) {}
-		es.dependents should equal(Set(mock))
+		es.dependents must_== Set(mock)
 
 		es emit 1
 		es emit 2
 		es emit 2
 		es emit 3
-		mock.messages.assert(1, 2, 2, 3)
+		mock.messages.values must_== List(1, 2, 2, 3)
 	}
 
-	test("eventsDotSelect") {
+	"eventsDotSelect" ! {
 		val es = new EventSource[Int]
 		val res = es collect {
 			case 1 => "Yeah"
@@ -316,10 +314,10 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		es emit 3
 		es emit 10
 		es emit 1
-		mock.messages.assert("Yeah", "Yes", "Yes", "Yeah")
+		mock.messages.values must_== List("Yeah", "Yes", "Yes", "Yeah")
 	}
 
-	test("eventsDotHold") {
+	"eventsDotHold" ! {
 		val es = new EventSource[Int]
 		val res = es.hold(0)
 		val mock = mockOb(res) {}
@@ -329,24 +327,24 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		es emit 2
 		es emit 3
 		es emit 10
-		mock.currents.assert(1, 2, 3, 10)
-		mock.messages.assert(1, 2, 3, 10)
+		mock.currents.values must_== List(1, 2, 3, 10)
+		mock.messages.values must_== List(1, 2, 3, 10)
 	}
 
-	test("eventsDotTake") {
+	"eventsDotTake" ! {
 		val es = new EventSource[Int]
 		val res = es.take(3)
 		val mock = mockOb(res) {}
 		es emit 1
 		es emit 2
 		es emit 3
-		mock.messages.assert(1, 2, 3)
+		mock.messages.values must_== List(1, 2, 3)
 		es emit 4
 		es emit 5
-		mock.messages.assert(1, 2, 3)
+		mock.messages.values must_== List(1, 2, 3)
 	}
 
-	test("eventsDotHappended") {
+	"eventsDotHappended" ! {
 		val es = new EventSource[Int]
 		val res = es.happened
 		val mock = mockOb(res) {}
@@ -355,31 +353,31 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		assert(res.now === true)
 		es emit 0
 		assert(res.now === true)
-		mock.currents.assert(true)
+		mock.currents.values must_== List(true)
 	}
 
-	test("eventsDotSwitch") {
+	"eventsDotSwitch" ! {
 		val es = new EventSource[Int]
 		val sig1 = Var(0)
 		val sig2 = Var(100)
 		val res = es switch (sig1, sig2)
 		val mock = mockOb(res) {}
-		assert(res.now === 0)
+		res.now must_== 0
 		sig1() = 1
-		assert(res.now === 1)
+		res.now must_== 1
 		sig2() = 101 // nope
-		assert(res.now === 1)
+		res.now must_== 1
 		es emit 1
-		assert(res.now === 101)
+		res.now must_== 101
 		sig1() = 2 // nope
-		assert(res.now === 101)
+		res.now must_== 101
 		es emit 2 // nope
-		assert(res.now === 101)
+		res.now must_== 101
 		sig2() = 102
-		assert(res.now === 102)
+		res.now must_== 102
 	}
 
-	test("signalDotFlattenEvents") {
+	"signalDotFlattenEvents" ! {
 		val es1 = new EventSource[Int]
 		val es2 = new EventSource[Int]
 
@@ -391,10 +389,10 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		es1 emit 2
 		es1 emit 2
 		sig() = es2
-		mock.messages.assert(1, 2, 2)
+		mock.messages.values must_== List(1, 2, 2)
 	}
 
-	test("signalDotFlattenSignal") {
+	"signalDotFlattenSignal" ! {
 		val s1 = Var(0)
 		val s2 = Var(10)
 
@@ -409,7 +407,6 @@ trait ReactiveTests extends FunSuite with ReactiveTestUtils {
 		sig() = s2
 		s1() = 4 // no
 		s2() = 11
-		mock.messages.assert(1, 2, 3, 10, 11)
+		mock.messages.values must_== List(1, 2, 3, 10, 11)
 	}
-
 }
