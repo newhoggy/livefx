@@ -5,6 +5,8 @@ import org.specs2.mutable.SpecificationWithJUnit
 class SpecReactive extends SpecificationWithJUnit with ReactiveSpecUtils {
 	import scala.react._
 
+	sequential
+	
 	"basicDef1" ! {
 		val x = Var(1)
 		x.now must_== 1

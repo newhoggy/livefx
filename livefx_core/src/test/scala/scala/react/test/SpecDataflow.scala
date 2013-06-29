@@ -6,6 +6,8 @@ import org.junit.runners.Suite
 import scala.react._
 
 class SpecDataflow extends SpecificationWithJUnit with ReactiveSpecUtils {
+  sequential
+  
   "simpleReactor" ! {
     val es = new EventSource[Int]
     val states = new ListLog[Int]
