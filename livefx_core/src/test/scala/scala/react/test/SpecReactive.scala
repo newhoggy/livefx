@@ -2,14 +2,14 @@ package scala.react.test
 
 import org.specs2.mutable.SpecificationWithJUnit
 
-class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
+class SpecReactive extends SpecificationWithJUnit with ReactiveSpecUtils {
 	import scala.react._
 
 	"basicDef1" ! {
 		val x = Var(1)
-		assert(x.now === 1)
-		assert(x.current(Observer.Nil) === 1)
-		assert(x.message(Observer.Nil) === None)
+		x.now must_== 1
+		x.current(Observer.Nil) must_== 1
+		x.message(Observer.Nil) must_== None
 		val y = Signal { x() must_== 1 }
 		y.now
 	}
@@ -45,11 +45,11 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		val y = Cache { !x() }
 		val res = Cache { x() && y() } // always false!
 		val mock = mockOb(res) {}
-		assert(res.now === false)
+		res.now must_== false
 		x() = false
-		assert(res.now === false)
+		res.now must_== false
 		x() = true
-		assert(res.now === false)
+		res.now must_== false
 		mock.currents.values must_== List() // no currents please
 		mock.messages.values must_== List() // no messages please
 	}
@@ -64,9 +64,9 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		x2.dependents must_== Set(mock)
 		x.dependents must_== Set(x2)
 		x() = 3
-		assert(x2.now === 6)
+		x2.now must_== 6
 		x() = 10
-		assert(x2.now === 20)
+		x2.now must_== 20
 		mock.currents.values must_== List(6, 20)
 		mock.messages.values must_== List(6, 20)
 	}
@@ -76,21 +76,21 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		val y = Var(2)
 		val sum = Cache { x() + y() }
 		val mock = mockOb(sum)()
-		assert(sum.current(mock) === 3)
-		assert(sum.level === 1)
+		sum.current(mock) must_== 3
+		sum.level must_== 1
 		sum.dependents must_== Set(mock)
 		x.dependents must_== Set(sum)
 		y.dependents must_== Set(sum)
-		assert(sum.now === 3)
+		sum.now must_== 3
 		x() = 10
-		assert(sum.now === 12)
+		sum.now must_== 12
 		y() = 3
-		assert(sum.now === 13)
+		sum.now must_== 13
 		x() = 20
-		assert(sum.now === 23)
+		sum.now must_== 23
 		x() = 30
 		y() = 4
-		assert(sum.now === 34)
+		sum.now must_== 34
 		mock.currents.values must_== List(12, 13, 23, 33, 34)
 	}
 
@@ -126,9 +126,9 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		prod.dependents must_== Set(res)
 
 		x() = 7
-		assert(sum.now === 9)
-		assert(prod.now === 14)
-		assert(res.now === 23)
+		sum.now must_== 9
+		prod.now must_== 14
+		res.now must_== 23
 		mock.currents.values must_== List(23)
 	}
 
@@ -203,10 +203,10 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		// x6 has no dependents, so cond will try to reevaluate with an outdated (but seemingly valid) x6
 
 		x() = 3
-		assert(x.now === 3)
-		assert(cond.now === 18)
-		assert(x6.now === 18)
-		assert(cond.level === 3)
+		x.now must_== 3
+		cond.now must_== 18
+		x6.now must_== 18
+		cond.level must_== 3
 
 		mock.currents.values must_== List(18)
 	}
@@ -218,20 +218,20 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		val x24 = Cache { 4 * x6() } // level 3
 		val cond = Cache { if (x() <= 2) x2() else x24.now } // level 2 or 4
 
-		assert(x.now === 1)
-		assert(x2.now === 2)
-		assert(x6.now === 6)
-		assert(x24.now === 24)
-		assert(cond.now === 2)
-		assert(cond.level === 2)
+		x.now must_== 1
+		x2.now must_== 2
+		x6.now must_== 6
+		x24.now must_== 24
+		cond.now must_== 2
+		cond.level must_== 2
 
 		x() = 2
-		assert(x.now === 2)
-		assert(x2.now === 4)
-		assert(x6.now === 12)
-		assert(x24.now === 48)
-		assert(cond.now === 4)
-		assert(cond.level === 2)
+		x.now must_== 2
+		x2.now must_== 4
+		x6.now must_== 12
+		x24.now must_== 48
+		cond.now must_== 4
+		cond.level must_== 2
 
 		val mock = mockOb(cond)()
 
@@ -321,7 +321,7 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		val es = new EventSource[Int]
 		val res = es.hold(0)
 		val mock = mockOb(res) {}
-		assert(res.now === 0)
+		res.now must_== 0
 		es emit 1
 		es emit 2
 		es emit 2
@@ -348,11 +348,11 @@ class ReactiveTests extends SpecificationWithJUnit with ReactiveSpecUtils {
 		val es = new EventSource[Int]
 		val res = es.happened
 		val mock = mockOb(res) {}
-		assert(res.now === false)
+		res.now must_== false
 		es emit 1
-		assert(res.now === true)
+		res.now must_== true
 		es emit 0
-		assert(res.now === true)
+		res.now must_== true
 		mock.currents.values must_== List(true)
 	}
 
