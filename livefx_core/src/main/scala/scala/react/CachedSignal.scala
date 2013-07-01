@@ -10,9 +10,10 @@ package scala.react
 
 class CachedSignal[A](op: => A) extends ValueCachingSignal[A] {
 	evaluateAndConnect()
+
 	// Attribute to dynamic dep graphs:
 	// always subscribe this if it has dependents, as dependencies might have changed
-	protected def evaluateAndConnect() = {
+	protected def evaluateAndConnect(): Unit = {
 		_value = Signal.withDep(this)(op)
 		_value
 	}

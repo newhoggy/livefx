@@ -9,13 +9,13 @@
 package scala.react
 
 object Var {
-	def apply[A](init: A) = logCreation(new Var(init))
+	def apply[A](init: A): Var[A] = logCreation(new Var(init))
 }
 
 /** A source signal that saves its value in a variable.
   */
 class Var[A](protected[react] var _value: A) extends SourceSignal[A] {
-	def update(newValue: A) = if (_value != newValue) {
+	def update(newValue: A): Unit = if (_value != newValue) {
 		_value = newValue
 		emit()
 	}

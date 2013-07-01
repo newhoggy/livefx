@@ -9,7 +9,7 @@
 package scala.react
 
 object EventSource {
-	def apply[A]() = new EventSource[A]
+	def apply[A](): EventSource[A] = new EventSource[A]
 }
 
 class EventSource[A] extends SourceReactive[A, Unit] with Events[A]

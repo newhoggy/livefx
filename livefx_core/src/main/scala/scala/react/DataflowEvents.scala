@@ -11,29 +11,30 @@ package scala.react
 import scala.util.continuations._
 
 class EventsToDataflow[A](val init: Events[A]) extends ReactiveToDataflow[A, Unit, Events[A], DataflowEvents[A]] with Events[A] {
-	protected def make(code: DataflowEvents[A] => Unit @suspendable) = new DataflowEvents(init) {
+	protected def make(code: DataflowEvents[A] => Unit @suspendable): scala.react.DataflowEvents[A] = new DataflowEvents(init) {
 		def body() = code(this)
 	}
+	
 	override def current(dep: Dependent) = super.current(dep)
 }
 
 /** Never call any methods of this stream outside of its body.
   */
 abstract class DataflowEvents[A](protected var _reactive: Events[A]) extends Events[A]
-	with DataflowReactive[A, Unit, Events[A]]
-	with InvalidatableDependent
-	with LevelCachingDependent
-	with Publisher[A, Unit] {
+  	with DataflowReactive[A, Unit, Events[A]]
+  	with InvalidatableDependent
+  	with LevelCachingDependent
+  	with Publisher[A, Unit] {
 	// eagerly start this stream
 	_continue.apply()
 
-	def receive(eng: Engine) {
+	def receive(eng: Engine): Unit = {
 		if (isAlive) {
 			mayAbort { _continue() }
 		}
 	}
 
-	override def message(dep: Dependent) = {
+	override def message(dep: Dependent): Option[A] = {
 		checkLevelNow()
 		subscribe(dep)
 		Engine messageFor this match {
@@ -44,7 +45,7 @@ abstract class DataflowEvents[A](protected var _reactive: Events[A]) extends Eve
 
 	def emit(a: A): Unit @suspendable = switchTo(Events.Now(a))
 
-	protected def checkDelegate() {
+	protected def checkDelegate(): Unit = {
 		_reactive message this match {
 			case Some(x) =>
 				Engine.setMessage(this, x)

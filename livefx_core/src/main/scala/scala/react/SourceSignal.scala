@@ -14,6 +14,6 @@ package scala.react
 abstract class SourceSignal[A] extends SourceReactive[A, A] with Signal[A] {
 	/** Convenience method. Emits a change message.
 	  */
-	protected def emit() { emit(_value) }
+	protected def emit(): Unit = { emit(_value) }
 	override def cached = this
 }

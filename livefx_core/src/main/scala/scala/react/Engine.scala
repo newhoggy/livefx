@@ -11,8 +11,8 @@ package scala.react
 import scala.collection.mutable.{ PriorityQueue, HashSet, ArrayBuffer, SynchronizedBuffer }
 
 abstract class Engine {
-	def invalidate(r: Dependent)
-	def invalidate(rs: Dependents)
+	def invalidate(r: Dependent): Unit
+	def invalidate(rs: Dependents): Unit
 }
 
 object Engine extends Engine {
@@ -23,13 +23,13 @@ object Engine extends Engine {
 		def compare(x: Dependent, y: Dependent): Int = x.level - y.level
 	})
 
-	private var invalids = newQueue
-	private var nextInvalids = newQueue
+	private var invalids: PriorityQueue[Dependent] = newQueue
+	private var nextInvalids: PriorityQueue[Dependent] = newQueue
 
-	private val _processed = new HashMap[DependencyNode, Any]
+	private val _processed: HashMap[DependencyNode, Any] = new HashMap[DependencyNode, Any]
 
 	def evaluating = _evaluating
-	private var _evaluating = false
+	private var _evaluating: Boolean = false
 
 	private var _level = Int.MaxValue
 	def level = _level
@@ -106,10 +106,10 @@ object Engine extends Engine {
 	var blockingRunner: (() => Unit) => Unit = { op => }
 	var nonBlockingRunner: (() => Unit) => Unit = { op => }
 
-	private[react] def runBlocking(op: => Unit) { blockingRunner(() => op) }
-	private def runNonBlocking(op: => Unit) { nonBlockingRunner(() => op) }
+	private[react] def runBlocking(op: => Unit): Unit = { blockingRunner(() => op) }
+	private def runNonBlocking(op: => Unit): Unit = { nonBlockingRunner(() => op) }
 
-	private def runCycle(preOp: => Unit) {
+	private def runCycle(preOp: => Unit): Unit = {
 		try {
 			_cycleNo += 1
 			_evaluating = true
@@ -140,13 +140,13 @@ object Engine extends Engine {
 
 	/** Entry method for reactive sources to start propagation.
 	  */
-	def propagateFrom(d: DependencyNode) {
+	def propagateFrom(d: DependencyNode): Unit = {
 		runCycle { invalidate(d.clearDependents()) }
 	}
 
 	/** Propagate to the given node.
 	  */
-	private def propagateTo(dep: Dependent) {
+	private def propagateTo(dep: Dependent): Unit = {
 		if (!_processed.contains(dep)) {
 			log("  Propagating to " + dbgInfo(dep))
 			assert(dep.level >= _level, dep.level + "<" + _level)
@@ -157,7 +157,7 @@ object Engine extends Engine {
 
 	/** Propagate to contents of invalids queue, starting with the node that has the lowest level.
 	  */
-	private def propagateFromQueue() {
+	private def propagateFromQueue(): Unit = {
 		var r = invalids.poll
 		while (r != null) {
 			// once we hit observers, we are done with evaluating
@@ -167,20 +167,20 @@ object Engine extends Engine {
 		}
 	}
 
-	def invalidate(dep: Dependent) = if (!_processed.contains(dep)) {
+	def invalidate(dep: Dependent): Unit = if (!_processed.contains(dep)) {
 		assert(dep.level >= this.level, dep.level + "<" + this.level)
 		log("  Invalidating " + dbgInfo(dep))
 		dep.invalidate()
 		invalids add dep
 	}
 
-	def lift(dep: Dependent) = {
+	def lift(dep: Dependent): Unit = {
 		invalids remove dep
 		invalidate(dep)
 		log("Lifted " + dbgInfo(dep))
 	}
 
-	def invalidate(deps: Dependents) {
+	def invalidate(deps: Dependents): Unit = {
 		deps foreach invalidate
 	}
 

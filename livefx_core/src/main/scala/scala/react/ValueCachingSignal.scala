@@ -12,16 +12,15 @@ package scala.react
   * value and level, that can be invalidated, and maintain a set of dependents. Clients need to
   * implement method `evaluateAndConnect()`.
   */
-abstract class ValueCachingSignal[A]
-	extends Signal[A]
-	with Dependency[A, A]
-	with MessageCachingReactive[A, A]
-	with InvalidatableDependent
-	with LevelCachingDependent
-	with Publisher[A, A] { outer =>
+abstract class ValueCachingSignal[A] extends Signal[A]
+  	with Dependency[A, A]
+  	with MessageCachingReactive[A, A]
+  	with InvalidatableDependent
+  	with LevelCachingDependent
+  	with Publisher[A, A] { outer =>
 	protected[react] var _value: A = _
 
-	override def current(dep: Dependent) = {
+	override def current(dep: Dependent): A = {
 		checkLevelNow()
 		subscribe(dep)
 		validate()
@@ -30,18 +29,18 @@ abstract class ValueCachingSignal[A]
 
 	/** Update the value of this signal and connect to dependencies.
 	  */
-	@throws(classOf[LevelMismatchNow]) protected def evaluateAndConnect()
+	@throws(classOf[LevelMismatchNow]) protected def evaluateAndConnect(): Unit
 
-	protected def validate() = if (!valid) forceValidation()
+	protected def validate(): Unit = if (!valid) forceValidation()
 
-	protected def forceValidation() {
+	protected def forceValidation(): Unit = {
 		// we always need to connect, otherwise we we don't get invalidated when a dependency changes
 		// and a later call to `now` might return an outdated value
 		evaluateAndConnect()
 		_valid = true
 	}
 
-	def receive(eng: Engine) {
+	def receive(eng: Engine): Unit = {
 		val oldValue = _value
 		try {
 			// always force a validation, as dataflow reactive might want switch to a different state, 

@@ -10,7 +10,7 @@ package scala.react
 
 object Observer {
 	case object Nil extends Observer {
-		def run() {}
+		def run(): Unit = {}
 	}
 }
 
@@ -21,21 +21,21 @@ trait Observer extends Dependent {
 	// Implementation note: max value will keep observers at the end of the 
 	// eval queue, i.e., observers are run only after all reactives have 
 	// been validated.
-	def level = Int.MaxValue
-	def dependents = Set.empty
+	def level: Int = Int.MaxValue
+	def dependents: Set[Dependent] = Set.empty
 
-	def receive(eng: Engine) = {
+	def receive(eng: Engine): Unit = {
 		run()
 		Engine.processed(this)
 	}
-	def run()
+	def run(): Unit
 
-	def valid = true
+	def valid: Boolean = true
 
-	final private[react] def invalidate() {
+	final private[react] def invalidate(): Unit = {
 		// Observers are leafs in the dep graph, so nothing to do here
 	}
-	private[react] def clearDependents() = scala.collection.Set.empty
+	private[react] def clearDependents(): scala.collection.Set[Dependent] = scala.collection.Set.empty
 
-	def dependsOn[A, B](reactive: Dependency[A, B]) {}
+	def dependsOn[A, B](reactive: Dependency[A, B]): Unit = {}
 }

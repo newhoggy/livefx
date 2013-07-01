@@ -40,7 +40,7 @@ trait MemorizesDependents {
 protected[react] class WeakHashSet[A] extends scala.collection.mutable.Set[A] {
 	private val map = new java.util.WeakHashMap[A, AnyRef]
 	override def size = map.size
-	def iterator = JIteratorWrapper(map.keySet.iterator)
+	def iterator: JIteratorWrapper[A] = JIteratorWrapper(map.keySet.iterator)
 	def contains(elem: A): Boolean = map.containsKey(elem)
 	def +=(elem: A): this.type = { map.put(elem, null); this }
 	def -=(elem: A): this.type = { map.remove(elem); this }

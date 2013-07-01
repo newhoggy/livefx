@@ -15,7 +15,7 @@ import scala.util.continuations._
 trait DataflowReactive[M, N, R <: Reactive[M, N]] extends Reactive[M, N] with DataflowBase with LevelCachingDependent {
 	protected var _reactive: R
 
-	override def initialContinuation = () => reset {
+	override def initialContinuation: () => Unit = () => reset {
 		checkDelegate()
 		body()
 	}
@@ -35,7 +35,7 @@ trait DataflowReactive[M, N, R <: Reactive[M, N]] extends Reactive[M, N] with Da
 			continueLater { checkDelegate(); k() }
 		}
 
-	protected def handleLevelMismatch(l: LevelMismatchNow) {
+	protected def handleLevelMismatch(l: LevelMismatchNow): Unit = {
 		_level = l.dependency.level + 1
 		Engine lift this
 	}

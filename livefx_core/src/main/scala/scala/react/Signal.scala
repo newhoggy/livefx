@@ -33,7 +33,7 @@ object Signal {
 		v
 	}
 
-	def apply[A](op: => A) = logCreation(new PermeableSignal(op))
+	def apply[A](op: => A): Signal[A] = logCreation(new PermeableSignal(op))
 
 	class PermeableSignal[A](op: => A) extends Signal[A] {
 		protected[react] def _value = now

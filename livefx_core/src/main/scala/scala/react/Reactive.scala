@@ -17,8 +17,8 @@ object Reactive {
 		//override def subscribe(dep: Dependent) {}
 		def valid = true
 		def level = 0
-		def clearDependents() = NoDependents
-		def dependents = NoDependents
+		def clearDependents(): Dependents = NoDependents
+		def dependents: Dependents = NoDependents
 		override protected[react] def message(dep: Dependent): Option[A] = None
 	}
 }
@@ -56,7 +56,7 @@ trait Reactive[+Msg, +Now] { outer =>
 	  * but the vast majority of times we are also interested in the value
 	  * on subscription anyways
 	  */
-	def subscribe(dep: Dependent)
+	def subscribe(dep: Dependent): Unit
 
 	/** Returns the current value of this reactive and subscribes the given observer.
 	  * Might be more efficient than consecutively calling now and subscribe.
@@ -90,9 +90,9 @@ trait Reactive[+Msg, +Now] { outer =>
 	def toSignal: Signal[Now] = new Signal[Now] {
 		protected[react] def _value = outer._value
 		def cached: Signal[Now] = new ValueCachingSignal[Now] {
-			protected def evaluateAndConnect() = _value = outer.current(this)
+			protected def evaluateAndConnect(): Unit = _value = outer.current(this)
 		}
-		def subscribe(dep: Dependent) = outer subscribe dep
+		def subscribe(dep: Dependent): Unit = outer subscribe dep
 		def message(dep: Dependent): Option[Now] = outer message dep map (_ => outer.now)
 	}
 
@@ -100,7 +100,7 @@ trait Reactive[+Msg, +Now] { outer =>
 	  * this reactive every time it changes.
 	  */
 	def toEvents: Events[Msg] = new Events[Msg] {
-		def message(dep: Dependent) = outer message dep
-		def subscribe(dep: Dependent) = outer subscribe dep
+		def message(dep: Dependent): Option[Msg] = outer message dep
+		def subscribe(dep: Dependent): Unit = outer subscribe dep
 	}
 }

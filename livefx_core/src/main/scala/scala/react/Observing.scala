@@ -15,38 +15,35 @@ package scala.react
 trait Observing { outer =>
 	protected val _obRefs = new scala.collection.mutable.HashSet[Observer]
 	/** An observer with a given identity */
-	protected abstract class ProxyObserver(id: Any) extends PersistentObserver
-		with Proxy {
-		def self = id
-		override def toString = "ProxyOb for " + self + " from " + outer
+	protected abstract class ProxyObserver(id: Any) extends PersistentObserver with Proxy {
+		def self: Any = id
+		override def toString: String = "ProxyOb for " + self + " from " + outer
 	}
 	/* An observer that will be automatically referenced by this (enclosing) object */
 	protected abstract class PersistentObserver extends Observer {
 		ref(this)
 		/** Unreference this observer */
-		def dispose() { unref(this) }
+		def dispose(): Unit = { unref(this) }
 		override def toString = "PersistentOb from " + outer
 	}
 
-	private def ref(ob: Observer) {
+	private def ref(ob: Observer): Unit = {
 		// TODO: optimize for singleton and small sets
 		_obRefs += ob
 	}
 
-	private def unref(ob: Observer) {
+	private def unref(ob: Observer): Unit = {
 		// TODO: fall back to singletons/small sets here if possible?
 		_obRefs -= ob
 	}
 
 	/** Removes all strong observer references held by `this` observing object.
 	  */
-	protected def clearObRefs() {
-		_obRefs.clear()
-	}
+	protected def clearObRefs(): Unit = _obRefs.clear()
 
 	/* Convenient method to observe a given publisher. The given handler 
    * should return true as long as wants to observe the publisher */
-	protected def observe[M](p: Reactive[M, _])(op: M => Boolean) = {
+	protected def observe[M](p: Reactive[M, _])(op: M => Boolean): PersistentObserver = {
 		val ob = new PersistentObserver { pob =>
 			def run() {
 				p.message(Observer.Nil) match {
@@ -66,11 +63,10 @@ trait Observing { outer =>
 	/** Applies a given function f to each event from the given stream as long
 	  * as f evaluates to true.
 	  */
-	protected def on[A](es: Events[A])(f: A => Boolean) = observe(es)(f)
+	protected def on[A](es: Events[A])(f: A => Boolean): PersistentObserver = observe(es)(f)
 
 	/** Applies a given function only once with the first event from the given
 	  * stream.
 	  */
-	protected def onceOn[A](es: Events[A])(f: A => Unit) =
-		on(es) { a => f(a); false }
+	protected def onceOn[A](es: Events[A])(f: A => Unit): PersistentObserver = on(es) { a => f(a); false }
 }

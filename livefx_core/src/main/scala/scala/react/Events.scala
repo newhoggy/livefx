@@ -12,12 +12,12 @@ object Events {
 	/** An event stream that never emits.
 	  */
 	case object Never extends Events[Nothing] with Reactive.Nil[Nothing, Unit] {
-		override def subscribe(dep: Dependent) {}
+		override def subscribe(dep: Dependent): Unit = {}
 		override def map[B](f: Nothing => B): Events[B] = this
 		override def collect[B](p: PartialFunction[Nothing, B]): Events[B] = this
 		override def filter(p: Nothing => Boolean): Events[Nothing] = this
 		override def when(s: Signal[Boolean]): Events[Nothing] = this
-		override def tag[B](v: => B) = this
+		override def tag[B](v: => B): this.type = this
 	}
 
 	/** An event stream that emits the given value only once, right now. It is safe to
@@ -30,9 +30,9 @@ object Events {
 		def valid = true
 		// Level == 0 should be safe, since we never enter this stream into the propagation queue
 		def level = 0
-		def clearDependents() = NoDependents
-		def dependents = NoDependents
-		override def subscribe(dep: Dependent) { dep.dependsOn(this) }
+		def clearDependents(): Dependents = NoDependents
+		def dependents: Dependents = NoDependents
+		override def subscribe(dep: Dependent): Unit = { dep.dependsOn(this) }
 	}
 
 	import scala.util.continuations._
@@ -52,8 +52,8 @@ object Events {
   * the same messages as ''a'' at the same times.
   */
 trait Events[+A] extends Reactive[A, Unit] { outer =>
-	override protected[react] def _value = ()
-	override def toEvents = this
+	override protected[react] def _value: Unit = ()
+	override def toEvents: Events[A] = this
 
 	/** An event stream that contains all events from this stream, applied to the given function.
 	  *
@@ -92,7 +92,7 @@ trait Events[+A] extends Reactive[A, Unit] { outer =>
 	  *
 	  * Equivalent to `map { a => v }`
 	  */
-	def tag[B](v: => B) = map { a => v }
+	def tag[B](v: => B): Events[B] = map { a => v }
 
 	/** Returns a signal that holds the last event `e` from `this` stream beginning
 	  * ''at'' the moment `e` was fired. Most straightforward conversion from an
@@ -134,11 +134,11 @@ trait Events[+A] extends Reactive[A, Unit] { outer =>
 	  * (those events are dropped).
 	  */
 	def merge[B >: A](that: Events[B]): Events[B] = new Events[B] {
-		def subscribe(dep: Dependent) {
+		def subscribe(dep: Dependent): Unit = {
 			outer.subscribe(dep)
 			that.subscribe(dep)
 		}
-		def message(dep: Dependent) = {
+		def message(dep: Dependent): Option[B] = {
 			val x = outer.message(dep)
 			if (x != None) x
 			else that.message(dep)

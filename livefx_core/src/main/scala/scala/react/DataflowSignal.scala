@@ -12,25 +12,25 @@ import scala.util.continuations._
 
 class SignalToDataflow[A](val init: Signal[A]) extends ReactiveToDataflow[A, A, Signal[A], DataflowSignal[A]] with Signal[A] {
 	protected def make(code: DataflowSignal[A] => Unit @suspendable) = new DataflowSignal(init) {
-		def body() = code(this)
+		def body(): Unit @suspendable = code(this)
 	}
-	override def subscribe(dep: Dependent) = super.subscribe(dep)
+	override def subscribe(dep: Dependent): Unit = super.subscribe(dep)
 	def cached: Signal[A] = init.cached
 }
 
 abstract class DataflowSignal[A](protected var _reactive: Signal[A]) extends ValueCachingSignal[A]
-	with DataflowReactive[A, A, Signal[A]] {
+    with DataflowReactive[A, A, Signal[A]] {
 	// eagerly start this signal
 	validate()
 
-	@throws(classOf[LevelMismatchNow]) protected def evaluateAndConnect() =
+	@throws(classOf[LevelMismatchNow]) protected def evaluateAndConnect(): Unit =
 		if (isAlive) {
 			_continue()
 		}
 
 	def body(): Unit @suspendable
 
-	protected def checkDelegate() {
+	protected def checkDelegate(): Unit = {
 		/*_reactive message this match {
       case Some(x) =>
         _value = x
@@ -45,7 +45,7 @@ abstract class DataflowSignal[A](protected var _reactive: Signal[A]) extends Val
 		_value
 	}
 
-	override protected def handleLevelMismatch(l: LevelMismatchNow) {
+	override protected def handleLevelMismatch(l: LevelMismatchNow): Unit = {
 		// rethrow: handled by value caching signal
 		throw l
 	}

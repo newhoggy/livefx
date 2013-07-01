@@ -21,7 +21,7 @@ trait ReactiveToDataflow[M, N, R <: Reactive[M, N], DR <: DataflowReactive[M, N,
 	def once(body: DR => Unit @suspendable): R = make(body)
 
 	protected[react] def _value = init._value
-	def subscribe(dep: Dependent) = init.subscribe(dep)
+	def subscribe(dep: Dependent): Unit = init.subscribe(dep)
 	override def current(dep: Dependent): N = init.current(dep)
 	protected[react] def message(dep: Dependent): Option[M] = init.message(dep)
 }

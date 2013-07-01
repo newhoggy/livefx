@@ -48,7 +48,7 @@ trait DataflowBase extends Dependent {
 		x.now.get
 	}
 
-	protected def checkDelegate()
+	protected def checkDelegate(): Unit
 
 	/** Suspends this dependent and continues execution in the next propagation cycle.
 	  */
@@ -59,31 +59,28 @@ trait DataflowBase extends Dependent {
 	  */
 	def isDisposed: Boolean = _disposed
 
-	def isAlive = !isDisposed
+	def isAlive: Boolean = !isDisposed
 
 	/** Will dispose this stream immediately. Permanently releases all allocated resources
 	  * to be reclaimed by the garbage collector. This stream will behave like an `Event.Never`
 	  * afterwards.
 	  */
-	def dispose(): Unit @suspendable = shift { (k: Unit => Unit) =>
-		_disposed = true
-	}
+	def dispose(): Unit @suspendable = shift { (k: Unit => Unit) => _disposed = true }
 
-	protected def mayAbort(op: => Unit) = try {
+	protected def mayAbort(op: => Unit): Unit = try {
 		op
 	} catch {
-		case e: LevelMismatchNow =>
-			handleLevelMismatch(e)
+		case e: LevelMismatchNow => handleLevelMismatch(e)
 	}
 
-	protected def handleLevelMismatch(l: LevelMismatchNow)
+	protected def handleLevelMismatch(l: LevelMismatchNow): Unit
 
 	protected def continueNow[A](body: (A => Unit) => Unit) = shift { (k: A => Unit) =>
 		_continue = { () => mayAbort { body(k) } }
 		_continue()
 	}
 
-	protected def continueLater(k: => Unit) = {
+	protected def continueLater(k: => Unit): Unit = {
 		_continue = { () => mayAbort { k } }
 		Engine nextTurn this
 	}

@@ -18,11 +18,11 @@ trait DependencyNode {
 	  */
 	def level: Int
 
-	protected def checkLevelNow() {
+	protected def checkLevelNow(): Unit = {
 		if (level >= Engine.level) throw LevelMismatchNow(this, Engine.level)
 	}
 
-	protected def checkLevelPrevious() {
+	protected def checkLevelPrevious(): Unit = {
 		if (Engine.evaluating && level < Engine.level) throw LevelMismatchPrevious(this, Engine.level)
 	}
 

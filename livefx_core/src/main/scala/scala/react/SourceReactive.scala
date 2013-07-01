@@ -9,11 +9,9 @@
 package scala.react
 
 trait SourceReactive[M, N] extends Publisher[M, N] {
-	def emit(msg: M) {
-		propagate(msg)
-	}
+	def emit(msg: M): Unit = propagate(msg)
 
 	def level = 0
 	def valid = true
-	private[react] def invalidate() {}
+	private[react] def invalidate(): Unit = {}
 }

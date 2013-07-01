@@ -14,13 +14,13 @@ package scala.react
 case class LevelMismatchNow(dependency: DependencyNode, level: Int) extends Exception {
 	// fast exception: don't generate stack trace 
 	//override def fillInStackTrace() = this
-	override def getMessage =
+	override def getMessage: String =
 		"Level of dependency " + dbgInfo(dependency) + ": " + dependency.level + " was >= level of acessor: " + level
 }
 
 case class LevelMismatchPrevious(dependency: DependencyNode, level: Int) extends Exception {
 	// fast exception: don't generate stack trace 
 	//override def fillInStackTrace() = this
-	override def getMessage =
+	override def getMessage: String =
 		"Level of dependency " + dbgInfo(dependency) + ": " + dependency.level + " was < level of acessor: " + level
 }

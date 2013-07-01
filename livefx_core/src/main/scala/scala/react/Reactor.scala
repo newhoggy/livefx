@@ -30,15 +30,15 @@ abstract class Reactor extends DataflowBase with Observer {
 
 	_continue()
 
-	protected def handleLevelMismatch(l: LevelMismatchNow) {
+	protected def handleLevelMismatch(l: LevelMismatchNow): Unit = {
 		// leaf node: never need to handle level mismatches
 	}
 
-	def run() {
+	def run(): Unit = {
 		if (isAlive) {
 			_continue()
 		}
 	}
 
-	def checkDelegate() {}
+	def checkDelegate(): Unit = {}
 }

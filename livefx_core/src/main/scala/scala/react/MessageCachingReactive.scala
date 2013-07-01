@@ -15,5 +15,5 @@ trait MessageCachingReactive[+Msg, +Now] extends Dependency[Msg, Now] {
 		Engine.messageFor(this)
 	}
 
-	protected[this] def cacheMessage(msg: Msg) { Engine.setMessage(this, msg) }
+	protected[this] def cacheMessage(msg: Msg): Unit = { Engine.setMessage(this, msg) }
 }

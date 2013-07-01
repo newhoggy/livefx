@@ -11,16 +11,16 @@ package scala.react
 /** A node in the dependency graph that has dependencies.
   */
 trait Dependent extends DependencyNode {
-	@throws(classOf[LevelMismatchNow]) def receive(eng: Engine)
+	@throws(classOf[LevelMismatchNow]) def receive(eng: Engine): Unit
 
-	def dependsOn[A, B](reactive: Dependency[A, B])
+	def dependsOn[A, B](reactive: Dependency[A, B]): Unit
 
 	/** Updates the internal state so that `valid` immediately after a call to this method
 	  * will return `false`.
 	  *
 	  * Important(!): Never ever call this method outside of an `Engine` implementation!
 	  */
-	private[react] def invalidate()
+	private[react] def invalidate(): Unit
 }
 
 /** Convenience implementation trait.
@@ -30,7 +30,7 @@ trait InvalidatableDependent extends Dependent {
 
 	def valid = _valid
 
-	private[react] def invalidate() {
+	private[react] def invalidate(): Unit = {
 		_valid = false
 	}
 }
@@ -40,7 +40,7 @@ trait LevelCachingDependent extends Dependent {
 
 	def level = _level
 
-	def dependsOn[A, B](dep: Dependency[A, B]) {
+	def dependsOn[A, B](dep: Dependency[A, B]): Unit = {
 		val oldLevel = _level
 		_level = math.max(dep.level + 1, _level)
 	}

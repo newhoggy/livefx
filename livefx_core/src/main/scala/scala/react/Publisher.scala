@@ -12,7 +12,7 @@ trait Publisher[+Msg, +Now] extends MessageCachingReactive[Msg, Now] {
 	private[this] var _dependents = newDependents
 	private[this] def newDependents = new WeakHashSet[Dependent]
 
-	override def subscribe(dep: Dependent) {
+	override def subscribe(dep: Dependent): Unit = {
 		if (dep != Observer.Nil) {
 			_dependents += dep
 			log("Added dependent " + dbgInfo(dep) + " to " + dbgInfo(this))
@@ -22,13 +22,13 @@ trait Publisher[+Msg, +Now] extends MessageCachingReactive[Msg, Now] {
 
 	def dependents = _dependents
 
-	private[react] def clearDependents() = {
+	private[react] def clearDependents(): WeakHashSet[Dependent] = {
 		val old = _dependents
 		_dependents = newDependents
 		old
 	}
 
-	protected[this] def propagate(msg: Msg) {
+	protected[this] def propagate(msg: Msg): Unit = {
 		cacheMessage(msg)
 		Engine.propagateFrom(this)
 	}

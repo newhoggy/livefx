@@ -11,7 +11,7 @@ package scala
 import scala.annotation._
 
 package object react {
-	def Cache[A](op: => A) = logCreation(new CachedSignal(op))
+	def Cache[A](op: => A): CachedSignal[A] = logCreation(new CachedSignal(op))
 	implicit def coerceConstant[A](x: A): Val[A] = Val(x)
 
 	type Dependents = scala.collection.Set[Dependent]
@@ -23,9 +23,9 @@ package object react {
 
 	// Debugging stuff:
 
-	private val DEBUG = elidable.ALL
+	private val DEBUG: Int = elidable.ALL
 
-	@elidable(DEBUG) def log(msg: String) {
+	@elidable(DEBUG) def log(msg: String): Unit = {
 		Console.err.println(msg)
 	}
 
@@ -39,15 +39,15 @@ package object react {
 		obj
 	}
 
-	def debugId(obj: AnyRef) = {
+	def debugId(obj: AnyRef): String = {
 		val n = lineNumbers(obj)
 		if (n != -1) "Line " + n + " "
 		else ""
 	}
 
-	def dbgInfo(d: DependencyNode) = d + " (" + debugId(d) + "on level " + d.level + ")"
+	def dbgInfo(d: DependencyNode): String = d + " (" + debugId(d) + "on level " + d.level + ")"
 
-	def parentLineNumber(n: Int) = Thread.currentThread.getStackTrace()(n).getLineNumber
+	def parentLineNumber(n: Int): Int = Thread.currentThread.getStackTrace()(n).getLineNumber
 
 	// TODO: need a concurrent, weak map
 	private val lineNumbers = new scala.collection.mutable.WeakHashMap[Any, Int] {
