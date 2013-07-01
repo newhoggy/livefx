@@ -39,61 +39,6 @@ object Engine extends Engine {
 	private val _todosAvailable = _todoLock.newCondition
 	private val _propagationDone = _propLock.newCondition
 
-	/*type Todo = ()=>Unit
-  private val _injected = new ArrayBuffer[Todo] with SynchronizedBuffer[Todo]
-  def inject(op: =>Unit) {
-    _injected += { ()=>op }
-    _todosAvailable.signalAll()
-    _propLock.lock()
-    try {
-      _propagationDone.await()
-    } finally {
-      _propLock.unlock()
-    }
-  }
-  
-  def processInjectedTodos() {
-    _injected.foreach(x => x())
-  }
-  
-  private val worker = new Thread {
-    override def run() { while(true) { propagate() } }
-    setDaemon(true)
-  }
-  worker.start()
-  
-  private def propagate() {
-    _todoLock.lock()
-    try {
-      _todosAvailable.await()
-      _evaluating = true
-      _level = 0
-      processInjectedTodos()
-      
-      // don't clear the processed here but at the end, since some reactive might have deposited 
-      // their messages already
-      
-      // we might have pending todos for this turn...
-      //processTodos()
-      invalids = nextInvalids
-      nextInvalids = newQueue
-      
-      log("### Starting to propagate. Initial invalids: " + invalids)
-      propagateFromQueue()
-      log("### Propagation done.")
-    } finally {
-      _evaluating = false
-      // don't forget to cleanup the dep stack
-      val s = Signal.dependentStack.get 
-      s.clear
-      s push Observer.Nil
-      _processed.clear()
-      _level = Int.MaxValue
-      _todoLock.unlock()
-      _propagationDone.signalAll()
-    }
-  }*/
-
 	private var _cycleNo = -1
 
 	def scheduleNextCycle(scheduledAtTurn: Long): Unit =
