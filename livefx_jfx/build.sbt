@@ -8,6 +8,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" %% "scalalogging-slf4j" % "1.0.1",
   "junit" % "junit" % "4.10" % "test",
   "org.scalaz" %% "scalaz-core" % "7.0.0",
+  "org.scalaz" %% "scalaz-concurrent" % "7.0.0",
   "org.scalaz" %% "scalaz-scalacheck-binding" % "7.0.0" % "test",
   "org.scalacheck" %% "scalacheck" % "1.10.1" % "test",
   "org.specs2" %% "specs2" % "1.14" % "test",

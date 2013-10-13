@@ -24,7 +24,7 @@ publishTo <<= version { (v: String) =>
 publishArtifact in Test := false
 
 pomExtra := (
-  <url>http://timesprint.com/livefx</url>
+  <url>http://timesprint.com/rillit-scalaz</url>
   <licenses>
     <license>
       <name>BSD-style</name>
@@ -34,7 +34,7 @@ pomExtra := (
   </licenses>
   <scm>
     <url>git@github.com:newhoggy/livefx.git</url>
-    <connection>scm:git:git@github.com:newhoggy/livefx.git</connection>
+    <connection>scm:git:git@github.com:newhoggy/rillit-scalaz.git</connection>
   </scm>
   <developers>
     <developer>
@@ -45,8 +45,4 @@ pomExtra := (
   </developers>)
 
 autoCompilerPlugins := true
-
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.0")
-
-scalacOptions += "-P:continuations:enable"
 
