@@ -1,25 +1,36 @@
+import sbt.Keys._
 import sbt._
-import Keys._
 
-object XSDK extends Build {
-  lazy val buildSettings = Seq(
-      organization := "com.timesprint",
-      scalaVersion := "2.10.2",
-      scalacOptions := Seq("-feature", "-deprecation", "-unchecked", "-Xlint", "-Yrangepos", "-encoding", "utf8"),
-      scalacOptions in (console) += "-Yrangepos"
-  )
+object Build extends sbt.Build {
+  val scalaz_core               = "org.scalaz"      %%  "scalaz-core"               % "7.2.3"
+  val scalaz_concurrent         = "org.scalaz"      %%  "scalaz-concurrent"         % "7.2.3"
+  
+  val scalacheck                = "org.scalacheck"  %%  "scalacheck"                % "1.13.0"
+  val scalaz_scalacheck_binding = "org.scalaz"      %%  "scalaz-scalacheck-binding" % "7.2.3"
+  val specs2_core               = "org.specs2"      %%  "specs2-core"               % "3.7.2"
+  val specs2_scalacheck         = "org.specs2"      %%  "specs2-scalacheck"         % "3.7.2"
 
-  lazy val commonSettings = Defaults.defaultSettings ++ buildSettings
+  implicit class ProjectOps(self: Project) {
+    def standard = {
+      self
+          .settings(scalacOptions in Test ++= Seq("-Yrangepos"))
+          .settings(publishTo := Some("Releases" at "s3://dl.john-ky.io/maven/releases"))
+          .settings(isSnapshot := true)
+    }
 
-  lazy val root = Project(id = "livefx", base = file("."))
-    .aggregate(livefx_core).settings(commonSettings: _*)
-    .aggregate(livefx_jfx).settings(commonSettings: _*)
+    def notPublished = self.settings(publish := {}).settings(publishArtifact := false)
 
-  lazy val livefx_core = Project(id = "livefx_core", base = file("livefx_core"))
-    .settings(commonSettings: _*)
+    def libs(modules: ModuleID*) = self.settings(libraryDependencies ++= modules)
 
-  lazy val livefx_jfx = Project(id = "livefx_jfx", base = file("livefx_jfx"))
-    .settings(commonSettings: _*)
-    .dependsOn(livefx_core)
+    def testLibs(modules: ModuleID*) = self.libs(modules.map(_ % "test"): _*)
+  }
+
+  lazy val `livefx-core` = Project(id = "livefx-core", base = file("livefx-core"))
+      .standard
+      .libs(scalaz_core, scalaz_concurrent)
+      .testLibs(specs2_core, scalaz_scalacheck_binding, scalacheck)
+
+  lazy val all = Project(id = "all", base = file("."))
+      .notPublished
+      .aggregate(`livefx-core`)
 }
-

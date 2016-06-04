@@ -1,49 +1,16 @@
-scalaVersion in ThisBuild := "2.10.0"
+name := "livefx"
 
-EclipseKeys.withSource := true
+organization in ThisBuild := "org.livefx"
 
-javaHome in ThisBuild := Some(file {
-   Option(System.getenv("JAVA_HOME")).getOrElse {
-     println("Warning: JAVA_HOME not defined")
-     "."
-   }
-})
+description := "Event library"
 
-unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/jfxrt.jar"))
+scalaVersion in ThisBuild := "2.11.7"
 
-publishMavenStyle := true
+resolvers in ThisBuild ++= Seq(
+  "bintray/non"           at "http://dl.bintray.com/non/maven",
+  "dl-john-ky-releases"   at "http://dl.john-ky.io/maven/releases",
+  "dl-john-ky-snapshots"  at "http://dl.john-ky.io/maven/snapshots")
 
-publishTo <<= version { (v: String) =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
+crossScalaVersions in ThisBuild := Seq("2.10.6", "2.11.8")
 
-publishArtifact in Test := false
-
-pomExtra := (
-  <url>http://timesprint.com/rillit-scalaz</url>
-  <licenses>
-    <license>
-      <name>BSD-style</name>
-      <url>http://www.opensource.org/licenses/bsd-license.php</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <url>git@github.com:newhoggy/livefx.git</url>
-    <connection>scm:git:git@github.com:newhoggy/rillit-scalaz.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <id>newhoggy</id>
-      <name>John Ky</name>
-      <url>http://timesprint.com</url>
-    </developer>
-  </developers>)
-
-autoCompilerPlugins := true
-
-credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+version in ThisBuild := Process("./version.sh").lines.head.trim
