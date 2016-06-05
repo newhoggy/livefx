@@ -30,6 +30,12 @@ object Build extends sbt.Build {
       .libs(scalaz_core, scalaz_concurrent)
       .testLibs(specs2_core, scalaz_scalacheck_binding, scalacheck)
 
+  lazy val `livefx-event` = Project(id = "livefx-event", base = file("livefx-event"))
+      .standard
+      .libs(scalaz_core, scalaz_concurrent)
+      .testLibs(specs2_core, scalaz_scalacheck_binding, scalacheck)
+      .dependsOn(`livefx-core`)
+
   lazy val all = Project(id = "all", base = file("."))
       .notPublished
       .aggregate(`livefx-core`)
