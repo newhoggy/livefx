@@ -18,5 +18,5 @@ class Disposer extends Disposable {
       mydisposables
     }
 
-  override def dispose(): Unit = takeDisposables.foreach(_.dispose())
+  override def onDispose(): Unit = takeDisposables.foreach(_.dispose())
 }

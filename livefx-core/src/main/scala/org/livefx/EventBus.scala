@@ -13,7 +13,7 @@ class EventBus[E] extends EventSource[E] with EventSink[E] {
     TidyReferenceQueue.tidy(2)
 
     val ref = new TidyWeakReference[E => Unit](subscriber, TidyReferenceQueue) with (E => Unit) {
-      override def dispose(): Unit = {
+      override def onDispose(): Unit = {
         subscribers -= this
         future {}
       }

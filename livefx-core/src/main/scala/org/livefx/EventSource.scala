@@ -8,7 +8,7 @@ trait EventSource[+E] { self =>
     private var subscription1 = self.subscribe(publish)
     private var subscription2 = that.subscribe(publish)
 
-    override def dispose(): Unit = {
+    override def onDispose(): Unit = {
       // TODO: Make exception safe
       try {
         subscription1.dispose()
@@ -27,7 +27,7 @@ trait EventSource[+E] { self =>
       stored = Some(e)
     }
 
-    override def dispose(): Unit = {
+    override def onDispose(): Unit = {
       // TODO: Make exception safe
       try {
         subscription.dispose()
@@ -40,7 +40,7 @@ trait EventSource[+E] { self =>
   def map[F](f: E => F): EventSource[F] = new EventBus[F] with Disposable {
     private var subscription = self.subscribe(e => publish(f(e)))
 
-    override def dispose(): Unit = {
+    override def onDispose(): Unit = {
       // TODO: Make exception safe
       try {
         subscription.dispose()
@@ -58,7 +58,7 @@ trait EventSource[+E] { self =>
       mapped = Some(events.subscribe(publish))
     }
 
-    override def dispose(): Unit = {
+    override def onDispose(): Unit = {
       // TODO: Make exception safe
       try {
         mapped.foreach(_.dispose())

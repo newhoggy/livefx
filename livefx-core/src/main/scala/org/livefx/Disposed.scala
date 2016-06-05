@@ -1,5 +1,5 @@
 package org.livefx
 
 object Disposed extends Disposable {
-  override def dispose(): Unit = ()
+  final override def onDispose(): Unit = ()
 }
