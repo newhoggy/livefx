@@ -47,6 +47,23 @@ class BusSpec extends Specification {
 //      zsValues must_== List(8, 7, 4, 3)
 //    }
 
+    "should be able to mapConcat using function that produces an iterable" ! {
+      val aBus = Bus[(Int, String)]
+      val bBus = Bus[String]
+
+      val disposer = new Disposer
+
+      disposer += aBus.mapConcat { case (n, s) => List.fill(n)(s) } into bBus
+
+      val result = bBus.foldRight(List.empty[String])(_ :: _)
+
+      aBus.publish(2 -> "A")
+      aBus.publish(1 -> "B")
+      aBus.publish(3 -> "C")
+
+      result.value must_== List("C", "C", "C", "B", "A", "A")
+    }
+
     "should be able to divert left of either into sink" ! {
       val inBus = Bus[Either[String, Int]]
       val ltBus = Bus[String]

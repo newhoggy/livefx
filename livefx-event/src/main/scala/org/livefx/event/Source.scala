@@ -25,6 +25,15 @@ trait Source[+A] extends Closeable { self =>
     }
   }
 
+  /** From a function that maps each event into an iterable event, create a new Source that will
+    * emit each element of the iterable event.
+    */
+  def mapConcat[B](f: A => Iterable[B]): Source[B] = {
+    new SimpleBus[B] { temp =>
+      val subscription = self.subscribe(f(_).foreach(temp.publish))
+    }
+  }
+
   /** Compose two sources of compatible type together into a new source that emits the same events
     * as either of the two originals.
     */
