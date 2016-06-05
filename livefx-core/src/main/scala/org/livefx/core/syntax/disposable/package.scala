@@ -1,9 +1,9 @@
-package org.livefx.syntax
+package org.livefx.core.syntax
 
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference
 
-import org.livefx.disposal.Disposable
+import org.livefx.core.disposal.Disposable
 
 package object disposable {
   implicit class DisposableOps_YYKh2cf[A](val self: A) extends AnyVal {

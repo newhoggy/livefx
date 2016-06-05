@@ -1,11 +1,11 @@
-package org.livefx.disposal
+package org.livefx.core.disposal
 
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference
 
-import org.livefx.std.autoCloseable._
-import org.livefx.syntax.disposable._
-import org.livefx.syntax.std.atomicReference._
+import org.livefx.core.std.autoCloseable._
+import org.livefx.core.syntax.disposable._
+import org.livefx.core.syntax.std.atomicReference._
 
 class Disposer extends Closeable {
   private val disposables = new AtomicReference[Closeable](Closed)

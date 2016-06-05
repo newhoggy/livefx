@@ -1,9 +1,9 @@
-package org.livefx.disposal
+package org.livefx.core.disposal
 
 import org.livefx.OnClose
-import org.livefx.std.autoCloseable._
-import org.livefx.syntax.disposable._
-import org.livefx.syntax.std.autoCloseable._
+import org.livefx.core.std.autoCloseable._
+import org.livefx.core.syntax.disposable._
+import org.livefx.core.syntax.std.autoCloseable._
 import org.specs2.mutable.Specification
 
 class DisposableSpec extends Specification {

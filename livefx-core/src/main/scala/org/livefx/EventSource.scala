@@ -2,9 +2,9 @@ package org.livefx
 
 import java.io.Closeable
 
-import org.livefx.disposal.Disposable
-import org.livefx.std.autoCloseable._
-import org.livefx.syntax.disposable._
+import org.livefx.core.disposal.Disposable
+import org.livefx.core.std.autoCloseable._
+import org.livefx.core.syntax.disposable._
 
 trait EventSource[+E] extends Closeable { self =>
   def subscribe(subscriber: E => Unit): Closeable

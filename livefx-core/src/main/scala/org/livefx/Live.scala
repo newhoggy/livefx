@@ -2,7 +2,7 @@ package org.livefx
 
 import java.io.Closeable
 
-import org.livefx.disposal.{Closed, Disposable}
+import org.livefx.core.disposal.{Closed, Disposable}
 import org.livefx.script.Change
 
 import scala.concurrent.ExecutionContext.Implicits.global

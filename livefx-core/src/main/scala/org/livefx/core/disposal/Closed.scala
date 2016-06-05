@@ -1,4 +1,4 @@
-package org.livefx.disposal
+package org.livefx.core.disposal
 
 import java.io.Closeable
 

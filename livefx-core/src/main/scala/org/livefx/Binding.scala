@@ -2,7 +2,7 @@ package org.livefx
 
 import java.io.Closeable
 
-import org.livefx.disposal.Closed
+import org.livefx.core.disposal.Closed
 import org.livefx.script.{Change, Spoil}
 
 trait Binding[A] extends Live[A] with Unspoilable { self =>
