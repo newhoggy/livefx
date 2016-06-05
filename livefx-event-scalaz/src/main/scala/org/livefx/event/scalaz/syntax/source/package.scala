@@ -14,5 +14,14 @@ package object source {
         }
       }
     }
+
+    def divertRight(sink: Sink[B]): Source[A] = {
+      new SimpleBus[A] { temp =>
+        val subscription = self.subscribe {
+          case \/-(rt) => sink.publish(rt)
+          case -\/(lt) => temp.publish(lt)
+        }
+      }
+    }
   }
 }
