@@ -4,7 +4,7 @@ import java.io.Closeable
 
 import org.livefx.core.disposal.{Closed, Disposable}
 
-trait Source[E] extends Closeable { self =>
+trait Source[+E] extends Closeable { self =>
   def subscribe(subscriber: E => Unit): Closeable
 }
 
@@ -15,7 +15,7 @@ object Source {
     }
   }
 
-  implicit def empty = new Source[Nothing] {
+  val empty = new Source[Nothing] {
     override def subscribe(subscriber: Nothing => Unit): Closeable = Closed
 
     override def close(): Unit = ()
