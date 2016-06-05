@@ -43,18 +43,20 @@ class BusSpec extends Specification {
 //      rs.publish(9)
 //      zsValues must_== List(8, 7, 4, 3)
 //    }
-//    "should implement |" ! {
-//      val es = Bus[Int]
-//      val fs = Bus[Int]
-//      val zs = es | fs
-//      var zsValues = List.empty[Int]
-//      zs.subscribe(v => zsValues ::= v)
-//      es.publish(0)
-//      fs.publish(1)
-//      es.publish(2)
-//      fs.publish(3)
-//      zsValues must_== List(3, 2, 1, 0)
-//    }
+
+    "should implement |" ! {
+      val ltBus = Bus[Int]
+      val rtBus = Bus[Int]
+      val combinedBus = ltBus | rtBus
+      var zsValues = List.empty[Int]
+      combinedBus.subscribe(zsValues ::= _)
+      ltBus.publish(0)
+      rtBus.publish(1)
+      ltBus.publish(2)
+      rtBus.publish(3)
+      zsValues must_== List(3, 2, 1, 0)
+    }
+
 //    "should implement impeded" ! {
 //      val es = Bus[Int]
 //      val esi = es.impeded

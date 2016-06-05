@@ -3,6 +3,8 @@ package org.livefx.event
 import java.io.Closeable
 
 import org.livefx.core.disposal.{Closed, Disposable}
+import org.livefx.core.std.autoCloseable._
+import org.livefx.core.syntax.disposable._
 
 trait Source[+A] extends Closeable { self =>
   def subscribe(subscriber: A => Unit): Closeable
@@ -12,6 +14,17 @@ trait Source[+A] extends Closeable { self =>
       override def transform: A => B = f
 
       val subscription = self.subscribe(temp.publish)
+    }
+  }
+
+  /** Compose two sources of compatible type together into a new source that emits the same events
+    * as the original.
+    */
+  def |[B >: A](that: Source[B]): Source[B] = {
+    new SimpleSinkSource[B, B] { temp =>
+      override def transform: B => B = identity
+
+      val subscription = self.subscribe(temp.publish) ++ that.subscribe(temp.publish)
     }
   }
 }

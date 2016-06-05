@@ -14,14 +14,12 @@ class SpecCollectionsPerformance extends Specification {
     val c = System.nanoTime()
     println("Done: " + x.zipWithIndex.size)
     val d = System.nanoTime()
-    
-    println(s"--> ${d - c}, ${b - a}")
 
     ok
   }
 
   "array" >> {
-    var x: Array[Int] = new Array[Int](1000000)
+    val x: Array[Int] = new Array[Int](1000000)
     val a = System.nanoTime()
     for (i <- 0 until 1000000) {
       x(i) = i
@@ -31,8 +29,6 @@ class SpecCollectionsPerformance extends Specification {
     val c = System.nanoTime()
     println("Done: " + x.foldLeft(0)(_ + _))
     val d = System.nanoTime()
-    
-    println(s"--> ${d - c}, ${b - a}")
 
     ok
   }
