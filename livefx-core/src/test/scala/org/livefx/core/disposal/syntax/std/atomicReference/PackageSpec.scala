@@ -1,4 +1,4 @@
-package org.livefx.core.disposal.syntax.std.atomicReference
+package org.livefx.core.syntax.std.atomicReference
 
 import java.util.concurrent.atomic.AtomicReference
 
