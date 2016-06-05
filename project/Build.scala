@@ -44,5 +44,5 @@ object Build extends sbt.Build {
 
   lazy val all = Project(id = "all", base = file("."))
       .notPublished
-      .aggregate(`livefx-core`)
+      .aggregate(`livefx-core`, `livefx-event`, `livefx-value`)
 }
