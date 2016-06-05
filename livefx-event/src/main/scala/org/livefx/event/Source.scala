@@ -3,7 +3,7 @@ package org.livefx.event
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference
 
-import org.livefx.core.disposal.{Closed, Disposable}
+import org.livefx.core.disposal.Closed
 import org.livefx.core.std.autoCloseable._
 import org.livefx.core.syntax.disposable._
 import org.livefx.core.syntax.std.atomicReference._
@@ -56,10 +56,6 @@ trait Source[+A] extends Closeable { self =>
 }
 
 object Source {
-  implicit def disposableEventSource_YYKh2cf[A] = new Disposable[Source[A]] {
-    override protected def onDispose(a: Source[A]): Unit = a.close()
-  }
-
   /** A source that never emits any events.
     */
   val empty = new Source[Nothing] {
