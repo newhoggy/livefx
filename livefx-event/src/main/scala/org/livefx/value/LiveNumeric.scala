@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.value
 
 import scala.language.implicitConversions
 

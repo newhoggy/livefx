@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.value
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary

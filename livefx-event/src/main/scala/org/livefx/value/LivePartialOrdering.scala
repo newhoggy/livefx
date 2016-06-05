@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.value
 
 trait LivePartialOrdering[T] extends LiveEquiv[T] { outer =>
   /** Result of comparing `x` with operand `y`.

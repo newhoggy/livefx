@@ -1,7 +1,6 @@
-package org.livefx
+package org.livefx.value
 
-import java.io.PrintWriter
-import java.io.PrintStream
+import java.io.{PrintStream, PrintWriter}
 
 case class BindTraceEntry(source: String, line: Int, column: Int, snippet: String) {
   def printTo(out: PrintWriter): Unit = {

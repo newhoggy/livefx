@@ -1,9 +1,9 @@
-package org
+package org.livefx
 
 import scala.util.DynamicVariable
 import scalaz._
 
-package object livefx {
+package object value {
   implicit class RichLiveValueBoolean(val self: Live[Boolean]) {
     def &&(that: Live[Boolean]): Live[Boolean] =  for (l <- self; r <- that) yield l && r
     def ||(that: Live[Boolean]): Live[Boolean] =  for (l <- self; r <- that) yield l || r
@@ -59,8 +59,8 @@ package object livefx {
   def const[A](value: A): Const[A] = Const(value)
 
   implicit object LiveMonad extends Monad[Live] {
-    override def point[A](a: => A): org.livefx.Live[A] = const(a)
-//    override def ap[A, B](liveA: org.livefx.Live[A])(f: A => B): Live[B] = liveA.map(f)
+    override def point[A](a: => A): Live[A] = const(a)
+//    override def ap[A, B](liveA: Live[A])(f: A => B): Live[B] = liveA.map(f)
 //    def ap[B](f: => OptionT[F, A => B])(implicit F: Apply[F]): OptionT[F, B] =
 //      OptionT(F.apply2(f.run, run) {
 //        case (ff, aa) => optionInstance.ap(aa)(ff)
@@ -70,6 +70,6 @@ package object livefx {
 //      bind(f)(f => map(fa)(f))
 //    }
     override def map[A, B](liveA: Live[A])(f: A => B) = liveA map f
-    override def bind[A, B](liveA: org.livefx.Live[A])(f: A => org.livefx.Live[B]): org.livefx.Live[B] = liveA.flatMap(f)
+    override def bind[A, B](liveA: Live[A])(f: A => Live[B]): Live[B] = liveA.flatMap(f)
   }
 }

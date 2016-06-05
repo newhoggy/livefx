@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.value
 
 import org.livefx.event.{EventBus, EventSink, EventSource}
 import org.livefx.value.script.{Change, Spoil}
