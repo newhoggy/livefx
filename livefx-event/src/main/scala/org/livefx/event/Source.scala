@@ -24,9 +24,9 @@ trait Source[+A] extends Closeable { self =>
   }
 
   /** Compose two sources of compatible type together into a new source that emits the same events
-    * as the original.
+    * as either of the two originals.
     */
-  def |[B >: A](that: Source[B]): Source[B] = {
+  def merge[B >: A](that: Source[B]): Source[B] = {
     new SimpleSinkSource[B, B] { temp =>
       override def transform: B => B = identity
 

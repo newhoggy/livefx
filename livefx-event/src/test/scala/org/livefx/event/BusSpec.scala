@@ -47,7 +47,7 @@ class BusSpec extends Specification {
     "should implement |" ! {
       val ltBus = Bus[Int]
       val rtBus = Bus[Int]
-      val combinedBus = ltBus | rtBus
+      val combinedBus = ltBus merge rtBus
       var zsValues = List.empty[Int]
       combinedBus.subscribe(zsValues ::= _)
       ltBus.publish(0)
