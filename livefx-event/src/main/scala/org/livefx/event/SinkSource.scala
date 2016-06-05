@@ -6,14 +6,26 @@ import java.io.Closeable
   * before emitting the transformed event to subscribers.
   */
 trait SinkSource[A, B] extends Sink[A] with Source[B] { self =>
-  override def map[C](f: B => C): SinkSource[A, C] = {
-    new SinkSource[A, C] { temp =>
-      val that = SinkSource[B, C](f)
-      val subscription = self.subscribe(that.publish)
-      override def publish(event: A): Unit = self.publish(event)
-      override def subscribe(subscriber: C => Unit): Closeable = that.subscribe(subscriber)
-      override def close(): Unit = subscription.close()
-    }
+  /** Create a new Sink that applies a function to the event before propagating it to the
+    * original sink.
+    */
+  override def comap[C](f: C => A): Sink[C] = new SinkSource[C, B] { temp =>
+    val that = SinkSource[C, A](f)
+    val subscription = that.subscribe(self.publish)
+    override def subscribe(subscriber: B => Unit): Closeable = temp.subscribe(subscriber)
+    override def publish(event: C): Unit = temp.publish(event)
+    override def close(): Unit = subscription.close()
+  }
+
+  /** Create a new Source that will emit transformed events that have been emitted by the original
+    * Source.  The transformation is described by the function argument.
+    */
+  override def map[C](f: B => C): SinkSource[A, C] = new SinkSource[A, C] { temp =>
+    val that = SinkSource[B, C](f)
+    val subscription = self.subscribe(that.publish)
+    override def subscribe(subscriber: C => Unit): Closeable = that.subscribe(subscriber)
+    override def publish(event: A): Unit = self.publish(event)
+    override def close(): Unit = subscription.close()
   }
 }
 
