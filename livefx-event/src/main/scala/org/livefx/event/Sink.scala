@@ -1,5 +1,5 @@
 package org.livefx.event
 
-trait EventSink[-E] {
+trait Sink[-E] {
   def publish(event: E): Unit
 }
