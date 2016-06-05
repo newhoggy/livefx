@@ -1,6 +1,10 @@
 package org.livefx.event
 import java.io.Closeable
 
+/** A SinkSource is both a Sink and a Source.
+  * Any events published to the SinkSource will have a transformation function applied to it
+  * before emitting the transformed event to subscribers.
+  */
 trait SinkSource[A, B] extends Sink[A] with Source[B] { self =>
   override def map[C](f: B => C): SinkSource[A, C] = {
     new SinkSource[A, C] { temp =>
