@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.event
 
 import java.io.Closeable
 

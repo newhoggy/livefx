@@ -3,14 +3,15 @@ package org.livefx
 import java.io.Closeable
 
 import org.livefx.core.disposal.Closed
-import org.livefx.script.{Change, Spoil}
+import org.livefx.event.{EventSink, EventSource}
+import org.livefx.value.script.{Change, Spoil}
 
 case class Const[A](value: A) extends Live[A] {
   def spoils: EventSource[Spoil] = NoEvents
 
   def changes: EventSource[Change[A]] = NoEvents
 
-  def spoilSink: org.livefx.EventSink[Spoil] = ???
+  def spoilSink: EventSink[Spoil] = ???
 }
 
 object NoEvents extends EventSource[Nothing] with EventSink[Nothing] {

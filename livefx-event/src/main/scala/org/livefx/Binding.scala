@@ -3,7 +3,8 @@ package org.livefx
 import java.io.Closeable
 
 import org.livefx.core.disposal.Closed
-import org.livefx.script.{Change, Spoil}
+import org.livefx.event.{EventBus, EventSink, EventSource}
+import org.livefx.value.script.{Change, Spoil}
 
 trait Binding[A] extends Live[A] with Unspoilable { self =>
   private lazy val _spoils = new EventBus[Spoil]

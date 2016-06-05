@@ -1,4 +1,4 @@
-package org.livefx.script
+package org.livefx.value.script
 
 sealed abstract class Location
 

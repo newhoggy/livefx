@@ -1,4 +1,4 @@
-package org.livefx.performance
+package org.livefx.value.performance
 
 import org.specs2.mutable.Specification
 

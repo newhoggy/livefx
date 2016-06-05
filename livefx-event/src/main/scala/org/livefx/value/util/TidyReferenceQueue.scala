@@ -1,4 +1,4 @@
-package org.livefx.util
+package org.livefx.value.util
 
 import scala.annotation.tailrec
 import scala.ref.ReferenceQueue

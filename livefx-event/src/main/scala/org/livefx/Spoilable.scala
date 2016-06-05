@@ -1,6 +1,7 @@
 package org.livefx
 
-import org.livefx.script.Spoil
+import org.livefx.event.{EventSink, EventSource}
+import org.livefx.value.script.Spoil
 
 trait Spoilable extends Publisher {
   protected def spoilSink: EventSink[Spoil]

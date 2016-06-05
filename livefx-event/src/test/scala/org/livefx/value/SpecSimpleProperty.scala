@@ -1,6 +1,6 @@
 package org.livefx
 
-import org.livefx.script.Change
+import org.livefx.value.script.Change
 import org.specs2.mutable._
 
 class SpecSimpleProperty extends Specification {

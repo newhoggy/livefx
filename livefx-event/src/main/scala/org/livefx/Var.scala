@@ -1,6 +1,7 @@
 package org.livefx
 
-import org.livefx.script.{Change, Spoil}
+import org.livefx.event.{EventBus, EventSink, EventSource}
+import org.livefx.value.script.{Change, Spoil}
 
 trait Var[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) A] extends Live[A] {
   private lazy val _spoils = new EventBus[Spoil]

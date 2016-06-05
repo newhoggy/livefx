@@ -1,6 +1,6 @@
 package org.livefx
 
-import org.livefx.script.Spoil
+import org.livefx.value.script.Spoil
 
 trait Unspoilable extends Spoilable {
   type Pub <: Unspoilable

@@ -1,4 +1,4 @@
-package org.livefx.script
+package org.livefx.value.script
 
 case class Change[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) +A](oldElem: A, newElem: A)
 

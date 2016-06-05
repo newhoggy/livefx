@@ -1,8 +1,8 @@
-package org.livefx
+package org.livefx.event
 
 import java.io.Closeable
 
-import org.livefx.util.{TidyReferenceQueue, TidyWeakReference}
+import org.livefx.value.util.{TidyReferenceQueue, TidyWeakReference}
 
 import scala.collection.immutable.HashSet
 import scala.concurrent.ExecutionContext.Implicits.global
