@@ -1,6 +1,8 @@
 package org.livefx.disposal
 
-import org.livefx.OnDispose
+import org.livefx.OnClose
+import org.livefx.std.autoCloseable._
+import org.livefx.syntax.disposable._
 import org.specs2.mutable.Specification
 
 class DisposerSpec extends Specification {
@@ -9,8 +11,8 @@ class DisposerSpec extends Specification {
       var value = 1
       val disposer = new Disposer()
 
-      disposer.disposes(OnDispose(value += 1))
-      disposer.disposes(OnDispose(value *= 10))
+      disposer.disposes(OnClose(value += 1))
+      disposer.disposes(OnClose(value *= 10))
       disposer.dispose()
 
       value ==== 11

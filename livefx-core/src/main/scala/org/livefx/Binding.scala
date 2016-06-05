@@ -1,8 +1,9 @@
 package org.livefx
 
-import org.livefx.disposal.{Disposable, Disposed}
-import org.livefx.script.Change
-import org.livefx.script.Spoil
+import java.io.Closeable
+
+import org.livefx.disposal.Closed
+import org.livefx.script.{Change, Spoil}
 
 trait Binding[A] extends Live[A] with Unspoilable { self =>
   private lazy val _spoils = new EventBus[Spoil]
@@ -13,12 +14,16 @@ trait Binding[A] extends Live[A] with Unspoilable { self =>
 
   lazy val _changes = new EventBus[Change[A]] {
     lazy val spoilHandler: Any => Unit = { _ => self.value }
-    var subscription: Disposable = Disposed
+    var subscription: AutoCloseable = Closed
 
-    override def subscribe(subscriber: Change[A] => Unit): Disposable = {
+    override def subscribe(subscriber: Change[A] => Unit): Closeable = {
       subscription = self.spoils.subscribe(spoilHandler)
       self.value
       super.subscribe(subscriber)
+    }
+
+    override def close(): Unit = {
+      subscription.close()
     }
   }
 

@@ -1,6 +1,8 @@
 package org.livefx
 
-import org.livefx.disposal.{Disposable, Disposed}
+import java.io.Closeable
+
+import org.livefx.disposal.{Closed, Disposable}
 import org.livefx.script.Change
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,12 +22,12 @@ trait Live[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) +A] exten
 
   def flatMap[B](f: A => Live[B]): Live[B] = {
     var child: Live[B] = null
-    var valueSubscription: Disposable = Disposed
+    var valueSubscription: Closeable = Closed
     
     new Binding[B] {
-      private val childSubscription: Disposable = self.spoils.subscribe { e =>
+      private val childSubscription: Closeable = self.spoils.subscribe { e =>
         child = null
-        valueSubscription.dispose
+        valueSubscription.close()
         spoil(e)
       }
       

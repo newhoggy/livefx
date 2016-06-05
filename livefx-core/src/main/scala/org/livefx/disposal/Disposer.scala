@@ -1,21 +1,19 @@
 package org.livefx.disposal
 
+import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference
 
+import org.livefx.std.autoCloseable._
+import org.livefx.syntax.disposable._
 import org.livefx.syntax.std.atomicReference._
 
-class Disposer extends Disposable {
-  private val disposables = new AtomicReference[Disposable](Disposed)
+class Disposer extends Closeable {
+  private val disposables = new AtomicReference[Closeable](Closed)
   
-  def disposes[D <: Disposable](disposable: D): D = {
-    disposables.update(_ ++ disposable)
+  def disposes[D: Disposable](disposable: D): D = {
+    disposables.update(_ ++ disposable.asCloseable)
     disposable
   }
 
-  def closes[D <: AutoCloseable](closeable: D): D = {
-    disposables.update(_ ++ Disposable(closeable))
-    closeable
-  }
-
-  override def onDispose(): Unit = disposables.getAndSet(Disposed).dispose()
+  override def close(): Unit = disposables.getAndSet(Closed).dispose()
 }

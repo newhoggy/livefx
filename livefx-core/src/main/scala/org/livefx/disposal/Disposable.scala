@@ -1,36 +1,13 @@
 package org.livefx.disposal
 
 import java.io.Closeable
-import java.util.concurrent.atomic.AtomicReference
 
-trait Disposable extends Closeable {
-  protected def onDispose(): Unit
+trait Disposable[-A] {
+  protected def onDispose(a: A): Unit
 
-  @inline final def dispose(): Unit = {
-    try {
-      onDispose()
-    } catch {
-      case e: Exception =>
-    }
+  def asCloseable(a: A): Closeable = new Closeable {
+    override def close(): Unit = onDispose(a)
   }
 
-  final override def close(): Unit = dispose()
-
-  def ++(that: Disposable): Disposable = {
-    val disposableRefThat = new AtomicReference[Disposable](that)
-    val disposableRefThis = new AtomicReference[Disposable](this)
-
-    new Disposable {
-      override def onDispose(): Unit = {
-        disposableRefThat.getAndSet(Disposed).dispose()
-        disposableRefThis.getAndSet(Disposed).dispose()
-      }
-    }
-  }
-}
-
-object Disposable {
-  def apply(a: AutoCloseable): Disposable = new Disposable {
-    override protected def onDispose(): Unit = a.close()
-  }
+  final def dispose(a: A): Unit = try onDispose(a) catch { case e: Exception => }
 }

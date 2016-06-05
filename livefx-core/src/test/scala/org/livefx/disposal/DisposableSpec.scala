@@ -1,6 +1,8 @@
 package org.livefx.disposal
 
-import org.livefx.OnDispose
+import org.livefx.OnClose
+import org.livefx.std.autoCloseable._
+import org.livefx.syntax.disposable._
 import org.livefx.syntax.std.autoCloseable._
 import org.specs2.mutable.Specification
 
@@ -9,8 +11,8 @@ class DisposableSpec extends Specification {
     "when composed" should {
       "dispose in reverse order" >> {
         var value = 1
-        val disposable1 = OnDispose(value += 1)
-        val disposable2 = OnDispose(value *= 10)
+        val disposable1 = OnClose(value += 1)
+        val disposable2 = OnClose(value *= 10)
 
         (disposable1 ++ disposable2).dispose()
 
@@ -21,8 +23,8 @@ class DisposableSpec extends Specification {
     "dispose in reverse order in nested for comprehension" >> {
       var x = 1
 
-      for (a <- OnDispose(x += 1)) {
-        for (b <- OnDispose(x *= 10)) {
+      for (a <- OnClose(x += 1)) {
+        for (b <- OnClose(x *= 10)) {
           "Hello world"
         }
       }: String
@@ -33,7 +35,7 @@ class DisposableSpec extends Specification {
     "dispose in reverse order in shared for comprehension" >> {
       var x = 1
 
-      for (a <- OnDispose(x += 1); b <- OnDispose(x *= 10)) {
+      for (a <- OnClose(x += 1); b <- OnClose(x *= 10)) {
         "Hello World"
       }: String
 

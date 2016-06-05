@@ -1,64 +1,54 @@
 package org.livefx
 
-import org.livefx.disposal.Disposable
+import java.io.Closeable
 
-trait EventSource[+E] { self =>
-  def subscribe(subscriber: E => Unit): Disposable
+import org.livefx.disposal.Disposable
+import org.livefx.std.autoCloseable._
+import org.livefx.syntax.disposable._
+
+trait EventSource[+E] extends Closeable { self =>
+  def subscribe(subscriber: E => Unit): Closeable
   def asEvents: EventSource[E] = this
 
-  def |[F >: E](that: EventSource[F]): EventSource[F] = new EventBus[F] with Disposable {
+  def |[F >: E](that: EventSource[F]): EventSource[F] = new EventBus[F] with Closeable {
     private val subscriptions = self.subscribe(publish) ++ that.subscribe(publish)
 
-    override def onDispose(): Unit = subscriptions.dispose()
+    override def close(): Unit = subscriptions.dispose()
   }
   
-  def impeded: EventSource[E] = new EventBus[E] with Disposable {
+  def impeded: EventSource[E] = new EventBus[E] {
     private var stored = Option.empty[E]
     private var subscription = self.subscribe { e =>
       stored.foreach(publish(_))
       stored = Some(e)
     }
-
-    override def onDispose(): Unit = {
-      // TODO: Make exception safe
-      try {
-        subscription.dispose()
-      } finally {
-        subscription = null
-      }
-    }
   }
 
-  def map[F](f: E => F): EventSource[F] = new EventBus[F] with Disposable {
+  def map[F](f: E => F): EventSource[F] = new EventBus[F] {
     private var subscription = self.subscribe(e => publish(f(e)))
 
-    override def onDispose(): Unit = {
-      // TODO: Make exception safe
-      try {
-        subscription.dispose()
-      } finally {
-        subscription = null
-      }
-    }
+    override def close(): Unit = subscription.dispose()
   }
 
-  def flatMap[F](f: E => EventSource[F]): EventSource[F] = new EventBus[F] with Disposable {
+  def flatMap[F](f: E => EventSource[F]): EventSource[F] = new EventBus[F] with Closeable {
     private val mappedEvents = self.map(e => f(e))    
-    private var mapped = Option.empty[Disposable]
+    private var mapped = Option.empty[Closeable]
     private var subscription = mappedEvents.subscribe { events =>
       mapped.foreach(_.dispose())
       mapped = Some(events.subscribe(publish))
     }
 
-    override def onDispose(): Unit = {
-      // TODO: Make exception safe
-      try {
-        mapped.foreach(_.dispose())
-        subscription.dispose()
-      } finally {
-        mapped = null
-        subscription = null
-      }
+    override def close(): Unit = {
+      mapped.foreach(_.dispose())
+      subscription.dispose()
+    }
+  }
+}
+
+object EventSource {
+  implicit def disposableEventSource_YYKh2cf[A] = new Disposable[EventSource[A]] {
+    override protected def onDispose(a: EventSource[A]): Unit = {
+      a.close()
     }
   }
 }
