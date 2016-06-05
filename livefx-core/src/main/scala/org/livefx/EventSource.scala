@@ -7,19 +7,9 @@ trait EventSource[+E] { self =>
   def asEvents: EventSource[E] = this
 
   def |[F >: E](that: EventSource[F]): EventSource[F] = new EventBus[F] with Disposable {
-    private var subscription1 = self.subscribe(publish)
-    private var subscription2 = that.subscribe(publish)
+    private val subscriptions = self.subscribe(publish) ++ that.subscribe(publish)
 
-    override def onDispose(): Unit = {
-      // TODO: Make exception safe
-      try {
-        subscription1.dispose()
-        subscription2.dispose()
-      } finally {
-        subscription1 = null
-        subscription2 = null
-      }
-    }
+    override def onDispose(): Unit = subscriptions.dispose()
   }
   
   def impeded: EventSource[E] = new EventBus[E] with Disposable {

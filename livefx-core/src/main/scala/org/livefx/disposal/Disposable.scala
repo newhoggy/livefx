@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference
 trait Disposable extends Closeable {
   protected def onDispose(): Unit
 
-  final def dispose(): Unit = {
+  @inline final def dispose(): Unit = {
     try {
       onDispose()
     } catch {
