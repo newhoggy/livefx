@@ -44,7 +44,7 @@ class BusSpec extends Specification {
 //      zsValues must_== List(8, 7, 4, 3)
 //    }
 
-    "should implement merge method" ! {
+    "should implement merge method such that merged source emits the same events as both underlying sources" ! {
       val ltBus = Bus[Int]
       val rtBus = Bus[Int]
       val combinedBus = ltBus merge rtBus
