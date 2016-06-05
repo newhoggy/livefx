@@ -4,8 +4,16 @@ import java.io.Closeable
 
 import org.livefx.core.disposal.{Closed, Disposable}
 
-trait Source[+E] extends Closeable { self =>
-  def subscribe(subscriber: E => Unit): Closeable
+trait Source[+A] extends Closeable { self =>
+  def subscribe(subscriber: A => Unit): Closeable
+
+  def map[B](f: A => B): Source[B] = {
+    new SimpleSinkSource[A, B] { temp =>
+      override def transform: A => B = f
+
+      val subscription = self.subscribe(temp.publish)
+    }
+  }
 }
 
 object Source {
