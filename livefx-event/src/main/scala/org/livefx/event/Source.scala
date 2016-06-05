@@ -1,10 +1,12 @@
 package org.livefx.event
 
 import java.io.Closeable
+import java.util.concurrent.atomic.AtomicReference
 
 import org.livefx.core.disposal.{Closed, Disposable}
 import org.livefx.core.std.autoCloseable._
 import org.livefx.core.syntax.disposable._
+import org.livefx.core.syntax.std.atomicReference._
 
 trait Source[+A] extends Closeable { self =>
   /** Subscribe a subscriber to a source.  The subscriber will be invoked with any events that the
@@ -27,10 +29,28 @@ trait Source[+A] extends Closeable { self =>
     * as either of the two originals.
     */
   def merge[B >: A](that: Source[B]): Source[B] = {
-    new SimpleSinkSource[B, B] { temp =>
-      override def transform: B => B = identity
-
+    new SimpleBus[B] { temp =>
       val subscription = self.subscribe(temp.publish) ++ that.subscribe(temp.publish)
+    }
+  }
+
+  /** Fold the event source into a value given the value's initial state.
+ *
+    * @param f The folding function
+    * @param initial The initial state
+    * @tparam B Type of the new value
+    * @return The value.
+    */
+  def fold[B](f: (B, => A) => B)(initial: B): Live[B] = {
+    val state = new AtomicReference[B](initial)
+
+    new SimpleBus[B] with Live[B] { temp =>
+      override def value: B = state.get
+
+      self.subscribe { e =>
+        val (_, newValue) = state.update(v => f(v, e))
+        temp.publish(newValue)
+      }
     }
   }
 }
