@@ -2,9 +2,9 @@ package org.livefx.event
 
 import java.io.Closeable
 
-import org.livefx.core.disposal.Closed
+import org.livefx.core.disposal.{Closed, Disposer}
 
-trait Source[+A] extends Closeable { self =>
+trait Source[+A] extends Disposer { self =>
   /** Subscribe a subscriber to a source.  The subscriber will be invoked with any events that the
     * source may emit.
     */
@@ -27,7 +27,5 @@ object Source {
     */
   val empty = new Source[Nothing] {
     override def subscribe(subscriber: Nothing => Unit): Closeable = Closed
-
-    override def close(): Unit = ()
   }
 }

@@ -1,8 +1,8 @@
 package org.livefx.event
 
-import java.io.Closeable
+import org.livefx.core.disposal.Disposer
 
-trait Sink[-A] extends Closeable { self =>
+trait Sink[-A] extends Disposer { self =>
   /** Publish an event to a sink.
     */
   def publish(event: A): Unit
@@ -12,8 +12,6 @@ trait Sink[-A] extends Closeable { self =>
     */
   def comap[B](f: B => A): Sink[B] = new Sink[B] {
     override def publish(event: B): Unit = self.publish(f(event))
-
-    override def close(): Unit = ()
   }
 }
 
@@ -22,7 +20,5 @@ object Sink {
     */
   val ignore = new Sink[Any] {
     override def publish(event: Any): Unit = ()
-
-    override def close(): Unit = ()
   }
 }

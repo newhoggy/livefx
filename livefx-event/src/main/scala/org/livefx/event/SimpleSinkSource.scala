@@ -41,8 +41,6 @@ trait SimpleSinkSource[A, B] extends SinkSource[A, B] {
     }
   }
 
-  override def close(): Unit = ()
-
   final def houseKeep(): Unit = {
     if (garbage.get() > subscribers.get().size) {
       garbage.set(0)
