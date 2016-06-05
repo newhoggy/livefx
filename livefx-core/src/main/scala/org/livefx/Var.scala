@@ -3,13 +3,13 @@ package org.livefx
 import org.livefx.script.{Change, Spoil}
 
 trait Var[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) A] extends Live[A] {
-  private lazy val _spoils = new EventSource[Spoil]
+  private lazy val _spoils = new EventBus[Spoil]
 
   protected override def spoilSink: EventSink[Spoil] = _spoils
 
   override def spoils: Events[Spoil] = _spoils
 
-  lazy val _changes = new EventSource[Change[A]]
+  lazy val _changes = new EventBus[Change[A]]
 
   override def changes: Events[Change[A]] = _changes
 
