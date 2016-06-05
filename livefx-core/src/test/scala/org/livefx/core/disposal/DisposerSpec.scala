@@ -1,6 +1,5 @@
 package org.livefx.core.disposal
 
-import org.livefx.OnClose
 import org.livefx.core.std.autoCloseable._
 import org.livefx.core.syntax.disposable._
 import org.specs2.mutable.Specification
