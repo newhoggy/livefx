@@ -1,22 +1,17 @@
 package org.livefx
 
+import java.util.concurrent.atomic.AtomicReference
+
+import org.livefx.syntax.std.atomicReference._
+
 class Disposer extends Disposable {
-  private val lock = new Object
-  private var disposables = List.empty[Disposable]
+  private val disposables = new AtomicReference[Disposable](Disposed)
   
   def disposes[D <: Disposable](disposable: D): D = {
-    // TODO: Make lock-free
-    lock.synchronized {
-      disposables = disposable :: disposables
-    }
+    disposables.update(disposable ++ _)
+
     disposable
   }
-  
-  def takeDisposables = lock.synchronized {
-      val mydisposables = disposables
-      disposables = Nil
-      mydisposables
-    }
 
-  override def onDispose(): Unit = takeDisposables.foreach(_.dispose())
+  override def onDispose(): Unit = disposables.getAndSet(Disposed).dispose()
 }

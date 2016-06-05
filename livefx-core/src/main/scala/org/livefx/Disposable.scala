@@ -17,10 +17,10 @@ trait Disposable extends Closeable {
   final override def close(): Unit = dispose()
 
   def ++(that: Disposable): Disposable = {
-    new Disposable {
-      val disposableRefThat = new AtomicReference[Disposable](that)
-      val disposableRefThis = new AtomicReference[Disposable](this)
+    val disposableRefThat = new AtomicReference[Disposable](that)
+    val disposableRefThis = new AtomicReference[Disposable](this)
 
+    new Disposable {
       override def onDispose(): Unit = {
         disposableRefThat.getAndSet(Disposed).dispose()
         disposableRefThis.getAndSet(Disposed).dispose()
