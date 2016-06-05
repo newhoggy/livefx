@@ -35,20 +35,20 @@ trait Source[+A] extends Closeable { self =>
   }
 
   /** Fold the event source into a value given the value's initial state.
- *
+    *
     * @param f The folding function
     * @param initial The initial state
     * @tparam B Type of the new value
     * @return The value.
     */
-  def fold[B](f: (B, => A) => B)(initial: B): Live[B] = {
+  def foldRight[B](initial: B)(f: (A, => B) => B): Live[B] = {
     val state = new AtomicReference[B](initial)
 
     new SimpleBus[B] with Live[B] { temp =>
       override def value: B = state.get
 
       self.subscribe { e =>
-        val (_, newValue) = state.update(v => f(v, e))
+        val (_, newValue) = state.update(v => f(e, v))
         temp.publish(newValue)
       }
     }

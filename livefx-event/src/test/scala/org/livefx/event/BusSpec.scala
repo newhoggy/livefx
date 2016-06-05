@@ -44,17 +44,16 @@ class BusSpec extends Specification {
 //      zsValues must_== List(8, 7, 4, 3)
 //    }
 
-    "should implement |" ! {
+    "should implement merge method" ! {
       val ltBus = Bus[Int]
       val rtBus = Bus[Int]
       val combinedBus = ltBus merge rtBus
-      var zsValues = List.empty[Int]
-      combinedBus.subscribe(zsValues ::= _)
+      val result = combinedBus.foldRight(List.empty[Int])(_ :: _)
       ltBus.publish(0)
       rtBus.publish(1)
       ltBus.publish(2)
       rtBus.publish(3)
-      zsValues must_== List(3, 2, 1, 0)
+      result.value must_== List(3, 2, 1, 0)
     }
 
 //    "should implement impeded" ! {
