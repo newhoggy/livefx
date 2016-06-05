@@ -3,6 +3,7 @@ package org.livefx.event.scalaz.syntax.source
 import org.livefx.core.disposal.Disposer
 import org.livefx.core.std.autoCloseable._
 import org.livefx.event.Bus
+import org.livefx.event.syntax.source._
 import org.specs2.mutable.Specification
 
 import scalaz.{-\/, \/, \/-}
