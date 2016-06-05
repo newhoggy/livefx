@@ -1,27 +1,28 @@
-//package org.livefx
-//
-//import org.specs2.mutable.Specification
-//
-//class SpecEvents extends Specification {
-//  "Events" should {
-//    "should implement map" ! {
-//      val es = new EventSource[Int]
-//      val fs = es.map(_ + 1)
-//      var esValues = List.empty[Int]
-//      var fsValues = List.empty[Int]
-//      es.subscribe(v => esValues ::= v)
-//      fs.subscribe(v => fsValues ::= v)
-//      es.publish(10)
-//      esValues must_== List(10)
-//      fsValues must_== List(11)
-//      es.publish(20)
-//      esValues must_== List(20, 10)
-//      fsValues must_== List(21, 11)
-//    }
+package org.livefx.event
+
+import org.specs2.mutable.Specification
+
+class BusSpec extends Specification {
+  "Bus" should {
+    "should implement map" ! {
+      val es = Bus[Int]
+      val fs = es.map(_ + 1)
+      var esValues = List.empty[Int]
+      var fsValues = List.empty[Int]
+      es.subscribe(v => esValues ::= v)
+      fs.subscribe(v => fsValues ::= v)
+      es.publish(10)
+      esValues must_== List(10)
+      fsValues must_== List(11)
+      es.publish(20)
+      esValues must_== List(20, 10)
+      fsValues must_== List(21, 11)
+    }
+
 //    "should implement flatMap" ! {
-//      val bs = new EventSource[Boolean]
-//      val ls = new EventSource[Int]
-//      val rs = new EventSource[Int]
+//      val bs = Bus[Boolean]
+//      val ls = Bus[Int]
+//      val rs = Bus[Int]
 //      val zs = bs.flatMap(v => if (v) ls else rs)
 //      var zsValues = List.empty[Int]
 //      zs.subscribe(v => zsValues ::= v)
@@ -43,8 +44,8 @@
 //      zsValues must_== List(8, 7, 4, 3)
 //    }
 //    "should implement |" ! {
-//      val es = new EventSource[Int]
-//      val fs = new EventSource[Int]
+//      val es = Bus[Int]
+//      val fs = Bus[Int]
 //      val zs = es | fs
 //      var zsValues = List.empty[Int]
 //      zs.subscribe(v => zsValues ::= v)
@@ -55,7 +56,7 @@
 //      zsValues must_== List(3, 2, 1, 0)
 //    }
 //    "should implement impeded" ! {
-//      val es = new EventSource[Int]
+//      val es = Bus[Int]
 //      val esi = es.impeded
 //      var esiValues = List.empty[Int]
 //      esi.subscribe(v => esiValues ::= v)
@@ -67,5 +68,5 @@
 //      es.publish(2)
 //      esiValues must_== List(1, 0)
 //    }
-//  }
-//}
+  }
+}

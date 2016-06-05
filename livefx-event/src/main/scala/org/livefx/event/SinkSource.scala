@@ -7,7 +7,7 @@ trait SinkSource[A, B] extends Sink[A] with Source[B] { self =>
       val that = SinkSource[B, C](f)
       val subscription = self.subscribe(that.publish)
       override def publish(event: A): Unit = self.publish(event)
-      override def subscribe(subscriber: C => Unit): Closeable = temp.subscribe(subscriber)
+      override def subscribe(subscriber: C => Unit): Closeable = that.subscribe(subscriber)
       override def close(): Unit = subscription.close()
     }
   }
