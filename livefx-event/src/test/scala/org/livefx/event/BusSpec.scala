@@ -1,5 +1,7 @@
 package org.livefx.event
 
+import org.livefx.core.disposal.Disposer
+import org.livefx.core.std.autoCloseable._
 import org.specs2.mutable.Specification
 
 class BusSpec extends Specification {
@@ -43,6 +45,29 @@ class BusSpec extends Specification {
 //      rs.publish(9)
 //      zsValues must_== List(8, 7, 4, 3)
 //    }
+
+    "should be able to join" ! {
+      val aBus = Bus[Int]
+      val bBus = Bus[Int]
+      val cBus = Bus[Int]
+
+      val disposer = new Disposer
+      disposer += aBus into bBus
+      disposer += bBus into cBus
+      val result = cBus.foldRight(List.empty[Int])(_ :: _)
+
+      aBus.publish(1)
+      aBus.publish(2)
+
+      result.value must_== List(2, 1)
+
+      disposer.close()
+
+      aBus.publish(3)
+      bBus.publish(4)
+
+      result.value must_== List(2, 1)
+    }
 
     "should implement merge method such that merged source emits the same events as both underlying sources" ! {
       val ltBus = Bus[Int]

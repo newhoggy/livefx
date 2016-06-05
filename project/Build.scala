@@ -27,14 +27,18 @@ object Build extends sbt.Build {
 
   lazy val `livefx-core` = Project(id = "livefx-core", base = file("livefx-core"))
       .standard
-      .libs(scalaz_core, scalaz_concurrent)
       .testLibs(specs2_core, scalaz_scalacheck_binding, scalacheck)
 
   lazy val `livefx-event` = Project(id = "livefx-event", base = file("livefx-event"))
       .standard
-      .libs(scalaz_core, scalaz_concurrent)
       .testLibs(specs2_core, scalaz_scalacheck_binding, scalacheck)
       .dependsOn(`livefx-core`)
+
+  lazy val `livefx-event-scalaz` = Project(id = "livefx-event-scalaz", base = file("livefx-event-scalaz"))
+      .standard
+      .libs(scalaz_core, scalaz_concurrent)
+      .testLibs(specs2_core, scalaz_scalacheck_binding, scalacheck)
+      .dependsOn(`livefx-event`)
 
   lazy val `livefx-value` = Project(id = "livefx-value", base = file("livefx-value"))
       .standard
