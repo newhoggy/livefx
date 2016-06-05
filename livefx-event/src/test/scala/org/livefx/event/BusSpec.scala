@@ -22,7 +22,7 @@ class BusSpec extends Specification {
       fsValues must_== List(21, 11)
     }
 
-    "should be able to mapConcat using function that produces an iterable" ! {
+    "should be able to mapConcat using an iterable producing function to create a source that emits elements" ! {
       val aBus = Bus[(Int, String)]
       val bBus = Bus[String]
 
@@ -60,7 +60,7 @@ class BusSpec extends Specification {
       rtValue.value must_== List(2, 1)
     }
 
-    "should be able to join" ! {
+    "should implement into method that creates a subscription on source that writes to sink" ! {
       val aBus = Bus[Int]
       val bBus = Bus[Int]
       val cBus = Bus[Int]
