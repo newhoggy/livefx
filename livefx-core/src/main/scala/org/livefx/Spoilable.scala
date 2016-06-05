@@ -5,7 +5,7 @@ import org.livefx.script.Spoil
 trait Spoilable extends Publisher {
   protected def spoilSink: EventSink[Spoil]
 
-  def spoils: Events[Spoil]
+  def spoils: EventSource[Spoil]
 
   def spoiled: Boolean = false
 

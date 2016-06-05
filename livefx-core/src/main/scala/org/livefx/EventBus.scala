@@ -6,7 +6,7 @@ import org.livefx.util.TidyReferenceQueue
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
-class EventBus[E] extends Events[E] with EventSink[E] {
+class EventBus[E] extends EventSource[E] with EventSink[E] {
   protected var subscribers = HashSet.empty[E => Unit]
 
   override def subscribe(subscriber: E => Unit): Disposable = {

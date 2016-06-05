@@ -8,7 +8,7 @@ trait Binding[A] extends Live[A] with Unspoilable { self =>
   
   protected override def spoilSink: EventSink[Spoil] = _spoils
   
-  override def spoils: Events[Spoil] = _spoils
+  override def spoils: EventSource[Spoil] = _spoils
 
   lazy val _changes = new EventBus[Change[A]] {
     lazy val spoilHandler: Any => Unit = { _ => self.value }
@@ -21,7 +21,7 @@ trait Binding[A] extends Live[A] with Unspoilable { self =>
     }
   }
 
-  override def changes: Events[Change[A]] = _changes
+  override def changes: EventSource[Change[A]] = _changes
 
   private var _value: A = null.asInstanceOf[A]
   

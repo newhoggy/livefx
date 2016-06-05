@@ -9,7 +9,7 @@ trait Live[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) +A] exten
   
   def asliveValue: Live[A] = this
 
-  def changes: Events[Change[A]]
+  def changes: EventSource[Change[A]]
   
   def map[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) B](f: A => B): Live[B] = new Binding[B] {
     val ref = self.spoils.subscribe(spoil)

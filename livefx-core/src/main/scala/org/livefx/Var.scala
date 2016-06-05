@@ -7,11 +7,11 @@ trait Var[@specialized(Boolean, Char, Byte, Short, Int, Long, Double) A] extends
 
   protected override def spoilSink: EventSink[Spoil] = _spoils
 
-  override def spoils: Events[Spoil] = _spoils
+  override def spoils: EventSource[Spoil] = _spoils
 
   lazy val _changes = new EventBus[Change[A]]
 
-  override def changes: Events[Change[A]] = _changes
+  override def changes: EventSource[Change[A]] = _changes
 
   def value: A
 

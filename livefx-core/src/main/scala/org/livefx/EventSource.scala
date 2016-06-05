@@ -1,10 +1,10 @@
 package org.livefx
 
-trait Events[+E] { self =>
+trait EventSource[+E] { self =>
   def subscribe(subscriber: E => Unit): Disposable
-  def asEvents: Events[E] = this
+  def asEvents: EventSource[E] = this
 
-  def |[F >: E](that: Events[F]): Events[F] = new EventBus[F] with Disposable {
+  def |[F >: E](that: EventSource[F]): EventSource[F] = new EventBus[F] with Disposable {
     private var subscription1 = self.subscribe(publish)
     private var subscription2 = that.subscribe(publish)
 
@@ -20,7 +20,7 @@ trait Events[+E] { self =>
     }
   }
   
-  def impeded: Events[E] = new EventBus[E] with Disposable {
+  def impeded: EventSource[E] = new EventBus[E] with Disposable {
     private var stored = Option.empty[E]
     private var subscription = self.subscribe { e =>
       stored.foreach(publish(_))
@@ -37,7 +37,7 @@ trait Events[+E] { self =>
     }
   }
 
-  def map[F](f: E => F): Events[F] = new EventBus[F] with Disposable {
+  def map[F](f: E => F): EventSource[F] = new EventBus[F] with Disposable {
     private var subscription = self.subscribe(e => publish(f(e)))
 
     override def dispose(): Unit = {
@@ -50,7 +50,7 @@ trait Events[+E] { self =>
     }
   }
 
-  def flatMap[F](f: E => Events[F]): Events[F] = new EventBus[F] with Disposable {
+  def flatMap[F](f: E => EventSource[F]): EventSource[F] = new EventBus[F] with Disposable {
     private val mappedEvents = self.map(e => f(e))    
     private var mapped = Option.empty[Disposable]
     private var subscription = mappedEvents.subscribe { events =>
