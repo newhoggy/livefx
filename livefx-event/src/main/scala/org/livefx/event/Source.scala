@@ -53,6 +53,10 @@ trait Source[+A] extends Closeable { self =>
       }
     }
   }
+
+  /** Direct all events into the sink.
+    */
+  def into(sink: Sink[A]): Closeable = this.subscribe(sink.publish)
 }
 
 object Source {
