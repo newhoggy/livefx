@@ -28,3 +28,9 @@ trait Disposable extends Closeable {
     }
   }
 }
+
+object Disposable {
+  def apply(a: AutoCloseable): Disposable = new Disposable {
+    override protected def onDispose(): Unit = a.close()
+  }
+}
