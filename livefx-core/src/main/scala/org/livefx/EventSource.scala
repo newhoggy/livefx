@@ -1,5 +1,7 @@
 package org.livefx
 
+import org.livefx.disposal.Disposable
+
 trait EventSource[+E] { self =>
   def subscribe(subscriber: E => Unit): Disposable
   def asEvents: EventSource[E] = this

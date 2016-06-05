@@ -4,33 +4,33 @@ import org.livefx.script.Change
 import org.specs2.mutable._
 
 class SpecSimpleProperty extends Specification {
-  "get and set" >> {
-    var spoilCount = 0
-    val liveValue = Var[Int](0)
-    
-    0     ==== liveValue.value
-    false ==== liveValue.spoiled
-    liveValue.value = 1
-    1     ==== liveValue.value
-    false ==== liveValue.spoiled
-    
-    val subscription = liveValue.spoils.subscribe(_ => spoilCount += 1)
-    0     ==== spoilCount
-    liveValue.value = 2
-    1     ==== spoilCount
-    2     ==== liveValue.value
-    false ==== liveValue.spoiled
-
-    subscription.dispose()
-    
-    liveValue.value = 3
-    1     ==== spoilCount
-    3     ==== liveValue.value
-    false ==== liveValue.spoiled
-    subscription.dispose()
-
-    ok
-  }
+//  "get and set" >> {
+//    var spoilCount = 0
+//    val liveValue = Var[Int](0)
+//
+//    0     ==== liveValue.value
+//    false ==== liveValue.spoiled
+//    liveValue.value = 1
+//    1     ==== liveValue.value
+//    false ==== liveValue.spoiled
+//
+//    val subscription = liveValue.spoils.subscribe(_ => spoilCount += 1)
+//    0     ==== spoilCount
+//    liveValue.value = 2
+//    1     ==== spoilCount
+//    2     ==== liveValue.value
+//    false ==== liveValue.spoiled
+//
+//    subscription.dispose()
+//
+//    liveValue.value = 3
+//    1     ==== spoilCount
+//    3     ==== liveValue.value
+//    false ==== liveValue.spoiled
+//    subscription.dispose()
+//
+//    ok
+//  }
 
 //  "change subscrier" >> {
 //    var changes = List[Change[Int]]()

@@ -1,5 +1,6 @@
 package org.livefx
 
+import org.livefx.disposal.{Disposable, Disposed}
 import org.livefx.script.Change
 
 import scala.concurrent.ExecutionContext.Implicits.global

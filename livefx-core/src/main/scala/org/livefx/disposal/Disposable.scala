@@ -1,4 +1,4 @@
-package org.livefx
+package org.livefx.disposal
 
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference

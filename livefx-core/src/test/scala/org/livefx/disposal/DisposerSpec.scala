@@ -1,5 +1,6 @@
-package org.livefx
+package org.livefx.disposal
 
+import org.livefx.OnDispose
 import org.specs2.mutable.Specification
 
 class DisposerSpec extends Specification {

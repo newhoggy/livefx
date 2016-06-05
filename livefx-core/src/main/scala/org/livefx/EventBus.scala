@@ -1,8 +1,11 @@
 package org.livefx
 
+import org.livefx.disposal.Disposable
+
 import scala.collection.immutable.HashSet
 import org.livefx.util.TidyWeakReference
 import org.livefx.util.TidyReferenceQueue
+
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
