@@ -3,6 +3,7 @@ package org.livefx.event
 import java.io.Closeable
 
 import org.livefx.core.disposal.{Closed, Disposer}
+import org.livefx.core.std.autoCloseable._
 
 trait Source[+A] extends Disposer { self =>
   /** Subscribe a subscriber to a source.  The subscriber will be invoked with any events that the
@@ -17,7 +18,7 @@ trait Source[+A] extends Disposer { self =>
     new SimpleSinkSource[A, B] { temp =>
       override def transform: A => B = f
 
-      val subscription = self.subscribe(temp.publish)
+      disposes(self.subscribe(temp.publish))
     }
   }
 }
