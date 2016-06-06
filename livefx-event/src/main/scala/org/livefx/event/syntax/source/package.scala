@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.livefx.core.std.autoCloseable._
 import org.livefx.core.syntax.disposable._
 import org.livefx.core.syntax.std.atomicReference._
-import org.livefx.event._
+import org.livefx.event.{Live, SimpleBus, _}
 
 package object source {
   implicit class SourceOps_qMVKwgW[A](val self: Source[A]) extends AnyVal {
@@ -38,12 +38,14 @@ package object source {
     def foldRight[B](initial: B)(f: (A, => B) => B): Live[B] = {
       val state = new AtomicReference[B](initial)
 
-      new SimpleBus[B] with Live[B] { temp =>
+      new Live[B] {
         override def value: B = state.get
 
-        self.subscribe { e =>
-          val (_, newValue) = state.update(v => f(e, v))
-          temp.publish(newValue)
+        override val source = new SimpleBus[B] { temp =>
+          self.subscribe { e =>
+            val (_, newValue) = state.update(v => f(e, v))
+            temp.publish(newValue)
+          }
         }
       }
     }
